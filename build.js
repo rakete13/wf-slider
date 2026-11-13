@@ -81,7 +81,7 @@ ${css.join('\n')}
 `;
 
 const footer = `<!-- WF Slider · Footer Code
-     Voraussetzung: Settings → GSAP integration → GSAP aktiv (keine Plugins nötig) -->
+     Voraussetzung: Settings → GSAP integration → GSAP aktiv. Optional SplitText für data-slider-anim="lines|words|chars" -->
 <script>
 ${header}
 ${code}

@@ -11,12 +11,12 @@ Die Übersicht mit Live-Demos und allen Attributen liegt in [`docs/index.html`](
 3. **Footer Code:** Inhalt von [`webflow/footer-code.html`](webflow/footer-code.html) am besten in den **Page Settings → Custom Code → Before </body>** der Seiten mit Slider einfügen.
 4. Veröffentlichen. Custom Code läuft nur auf der veröffentlichten Seite, nicht im Designer.
 
-**Warum Page Code?** Die Vollversion hat rund 24.000 Zeichen, WF Anim rund 42.000. Webflow erlaubt 50.000 pro Feld. Beides zusammen passt nicht in den Site-Footer, jede Seite hat aber ihr eigenes Feld. Alternativ mit `build.js` ausdünnen oder aus GitHub laden.
+**Warum Page Code?** Die Vollversion hat rund 28.500 Zeichen, WF Anim rund 42.000. Webflow erlaubt 50.000 pro Feld. Beides zusammen passt nicht in den Site-Footer, jede Seite hat aber ihr eigenes Feld. Alternativ mit `build.js` ausdünnen oder aus GitHub laden.
 
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.0.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.1.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -50,9 +50,42 @@ slider-wrapper            ← data-slider = carousel
 
 Galerie = Haupt-Slider (`fade` oder `carousel`) mit `data-slider-id="galerie"` plus Thumbnails mit `data-slider="thumbs"` und `data-slider-for="galerie"`. Beide können aus derselben Collection kommen.
 
+## Effekte und Übergänge (ab 1.1)
+
+Live zum Umschalten: [`docs/effekte.html`](docs/effekte.html). Bei „Bewegung reduzieren“ fallen alle Effekte weg.
+
+**Carousel: `data-slider-effect`**, läuft stufenlos mit der Position, auch beim Ziehen:
+
+| Wert | Wirkung |
+|---|---|
+| `parallax` | Bild bewegt sich langsamer als die Slide (wird leicht vergrößert, das Eltern-Element schneidet ab) |
+| `focus` | Mitte voll da, Nachbarn kleiner und blasser, am besten mit `data-slider-align="center"` |
+| `tilt` | Neigung je nach Tempo, richtet sich beim Anhalten wieder auf |
+| `coverflow` | seitliche Slides drehen sich in die Tiefe |
+
+Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`). Der Effekt wirkt auf ein **inneres Element** der Slide: das erste Kind, bei `parallax` das erste Bild, oder das Element mit `data-slider-effect-target`. Nie auf die Slide selbst, die bewegt im Loop die Library.
+
+**Fade: `data-slider-transition`**, mit Richtung (Weiter läuft anders als Zurück):
+
+| Wert | Wirkung |
+|---|---|
+| `fade` | Standard: weiches Überblenden |
+| `zoom` | Einblenden und dabei von 115 % auf 100 % zoomen |
+| `wipe` | Aufdecken aus Richtung der Navigation, die alte Slide rutscht ein Stück mit |
+| `push` | neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab |
+| `circle` | Kreis öffnet sich an der Klick- oder Tippstelle (bei Autoplay und Tastatur vom Rand) |
+
+**Text: `data-slider-anim="lines"`** (oder `words`, `chars`) lässt Text aus einer Maske aufsteigen. Braucht SplitText (*GSAP integration → SplitText* anhaken), sonst wird daraus `fade-up`.
+
+**Eigene Effekte: `--slide-progress`.** Jede Carousel-Slide hat diese CSS-Variable: 0 an der Ausrichtung, −1 eine Slide links, 1 eine Slide rechts, stufenlos. Beispiel als Custom CSS:
+
+```css
+.slide-inner { transform: rotate(calc(var(--slide-progress) * 6deg)); }
+```
+
 ## Einstellungen am Wrapper
 
-`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` (bei thumbs).
+`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` (bei thumbs), `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` (bei fade).
 
 ## Markierte Elemente
 
@@ -66,7 +99,8 @@ Galerie = Haupt-Slider (`fade` oder `carousel`) mit `data-slider-id="galerie"` p
 | `data-slider-current` / `data-slider-total` | Zähler |
 | `data-slider-progress` | Fortschritt, wird mit `scaleX` von links gefüllt (Autoplay-Zeit, sonst Position) |
 | `data-slider-pause` | Pause/Play für Autoplay |
-| `data-slider-anim` | Inhalt in einer Slide animieren: `fade-in` `fade-up` `fade-down` `fade-left` `fade-right` `scale-in` `blur-in` `clip-up`, dazu `-delay` `-duration` `-distance` `-stagger` `-ease` |
+| `data-slider-effect-target` | optional: Element, auf das der Carousel-Effekt wirkt |
+| `data-slider-anim` | Inhalt in einer Slide animieren: `fade-in` `fade-up` `fade-down` `fade-left` `fade-right` `scale-in` `blur-in` `clip-up`, mit SplitText auch `lines` `words` `chars`, dazu `-delay` `-duration` `-distance` `-stagger` `-ease` |
 | `data-slider-nodrag` | darin startet kein Ziehen (z. B. Video-Steuerung) |
 
 ## Klassen zum Gestalten
@@ -126,7 +160,7 @@ test/                     Browser-Test der Demo-Seite (Playwright)
 node build.js carousel,autoplay ./ausgabe-ordner
 ```
 
-Typen `carousel`, `fade`, `thumbs`, Bausteine `autoplay` (Autoplay und Pause-Button) und `anim` (`data-slider-anim`). Nur `fade`: rund 19.000 Zeichen. Ohne Ordnerangabe wird die Vollversion nach `webflow/` und `src/wf-slider.min.js` geschrieben. Benötigt Node.js und esbuild (`npm i -g esbuild`) oder TypeScript.
+Typen `carousel`, `fade`, `thumbs`, Bausteine `autoplay` (Autoplay und Pause-Button), `anim` (`data-slider-anim`), `effects` (Carousel-Effekte) und `transitions` (Fade-Übergänge). Ohne Effekte und Übergänge spart man rund 4.500 Zeichen. Ohne Ordnerangabe wird die Vollversion nach `webflow/` und `src/wf-slider.min.js` geschrieben. Benötigt Node.js und esbuild (`npm i -g esbuild`) oder TypeScript.
 
 ## Versionen
 

@@ -140,16 +140,17 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
     <a href="#carousel"><span>01</span>Carousel</a>
     <a href="#fade"><span>02</span>Fade</a>
     <a href="#gallery"><span>03</span>Galerie</a>
-    <a href="#referenz"><span>04</span>Referenz</a>
+    <a href="#effekte"><span>04</span>Effekte</a>
+    <a href="#referenz"><span>05</span>Referenz</a>
   </nav>
 
   <main>
     <header class="hero">
-      <div class="eyebrow">WF Slider · v1.0.0 · Begleiter zu WF Anim</div>
+      <div class="eyebrow">WF Slider · v1.1.0 · Begleiter zu WF Anim</div>
       <h1>Slider per <em>Attribut</em>, für CMS und statische Inhalte.</h1>
       <p>Wrapper bauen, <code>data-slider="carousel"</code> setzen, fertig. Ob die Slides aus einer Collection List kommen oder von Hand gebaut sind, ist egal. Pfeile, Punkte und Zähler gestaltest du selbst im Designer und markierst sie nur.</p>
       <div class="notice">Braucht nur GSAP selbst, keine Plugins. Läuft auf der veröffentlichten Seite, nicht im Designer. Mit <code>?wfslider-debug</code> an der Adresse siehst du Hinweise zu jedem Slider in der Konsole.</div>
-      <div class="notice">Neu in Arbeit: <a href="effekte.html">Effekte und Übergänge zum Ausprobieren</a>.</div>
+      <div class="notice">Neu in 1.1: <a href="effekte.html">Effekte und Übergänge</a> zum Ausprobieren und Vergleichen.</div>
     </header>
 
     <!-- 00 Einbau -->
@@ -337,10 +338,56 @@ dots             data-slider-dots="hero"</pre>
 thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
     </section>
 
-    <!-- 04 Referenz -->
-    <section class="cat" id="referenz">
+    <!-- 04 Effekte -->
+    <section class="cat" id="effekte">
       <div class="cat-head">
         <div class="num">04</div>
+        <h2>Effekte und Übergänge</h2>
+        <p>Alle Effekte live zum Umschalten auf der <a href="effekte.html">Effekt-Demo</a>. Bei „Bewegung reduzieren“ fallen sie automatisch weg.</p>
+      </div>
+      <div class="info">
+        <h3>Carousel: <code>data-slider-effect</code></h3>
+        <p>Läuft stufenlos mit der Position, auch beim Ziehen. Wirkt auf ein <strong>inneres Element</strong> der Slide (das erste Kind, bei <code>parallax</code> das erste Bild), nie auf die Slide selbst. Ein anderes Element markierst du mit <code>data-slider-effect-target</code>.</p>
+      </div>
+      <table>
+        <tbody>
+          <tr><td><code>parallax</code></td><td>Bild bewegt sich langsamer als die Slide. Die Library vergrößert das Bild leicht und schneidet am Eltern-Element ab.</td></tr>
+          <tr><td><code>focus</code></td><td>Mitte voll da, Nachbarn kleiner und blasser. Am besten mit <code>data-slider-align="center"</code>.</td></tr>
+          <tr><td><code>tilt</code></td><td>Neigung je nach Tempo, richtet sich beim Anhalten wieder auf.</td></tr>
+          <tr><td><code>coverflow</code></td><td>Seitliche Slides drehen sich in die Tiefe.</td></tr>
+          <tr><td><code>data-slider-effect-strength</code></td><td>Stärke, Standard <code>1</code>. Z. B. <code>0.5</code> dezent, <code>1.6</code> kräftig</td></tr>
+        </tbody>
+      </table>
+      <div class="info">
+        <h3>Fade: <code>data-slider-transition</code></h3>
+        <p>Übergänge mit Richtung: Weiter läuft anders als Zurück. Dauer über <code>data-slider-duration</code>.</p>
+      </div>
+      <table>
+        <tbody>
+          <tr><td><code>fade</code></td><td>Standard: weiches Überblenden</td></tr>
+          <tr><td><code>zoom</code></td><td>Einblenden und dabei von 115 % auf 100 % zoomen</td></tr>
+          <tr><td><code>wipe</code></td><td>Aufdecken aus Richtung der Navigation, die alte Slide rutscht ein Stück mit</td></tr>
+          <tr><td><code>push</code></td><td>Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab</td></tr>
+          <tr><td><code>circle</code></td><td>Kreis öffnet sich an der Klick- oder Tippstelle (bei Autoplay und Tastatur vom Rand)</td></tr>
+        </tbody>
+      </table>
+      <div class="info">
+        <h3>Text: <code>data-slider-anim="lines"</code></h3>
+        <p><code>lines</code>, <code>words</code> und <code>chars</code> lassen Text aus einer Maske aufsteigen. Dafür muss SplitText geladen sein (Webflow: Settings → GSAP integration → SplitText anhaken). Ohne SplitText wird daraus <code>fade-up</code>.</p>
+      </div>
+      <div class="info">
+        <h3>Eigene Effekte: <code>--slide-progress</code></h3>
+        <p>Jede Carousel-Slide hat die CSS-Variable <code>--slide-progress</code>: 0 an der Ausrichtung, −1 eine Slide links, 1 eine Slide rechts, stufenlos. Damit baust du eigene Effekte per Custom CSS, z. B. im Embed:</p>
+        <pre>.slide-inner {
+  transform: rotate(calc(var(--slide-progress) * 6deg));
+}</pre>
+      </div>
+    </section>
+
+    <!-- 05 Referenz -->
+    <section class="cat" id="referenz">
+      <div class="cat-head">
+        <div class="num">05</div>
         <h2>Referenz</h2>
       </div>
 
@@ -368,6 +415,8 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
           <tr><td><code>data-slider-pad</code></td><td>Zähler mit führenden Nullen, z. B. <code>2</code> → 03</td></tr>
           <tr><td><code>data-slider-label</code></td><td>Name für Screenreader</td></tr>
           <tr><td><code>data-slider-for</code></td><td>Nur bei <code>thumbs</code>: ID des gesteuerten Sliders</td></tr>
+          <tr><td><code>data-slider-effect</code></td><td>Nur bei <code>carousel</code>: <code>parallax</code>, <code>focus</code>, <code>tilt</code>, <code>coverflow</code>. Dazu <code>-strength</code></td></tr>
+          <tr><td><code>data-slider-transition</code></td><td>Nur bei <code>fade</code>: <code>fade</code>, <code>zoom</code>, <code>wipe</code>, <code>push</code>, <code>circle</code></td></tr>
         </tbody>
       </table>
 
@@ -383,7 +432,8 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
           <tr><td><code>data-slider-current</code> / <code>-total</code></td><td>Zähler</td></tr>
           <tr><td><code>data-slider-progress</code></td><td>Fortschritt (Autoplay-Zeit, sonst Position)</td></tr>
           <tr><td><code>data-slider-pause</code></td><td>Pause/Play für Autoplay</td></tr>
-          <tr><td><code>data-slider-anim</code></td><td>Inhalt in einer Slide animieren. Dazu <code>-delay</code>, <code>-duration</code>, <code>-distance</code>, <code>-stagger</code>, <code>-ease</code></td></tr>
+          <tr><td><code>data-slider-anim</code></td><td>Inhalt in einer Slide animieren, auch <code>lines</code>, <code>words</code>, <code>chars</code> mit SplitText. Dazu <code>-delay</code>, <code>-duration</code>, <code>-distance</code>, <code>-stagger</code>, <code>-ease</code></td></tr>
+          <tr><td><code>data-slider-effect-target</code></td><td>Optional: Element, auf das der Carousel-Effekt wirkt</td></tr>
           <tr><td><code>data-slider-nodrag</code></td><td>In diesem Element startet kein Ziehen (z. B. Video-Steuerung)</td></tr>
         </tbody>
       </table>
