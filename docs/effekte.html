@@ -104,6 +104,15 @@ pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 
 }
 .arc-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+/* Farbverläufe als Rückfall, falls die Bilder nicht laden */
+img { color: transparent; }
+.fx-slide:nth-child(6n+1) .fx-media, .arc-slide:nth-child(6n+1) .arc-in, .h-slide:nth-child(4n+1) { background: linear-gradient(135deg, #1b2a8f, #5b7cff); }
+.fx-slide:nth-child(6n+2) .fx-media, .arc-slide:nth-child(6n+2) .arc-in, .h-slide:nth-child(4n+2) { background: linear-gradient(135deg, #7a1f22, #ff7a59); }
+.fx-slide:nth-child(6n+3) .fx-media, .arc-slide:nth-child(6n+3) .arc-in, .h-slide:nth-child(4n+3) { background: linear-gradient(135deg, #0b5148, #3fd6b8); }
+.fx-slide:nth-child(6n+4) .fx-media, .arc-slide:nth-child(6n+4) .arc-in, .h-slide:nth-child(4n+4) { background: linear-gradient(135deg, #5b2d86, #c58cf2); }
+.fx-slide:nth-child(6n+5) .fx-media, .arc-slide:nth-child(6n+5) .arc-in { background: linear-gradient(135deg, #8a4a00, #ffb547); }
+.fx-slide:nth-child(6n+6) .fx-media, .arc-slide:nth-child(6n+6) .arc-in { background: linear-gradient(135deg, #1e3a4c, #6fb3d9); }
+
 @media (max-width: 700px) {
   .stage { padding: 20px 0; }
   .stage-pad { padding-inline: 16px; }
