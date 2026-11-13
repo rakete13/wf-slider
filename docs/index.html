@@ -123,6 +123,18 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
 .thumb { flex: 0 0 120px; aspect-ratio: 4 / 3; border-radius: 8px; display: grid; place-items: center; color: #fff; font: 700 1rem var(--font-display); cursor: pointer; opacity: .5; outline-offset: -4px; transition: opacity .3s; }
 .thumb.is-active { opacity: 1; box-shadow: inset 0 0 0 3px var(--ink); }
 
+/* Showcase */
+.sc-wrap { position: relative; }
+.sc { border-radius: 12px; overflow: hidden; }
+.sc-slide { position: relative; height: min(70vh, 560px); }
+.sc-box { position: absolute; inset: 0; }
+.sc-box img { width: 100%; height: 100%; object-fit: cover; display: block; color: transparent; }
+.sc-title { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; z-index: 2; pointer-events: none;
+  font: 800 clamp(3rem, 11vw, 8rem)/1 var(--font-display); letter-spacing: -0.03em; color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,.25); }
+.sc-nav { position: absolute; inset: auto 0 20px 0; display: flex; justify-content: space-between; padding-inline: 20px; z-index: 3; pointer-events: none; }
+.sc-nav .btn { pointer-events: auto; background: rgba(255,255,255,.92); border: 0; color: #141824; }
+.sc-count { position: absolute; top: 18px; left: 20px; z-index: 3; color: #fff; font-family: var(--font-mono); font-size: .85rem; }
+
 @media (max-width: 860px) {
   .shell { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 40px; }
   nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 4px 16px; }
@@ -140,8 +152,9 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
     <a href="#carousel"><span>01</span>Carousel</a>
     <a href="#fade"><span>02</span>Fade</a>
     <a href="#gallery"><span>03</span>Galerie</a>
-    <a href="#effekte"><span>04</span>Effekte</a>
-    <a href="#referenz"><span>05</span>Referenz</a>
+    <a href="#showcase"><span>04</span>Showcase</a>
+    <a href="#effekte"><span>05</span>Effekte</a>
+    <a href="#referenz"><span>06</span>Referenz</a>
   </nav>
 
   <main>
@@ -338,10 +351,45 @@ dots             data-slider-dots="hero"</pre>
 thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
     </section>
 
-    <!-- 04 Effekte -->
-    <section class="cat" id="effekte">
+    <!-- 04 Showcase -->
+    <section class="cat" id="showcase">
       <div class="cat-head">
         <div class="num">04</div>
+        <h2>Showcase</h2>
+        <p>Ein <code>fade</code>-Slider mit dem Übergang <code>showcase</code>: Das Bild schrumpft und gibt die Hintergrundfarbe der Slide frei, die Slides wechseln seitlich mit Parallax im Bild, dann wächst das neue Bild wieder. Die Schrift blendet vorher aus und danach ein.</p>
+      </div>
+      <div class="stage">
+        <div class="sc-wrap">
+          <div class="sc" data-slider="fade" data-slider-id="showcase" data-slider-transition="showcase" data-slider-duration="1.1" data-slider-pad="2" data-slider-label="Kollektion">
+            <div data-slider-track>
+              <div class="sc-slide" style="background-color:#d39a85"><div class="sc-box"><img src="https://picsum.photos/id/21/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Rosé</h3></div>
+              <div class="sc-slide" style="background-color:#8e77bd"><div class="sc-box"><img src="https://picsum.photos/id/103/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Lavendel</h3></div>
+              <div class="sc-slide" style="background-color:#8f9a4f"><div class="sc-box"><img src="https://picsum.photos/id/1062/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Olive</h3></div>
+              <div class="sc-slide" style="background-color:#6f8fb3"><div class="sc-box"><img src="https://picsum.photos/id/177/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Fjord</h3></div>
+            </div>
+          </div>
+          <div class="sc-count"><span data-slider-current="showcase"></span> / <span data-slider-total="showcase"></span></div>
+          <div class="sc-nav">
+            <button class="btn" data-slider-prev="showcase" aria-label="Zurück">←</button>
+            <button class="btn" data-slider-next="showcase" aria-label="Weiter">→</button>
+          </div>
+        </div>
+      </div>
+      <pre>slider-wrapper   data-slider="fade"  data-slider-transition="showcase"  data-slider-id="showcase"
+  slide          Background Color aus dem CMS (Farbfeld an die Hintergrundfarbe des Collection Items binden)
+    bild-box     erstes Kind der Slide (oder data-slider-effect-target), schrumpft beim Wechsel
+      bild       bekommt den Parallax
+    titel        data-slider-anim="fade-in"   (blendet aus und wieder ein)
+button-prev      data-slider-prev="showcase"  (Position frei im Designer)
+button-next      data-slider-next="showcase"
+
+Optional: data-slider-scale="0.6" (wie klein das Bild wird) · data-slider-duration="1.1"</pre>
+    </section>
+
+    <!-- 05 Effekte -->
+    <section class="cat" id="effekte">
+      <div class="cat-head">
+        <div class="num">05</div>
         <h2>Effekte und Übergänge</h2>
         <p>Alle Effekte live zum Umschalten auf der <a href="effekte.html">Effekt-Demo</a>. Bei „Bewegung reduzieren“ fallen sie automatisch weg.</p>
       </div>
@@ -385,10 +433,10 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
       </div>
     </section>
 
-    <!-- 05 Referenz -->
+    <!-- 06 Referenz -->
     <section class="cat" id="referenz">
       <div class="cat-head">
-        <div class="num">05</div>
+        <div class="num">06</div>
         <h2>Referenz</h2>
       </div>
 
