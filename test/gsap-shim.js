@@ -14,7 +14,11 @@
       s.visibility = v === 0 ? 'hidden' : 'inherit';
     } else if (k === 'opacity') s.opacity = v;
     else if (k === 'zIndex') s.zIndex = Math.round(v);
-    else if (k === 'x' || k === 'y' || k === 'scale') {
+    else if (k === 'xPercent' || k === 'yPercent') {
+      const m = getT(t);
+      m[k] = v;
+      s.translate = `${m.xPercent || 0}% ${m.yPercent || 0}%`;
+    } else if (k === 'x' || k === 'y' || k === 'scale') {
       const m = getT(t);
       m[k] = v;
       s.transform = `translate(${m.x}px,${m.y}px) scale(${m.scale})`;
@@ -24,6 +28,7 @@
   const read = (t, k) => {
     if (!isEl(t)) return t[k];
     if (k === 'x' || k === 'y' || k === 'scale') return getT(t)[k];
+    if (k === 'xPercent' || k === 'yPercent') return getT(t)[k] || 0;
     if (k === 'autoAlpha' || k === 'opacity') return parseFloat(getComputedStyle(t).opacity);
     if (k === 'zIndex') return parseFloat(t.style.zIndex) || 0;
     return null;
@@ -106,5 +111,14 @@
       tweens.forEach((tw) => tw.targets.some((x) => list.includes(x)) && tweens.delete(tw));
     },
     _count: () => tweens.size,
+    registerPlugin: () => {},
+    delayedCall: (sec, fn) => make({}, null, { duration: 0, delay: sec, onComplete: fn }),
+    quickTo: (t, prop, v) => {
+      let tw = null;
+      return (val) => {
+        if (tw) tw.kill();
+        tw = make(t, null, Object.assign({}, v, { [prop]: val }));
+      };
+    },
   };
 })();

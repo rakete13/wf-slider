@@ -1,0 +1,294 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WF Slider · Effekte (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<!-- Head Code der Library -->
+<script>
+document.documentElement.classList.add('js-slider');
+setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+</script>
+<style>
+[data-slider]{min-width:0}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items){display:grid}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>*{grid-area:1/1/2/2}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child){opacity:0;visibility:hidden}
+.js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}
+</style>
+
+<style>
+:root {
+  --bg: #f3f4f7; --surface: #ffffff; --ink: #141824; --muted: #5d6476; --line: #dde0e8;
+  --accent: #2f4cf5; --accent-ink: #ffffff; --stage: #e9ebf2; --code-bg: #eef0f6;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f121a; --surface: #171b26; --ink: #e8eaf2; --muted: #9aa1b4; --line: #272d3b;
+    --accent: #7f93ff; --accent-ink: #0f121a; --stage: #1d2230; --code-bg: #1d2230; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+code, pre { font-family: var(--font-mono); font-size: 0.84rem; }
+p code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 56px 120px; display: grid; gap: 88px; }
+header.hero { display: grid; gap: 16px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); }
+.hero h1 { font-size: clamp(2.4rem, 5.5vw, 4rem); font-weight: 800; letter-spacing: -0.02em; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { max-width: 64ch; color: var(--muted); margin: 0; font-size: 1.05rem; }
+
+section { display: grid; gap: 20px; min-width: 0; }
+.head { display: grid; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.head .num { font-family: var(--font-mono); color: var(--accent); font-size: 0.85rem; }
+.head h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.head p { margin: 0; color: var(--muted); max-width: 70ch; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips .label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 14px; font: 600 0.85rem var(--font-body); cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.note { font-size: 0.9rem; color: var(--muted); margin: 0; min-height: 1.5em; max-width: 80ch; }
+
+.stage { background: var(--stage); border-radius: 14px; padding: 32px 0; min-width: 0; overflow: hidden; display: grid; gap: 20px; }
+.stage-pad { padding-inline: 32px; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; overflow-x: auto; margin: 0; line-height: 1.55; }
+
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn { width: 46px; height: 46px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; font-size: 1.1rem; }
+.btn:hover { border-color: var(--accent); }
+.btn.is-disabled { opacity: .35; pointer-events: none; }
+.dots { display: flex; gap: 8px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 999px; background: var(--ink); opacity: .25; cursor: pointer; transition: width .3s, opacity .3s; }
+.dot.is-active { width: 28px; opacity: 1; background: var(--accent); }
+.counter { font-family: var(--font-mono); margin-left: auto; }
+
+/* ---------- 1 · Carousel-Effekte ---------- */
+.fx-track { display: flex; gap: 20px; }
+.fx-slide { flex: 0 0 min(440px, 72%); }
+.fx-in { display: grid; gap: 12px; transform-origin: center center; }
+.fx-media { aspect-ratio: 4 / 5; border-radius: 12px; overflow: hidden; background: #2b2f3a; }
+.fx-media img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.fx-cap { display: flex; justify-content: space-between; gap: 12px; font-size: 0.9rem; }
+.fx-cap strong { font-family: var(--font-display); font-size: 1.15rem; }
+.fx-cap span { color: var(--muted); font-family: var(--font-mono); font-size: 0.8rem; }
+
+/* ---------- 2 · Hero-Übergänge ---------- */
+.hero-slider { border-radius: 14px; overflow: hidden; background: #000; }
+.h-slide { position: relative; min-height: min(70vh, 560px); display: flex; align-items: flex-end; color: #fff; }
+.h-slide img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.h-slide::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,0) 35%, rgba(0,0,0,.65)); }
+.h-text { position: relative; z-index: 1; padding: clamp(24px, 5vw, 56px); display: grid; gap: 12px; max-width: 760px; }
+.h-text .tag { font-family: var(--font-mono); font-size: .8rem; opacity: .85; }
+.h-text h3 { font-size: clamp(2rem, 5vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; }
+.h-text p { margin: 0; max-width: 48ch; opacity: .9; }
+
+/* ---------- 3 · Eigener Effekt per CSS-Variable ---------- */
+.arc-track { display: flex; gap: 16px; padding-block: 40px 70px; }
+.arc-slide { flex: 0 0 min(260px, 56%); }
+.arc-in { aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: #2b2f3a;
+  /* --slide-progress setzt die Library: 0 = Mitte, ±1 = eine Slide daneben */
+  transform: translateY(calc(var(--slide-progress, 0) * var(--slide-progress, 0) * 22px)) rotate(calc(var(--slide-progress, 0) * 6deg));
+}
+.arc-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+@media (max-width: 700px) {
+  .stage { padding: 20px 0; }
+  .stage-pad { padding-inline: 16px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">WF Slider · Effekte · Demo zum Aussuchen</div>
+    <h1>Welche <em>Übergänge</em> kommen in die Library?</h1>
+    <p>Alle Kandidaten zum Anfassen: Effekte umschalten, ziehen, klicken. Was ihr aussortiert, fliegt wieder raus. Alles läuft mit GSAP Core, nur die Text-Effekte nutzen SplitText, falls es geladen ist. Bei „Bewegung reduzieren“ bleibt es bei einfachem Überblenden. Zurück zur <a href="./">Doku</a>.</p>
+  </header>
+
+  <!-- 1 -->
+  <section id="carousel">
+    <div class="head">
+      <div class="num">01</div>
+      <h2>Carousel-Effekte</h2>
+      <p>Die Effekte hängen an der Position und laufen beim Ziehen stufenlos mit. Sie wirken auf ein inneres Element der Slide, nie auf die Slide selbst.</p>
+    </div>
+    <div class="chips" data-chips="effect">
+      <span class="label">Effekt</span>
+      <button class="chip" data-v="" aria-pressed="false">keiner</button>
+      <button class="chip" data-v="parallax" aria-pressed="true">parallax</button>
+      <button class="chip" data-v="focus" aria-pressed="false">focus</button>
+      <button class="chip" data-v="tilt" aria-pressed="false">tilt</button>
+      <button class="chip" data-v="coverflow" aria-pressed="false">coverflow</button>
+    </div>
+    <div class="chips" data-chips="strength">
+      <span class="label">Stärke</span>
+      <button class="chip" data-v="0.5" aria-pressed="false">dezent</button>
+      <button class="chip" data-v="1" aria-pressed="true">normal</button>
+      <button class="chip" data-v="1.6" aria-pressed="false">kräftig</button>
+    </div>
+    <p class="note" data-note="effect"></p>
+    <div class="stage">
+      <div id="fx" data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-effect="parallax" data-slider-label="Projekte">
+        <div class="fx-track" data-slider-track>
+          <div class="fx-slide"><div class="fx-in"><div class="fx-media"><img src="https://picsum.photos/id/1018/900/1100" alt="Berglandschaft"></div><div class="fx-cap"><strong>Alpenhütte</strong><span>2026</span></div></div></div>
+          <div class="fx-slide"><div class="fx-in"><div class="fx-media"><img src="https://picsum.photos/id/1036/900/1100" alt="Winterwald"></div><div class="fx-cap"><strong>Winterwald</strong><span>2025</span></div></div></div>
+          <div class="fx-slide"><div class="fx-in"><div class="fx-media"><img src="https://picsum.photos/id/1043/900/1100" alt="Küste"></div><div class="fx-cap"><strong>Küstenweg</strong><span>2025</span></div></div></div>
+          <div class="fx-slide"><div class="fx-in"><div class="fx-media"><img src="https://picsum.photos/id/1015/900/1100" alt="Fluss im Tal"></div><div class="fx-cap"><strong>Flusstal</strong><span>2024</span></div></div></div>
+          <div class="fx-slide"><div class="fx-in"><div class="fx-media"><img src="https://picsum.photos/id/1039/900/1100" alt="Wasserfall"></div><div class="fx-cap"><strong>Wasserfall</strong><span>2024</span></div></div></div>
+          <div class="fx-slide"><div class="fx-in"><div class="fx-media"><img src="https://picsum.photos/id/1044/900/1100" alt="Felsküste"></div><div class="fx-cap"><strong>Felsküste</strong><span>2023</span></div></div></div>
+        </div>
+        <div class="controls stage-pad" style="margin-top:22px">
+          <button class="btn" data-slider-prev>←</button>
+          <button class="btn" data-slider-next>→</button>
+          <div class="counter"><span data-slider-current></span> / <span data-slider-total></span></div>
+        </div>
+      </div>
+    </div>
+    <pre data-code="fx"></pre>
+  </section>
+
+  <!-- 2 -->
+  <section id="hero">
+    <div class="head">
+      <div class="num">02</div>
+      <h2>Hero-Übergänge</h2>
+      <p>Echte Übergänge mit Richtung: Weiter läuft anders als Zurück. Der Kreis öffnet sich dort, wo geklickt oder getippt wurde. Die Headline kommt Zeile für Zeile aus einer Maske.</p>
+    </div>
+    <div class="chips" data-chips="transition">
+      <span class="label">Übergang</span>
+      <button class="chip" data-v="fade" aria-pressed="false">fade</button>
+      <button class="chip" data-v="zoom" aria-pressed="false">zoom</button>
+      <button class="chip" data-v="wipe" aria-pressed="true">wipe</button>
+      <button class="chip" data-v="push" aria-pressed="false">push</button>
+      <button class="chip" data-v="circle" aria-pressed="false">circle</button>
+    </div>
+    <div class="chips" data-chips="text">
+      <span class="label">Text</span>
+      <button class="chip" data-v="lines" aria-pressed="true">lines</button>
+      <button class="chip" data-v="words" aria-pressed="false">words</button>
+      <button class="chip" data-v="chars" aria-pressed="false">chars</button>
+      <button class="chip" data-v="fade-up" aria-pressed="false">fade-up</button>
+    </div>
+    <p class="note" data-note="transition"></p>
+    <div class="stage stage-pad">
+      <div id="hero-slider" class="hero-slider" data-slider="fade" data-slider-id="hero" data-slider-transition="wipe" data-slider-duration="1.1" data-slider-label="Highlights">
+        <div data-slider-track>
+          <div class="h-slide"><img src="https://picsum.photos/id/1016/1600/1000" alt=""><div class="h-text"><span class="tag" data-slider-anim="fade-in">01 · Landschaft</span><h3 data-slider-anim="lines">Weite Räume für große Geschichten.</h3><p data-slider-anim="fade-up" data-slider-anim-delay="0.2">Die Bühne für euer wichtigstes Projekt.</p></div></div>
+          <div class="h-slide"><img src="https://picsum.photos/id/1019/1600/1000" alt=""><div class="h-text"><span class="tag" data-slider-anim="fade-in">02 · Meer</span><h3 data-slider-anim="lines">Übergänge, die eine Richtung kennen.</h3><p data-slider-anim="fade-up" data-slider-anim-delay="0.2">Weiter und Zurück fühlen sich unterschiedlich an.</p></div></div>
+          <div class="h-slide"><img src="https://picsum.photos/id/1050/1600/1000" alt=""><div class="h-text"><span class="tag" data-slider-anim="fade-in">03 · Stadt</span><h3 data-slider-anim="lines">Nur GSAP, keine weiteren Plugins.</h3><p data-slider-anim="fade-up" data-slider-anim-delay="0.2">SplitText nur für die Text-Effekte, wenn es da ist.</p></div></div>
+          <div class="h-slide"><img src="https://picsum.photos/id/1025/1600/1000" alt=""><div class="h-text"><span class="tag" data-slider-anim="fade-in">04 · Detail</span><h3 data-slider-anim="lines">Ein Attribut, ein anderer Charakter.</h3><p data-slider-anim="fade-up" data-slider-anim-delay="0.2">Einfach oben umschalten und vergleichen.</p></div></div>
+        </div>
+      </div>
+      <div class="controls">
+        <button class="btn" data-slider-prev="hero">←</button>
+        <div class="dots" data-slider-dots="hero"><div class="dot"></div></div>
+        <button class="btn" data-slider-next="hero">→</button>
+      </div>
+    </div>
+    <pre data-code="hero"></pre>
+  </section>
+
+  <!-- 3 -->
+  <section id="eigen">
+    <div class="head">
+      <div class="num">03</div>
+      <h2>Eigener Effekt per CSS-Variable</h2>
+      <p>Jede Slide bekommt <code>--slide-progress</code>: 0 in der Mitte, −1 links daneben, 1 rechts daneben, stufenlos beim Ziehen. Damit baut ihr eigene Effekte in Webflow (Custom Code im Embed), ohne die Library anzufassen. Hier: ein Bogen mit leichter Drehung.</p>
+    </div>
+    <div class="stage">
+      <div data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-label="Bogen">
+        <div class="arc-track" data-slider-track>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1011/600/800" alt=""></div></div>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1012/600/800" alt=""></div></div>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1013/600/800" alt=""></div></div>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1014/600/800" alt=""></div></div>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1020/600/800" alt=""></div></div>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1021/600/800" alt=""></div></div>
+          <div class="arc-slide"><div class="arc-in"><img src="https://picsum.photos/id/1022/600/800" alt=""></div></div>
+        </div>
+      </div>
+    </div>
+    <pre>.arc-in {
+  transform:
+    translateY(calc(var(--slide-progress) * var(--slide-progress) * 22px))
+    rotate(calc(var(--slide-progress) * 6deg));
+}</pre>
+  </section>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/SplitText.min.js"></script>
+<script src="../src/wf-slider.js"></script>
+<script>
+// Nur für die Demo: Attribute umschalten und den Slider neu starten
+(() => {
+  const NOTES = {
+    effect: {
+      '': 'Ohne Effekt: die Basis zum Vergleichen.',
+      parallax: 'Das Bild bewegt sich langsamer als die Slide. Wirkt auf das erste Bild in der Slide (oder data-slider-effect-target).',
+      focus: 'Mitte voll da, Nachbarn kleiner und blasser. Passt am besten zu align="center".',
+      tilt: 'Neigung je nach Tempo, richtet sich beim Loslassen wieder auf. Am besten kräftig ziehen.',
+      coverflow: 'Seitliche Slides drehen sich in die Tiefe.',
+    },
+    transition: {
+      fade: 'Der bisherige Standard: weiches Überblenden.',
+      zoom: 'Neue Slide blendet ein und zoomt dabei von 115 % auf 100 %.',
+      wipe: 'Neue Slide wird aus Richtung der Navigation aufgedeckt, die alte rutscht ein Stück mit.',
+      push: 'Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab.',
+      circle: 'Öffnet sich als Kreis von der Klick- oder Tippstelle. Ohne Klick (Autoplay, Tastatur) vom Rand.',
+    },
+  };
+  const fx = document.getElementById('fx');
+  const hero = document.getElementById('hero-slider');
+  const restart = (el) => {
+    WFSlider.destroy(el);
+    WFSlider.init(el);
+  };
+  const code = () => {
+    const a = (el, n) => (el.hasAttribute(n) ? `  ${n}${el.getAttribute(n) ? `="${el.getAttribute(n)}"` : ''}` : '');
+    document.querySelector('[data-code="fx"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-loop', 'data-slider-align', 'data-slider-effect', 'data-slider-effect-strength'].map((n) => a(fx, n)).join('');
+    document.querySelector('[data-code="hero"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-transition', 'data-slider-duration'].map((n) => a(hero, n)).join('') + '\nheadline        data-slider-anim="' + hero.querySelector('h3').getAttribute('data-slider-anim') + '"';
+    document.querySelector('[data-note="effect"]').textContent = NOTES.effect[fx.getAttribute('data-slider-effect') || ''];
+    document.querySelector('[data-note="transition"]').textContent = NOTES.transition[hero.getAttribute('data-slider-transition')];
+  };
+  document.querySelectorAll('[data-chips]').forEach((group) => {
+    group.addEventListener('click', (e) => {
+      const b = e.target.closest('.chip');
+      if (!b) return;
+      group.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+      const v = b.dataset.v;
+      const kind = group.dataset.chips;
+      if (kind === 'effect') {
+        v ? fx.setAttribute('data-slider-effect', v) : fx.removeAttribute('data-slider-effect');
+        restart(fx);
+      } else if (kind === 'strength') {
+        v === '1' ? fx.removeAttribute('data-slider-effect-strength') : fx.setAttribute('data-slider-effect-strength', v);
+        restart(fx);
+      } else if (kind === 'transition') {
+        hero.setAttribute('data-slider-transition', v);
+        restart(hero);
+      } else if (kind === 'text') {
+        hero.querySelectorAll('h3').forEach((h) => h.setAttribute('data-slider-anim', v));
+        restart(hero);
+      }
+      code();
+    });
+  });
+  code();
+})();
+</script>
+</body>
+</html>

@@ -27,7 +27,7 @@ const ts = esbuild ? null : tryRequire(['typescript', path.join(globalRoot, 'typ
 if (!esbuild && !ts) throw new Error('Weder esbuild noch typescript gefunden: npm i -g esbuild');
 
 const src = fs.readFileSync(path.join(__dirname, 'src', 'wf-slider.js'), 'utf8');
-const version = (/WF Slider v([\d.]+)/.exec(src) || [])[1] || '0.0.0';
+const version = (/WF Slider v([\w.-]+)/.exec(src) || [])[1] || '0.0.0';
 const arg = process.argv[2];
 const used = arg && arg !== 'all' ? new Set(arg.split(',').map((s) => s.trim()).filter(Boolean)) : null;
 const outDir = process.argv[3] || path.join(__dirname, 'webflow');

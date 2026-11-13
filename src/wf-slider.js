@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.0.0
+ * WF Slider v1.1.0-beta
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.0.0';
+  const VERSION = '1.1.0-beta';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -156,6 +156,7 @@
     let vpW = 0;
     let maxPos = 0;
     let maxW = 0;
+    let gap = 0;
     let lo = 0;
     let loopOn = false;
     let active = false;
@@ -225,6 +226,18 @@
         const x = active ? xOf(i) : L[i];
         s.classList.toggle('is-in-view', !measured || (x + W[i] > a + 1 && x < b - 1));
       });
+      // Fortschritt je Slide: 0 = an der Ausrichtung, ±1 = eine Slide daneben (als CSS-Variable --slide-progress)
+      const pr = slides.map((_, i) => {
+        if (!active) return 0;
+        const at = o.align === 'center' ? vpW / 2 - off - W[i] / 2 : o.align === 'end' ? vpW - off - W[i] : 0;
+        return (xOf(i) - at) / (W[i] + gap || 1);
+      });
+      slides.forEach((s, i) => s.style.setProperty('--slide-progress', pr[i].toFixed(3)));
+      if (c.fx) {
+        // Lage im sichtbaren Bereich: -1 = gerade links raus, 0 = Mitte, 1 = gerade rechts rein
+        const pv = slides.map((_, i) => (active ? clamp((xOf(i) + W[i] / 2 - (vpW / 2 - off)) / (vpW / 2 + W[i] / 2), -1, 1) : 0));
+        c.fx(pr, pv, st.p);
+      }
       c.onRender();
     };
 
@@ -266,7 +279,7 @@
       L = rects.map((r) => r.left - first.left);
       W = rects.map((r) => r.width);
       maxW = Math.max(...W);
-      const gap = n > 1 ? Math.max(0, rects[1].left - rects[0].right) : 0;
+      gap = n > 1 ? Math.max(0, rects[1].left - rects[0].right) : 0;
       vpW = viewport.clientWidth;
       off = first.left - vl;
       const padR = parseFloat(getComputedStyle(track).paddingRight) || 0;
@@ -394,7 +407,21 @@
       s.classList.toggle('is-in-view', i === cur);
     });
 
+    const T = o.transition !== 'fade' && F.transitions ? F.transitions[o.transition] : null;
+    if (o.transition !== 'fade' && !T) c.issue(`Unbekannter Übergang "${o.transition}", es wird überblendet.`);
+    if (T) {
+      R.style(c.viewport);
+      c.viewport.style.overflow = 'hidden';
+    }
+    // Reste eines abgebrochenen Übergangs entfernen
+    const tidy = (s) => {
+      if (!T) return;
+      gsap.killTweensOf(s);
+      gsap.set(s, { xPercent: 0, scale: 1, clipPath: 'none', filter: 'none' });
+    };
+
     const go = (i, dir, instant) => {
+      if (!dir) dir = i > cur ? 1 : -1;
       i = o.loop ? mod(i, n) : clamp(i, 0, n - 1);
       if (i === cur) return;
       const prev = slides[cur];
@@ -403,12 +430,18 @@
       cur = i;
       gsap.killTweensOf(slides);
       slides.forEach((s) => {
-        if (s !== prev && s !== next) gsap.set(s, { autoAlpha: 0, zIndex: 1 });
+        if (s !== prev && s !== next) {
+          gsap.set(s, { autoAlpha: 0, zIndex: 1 });
+          tidy(s);
+        }
       });
-      gsap.set(prev, { zIndex: 1 });
+      tidy(prev);
+      tidy(next);
+      gsap.set(prev, { zIndex: 1, autoAlpha: 1 });
       gsap.set(next, { zIndex: 2 });
       const leave = () => {
         gsap.set(prev, { autoAlpha: 0 });
+        tidy(prev);
         prev.classList.remove('is-in-view');
         c.onLeave(prevIdx);
       };
@@ -416,6 +449,8 @@
       if (instant || c.reduce) {
         gsap.set(next, { autoAlpha: 1 });
         leave();
+      } else if (T) {
+        T({ next, prev, dir, d: o.duration, point: c.point(), done: leave });
       } else {
         gsap.fromTo(next, { autoAlpha: 0 }, { autoAlpha: 1, duration: o.duration, ease: 'power2.inOut', onComplete: leave });
       }
@@ -488,6 +523,114 @@
   /*@end*/
 
   /* ------------------------------------------------------------------ */
+  /*  Carousel-Effekte: data-slider-effect="parallax | focus | tilt |    */
+  /*  coverflow". Wirken auf ein inneres Element der Slide, nie auf die    */
+  /*  Slide selbst (die bewegt im Loop die Library).                      */
+  /* ------------------------------------------------------------------ */
+  /*@block effects*/
+  F.effects = (c, name) => {
+    const { slides, R } = c;
+    if (!['parallax', 'focus', 'tilt', 'coverflow'].includes(name)) {
+      c.issue(`Unbekannter Effekt "${name}".`);
+      return null;
+    }
+    const k = num(c.root.dataset.sliderEffectStrength, 1);
+    const pick = (s) =>
+      s.querySelector('[data-slider-effect-target]') || (name === 'parallax' ? s.querySelector('img') : null) || s.firstElementChild || s;
+    const T = slides.map(pick);
+    if (T.some((t, i) => t === slides[i])) c.issue('Effekt braucht ein inneres Element in jeder Slide (z. B. ein Div um den Inhalt).');
+    T.forEach((t, i) => {
+      if (t === slides[i]) return;
+      R.style(t);
+      t.style.willChange = 'transform';
+      if (name === 'parallax') {
+        const p = t.parentElement;
+        R.style(p);
+        p.style.overflow = 'hidden';
+      }
+    });
+    const own = T.filter((t, i) => t !== slides[i]);
+    const set = (i, tf, op) => {
+      const t = T[i];
+      if (t === slides[i]) return;
+      t.style.transform = tf;
+      if (op !== undefined) t.style.opacity = op;
+    };
+
+    // Kippen nach Tempo: Neigung folgt der Geschwindigkeit und richtet sich wieder auf
+    let tilt = null;
+    const v = { a: 0 };
+    let rest = null;
+    if (name === 'tilt') {
+      const apply = () => own.forEach((t) => (t.style.transform = `skewX(${v.a.toFixed(2)}deg)`));
+      const to = gsap.quickTo(v, 'a', { duration: 0.6, ease: 'power3.out', onUpdate: apply });
+      let last = null;
+      let lt = 0;
+      tilt = (pos) => {
+        const t = now();
+        if (last !== null && t - lt > 4) to(clamp((-(pos - last) / (t - lt)) * 1000 / 160 * k, -12, 12));
+        last = pos;
+        lt = t;
+        if (rest) rest.kill();
+        rest = gsap.delayedCall(0.08, () => to(0));
+      };
+    }
+
+    return {
+      render(pr, pv, pos) {
+        if (tilt) return tilt(pos);
+        pr.forEach((p, i) => {
+          const d = Math.min(Math.abs(p), 1);
+          if (name === 'parallax') {
+            const s = 0.12 * k;
+            set(i, `translate3d(${(-pv[i] * s * 100).toFixed(2)}%,0,0) scale(${(1 + 2 * s).toFixed(3)})`);
+          } else if (name === 'focus') {
+            set(i, `scale(${(1 - d * 0.14 * k).toFixed(3)})`, (1 - d * 0.55 * Math.min(k, 1.8)).toFixed(3));
+          } else if (name === 'coverflow') {
+            const q = clamp(p, -1.5, 1.5);
+            set(i, `perspective(1200px) rotateY(${(-q * 38 * k).toFixed(2)}deg) scale(${(1 - d * 0.14).toFixed(3)})`);
+          }
+        });
+      },
+      destroy() {
+        if (rest) rest.kill();
+        gsap.killTweensOf([v, ...own]);
+      },
+    };
+  };
+  /*@end*/
+
+  /* ------------------------------------------------------------------ */
+  /*  Fade-Übergänge: data-slider-transition="zoom | wipe | push |       */
+  /*  circle". dir: 1 = weiter, -1 = zurück                              */
+  /* ------------------------------------------------------------------ */
+  /*@block transitions*/
+  F.transitions = {
+    zoom: ({ next, d, done }) =>
+      gsap.fromTo(next, { autoAlpha: 0, scale: 1.15 }, { autoAlpha: 1, scale: 1, duration: d * 1.3, ease: 'power2.out', onComplete: done }),
+    wipe: ({ next, prev, dir, d, done }) => {
+      gsap.set(next, { autoAlpha: 1 });
+      gsap.fromTo(
+        next,
+        { clipPath: dir > 0 ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)' },
+        { clipPath: 'inset(0% 0% 0% 0%)', duration: d, ease: 'power3.inOut', onComplete: done }
+      );
+      gsap.to(prev, { xPercent: -12 * dir, duration: d, ease: 'power3.inOut' });
+    },
+    push: ({ next, prev, dir, d, done }) => {
+      gsap.set(next, { autoAlpha: 1 });
+      gsap.fromTo(next, { xPercent: 100 * dir }, { xPercent: 0, duration: d, ease: 'power3.inOut', onComplete: done });
+      gsap.to(prev, { xPercent: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
+    },
+    circle: ({ next, dir, d, point, done }) => {
+      const at = point || (dir > 0 ? '100% 50%' : '0% 50%');
+      gsap.set(next, { autoAlpha: 1 });
+      gsap.fromTo(next, { clipPath: `circle(0% at ${at})` }, { clipPath: `circle(150% at ${at})`, duration: d * 1.2, ease: 'power2.inOut', onComplete: done });
+    },
+  };
+  /*@end*/
+
+  /* ------------------------------------------------------------------ */
   /*  Inhalts-Animationen in Slides: data-slider-anim="fade-up" …        */
   /*  fade: bei jedem Wechsel neu · carousel: einmal, wenn sichtbar       */
   /* ------------------------------------------------------------------ */
@@ -517,19 +660,49 @@
     const TO = { opacity: 1, x: 0, y: 0, scale: 1, filter: 'blur(0px)', clipPath: 'inset(0% 0% 0% 0%)' };
     const per = slides.map((s) => Array.from(s.querySelectorAll('[data-slider-anim]')));
     const all = per.flat();
+    // Text Zeile für Zeile (lines, words, chars) mit SplitText, sonst wie fade-up
+    const SPLIT = { lines: 0.1, words: 0.04, chars: 0.02 };
+    const ST = window.SplitText;
+    if (ST) gsap.registerPlugin(ST);
+    const splits = new Map();
+    const shown = new Set(); // Slides, deren Inhalt gerade sichtbar ist
+    let ready = !all.some((el) => SPLIT[el.dataset.sliderAnim] && ST);
     all.forEach((el) => {
       R.style(el);
+      if (SPLIT[el.dataset.sliderAnim] && ST) return;
       gsap.set(el, from(el));
     });
+    const doSplit = () => {
+      all.forEach((el) => {
+        const t = el.dataset.sliderAnim;
+        if (!SPLIT[t] || !ST || splits.has(el)) return;
+        const sp = new ST(el, { type: t === 'lines' ? 'lines' : 'lines,' + t, mask: 'lines' });
+        splits.set(el, { sp, parts: sp[t], stagger: SPLIT[t] });
+        gsap.set(sp[t], { yPercent: 110 });
+        gsap.set(el, { opacity: 1 });
+      });
+      ready = true;
+      shown.forEach((i) => play(i, 0));
+    };
+    if (!ready) document.fonts && document.fonts.status !== 'loaded' ? document.fonts.ready.then(doSplit) : doSplit();
     const played = new Set();
     const play = (i, delay) => {
       const els = per[i] || [];
+      shown.add(i);
+      if (!ready) return;
       gsap.killTweensOf(els);
       els.forEach((el, k) => {
+        const sp = splits.get(el);
+        const base = (delay || 0) + k * num(el.dataset.sliderAnimStagger, 0.1) + num(el.dataset.sliderAnimDelay, 0);
+        if (sp) {
+          gsap.killTweensOf(sp.parts);
+          gsap.fromTo(sp.parts, { yPercent: 110 }, { yPercent: 0, duration: num(el.dataset.sliderAnimDuration, 0.9), ease: el.dataset.sliderAnimEase || 'power4.out', stagger: sp.stagger, delay: base });
+          return;
+        }
         const f = from(el);
         const t = { duration: num(el.dataset.sliderAnimDuration, 0.8), ease: el.dataset.sliderAnimEase || 'power3.out' };
         Object.keys(f).forEach((p) => (t[p] = TO[p]));
-        t.delay = (delay || 0) + k * num(el.dataset.sliderAnimStagger, 0.1) + num(el.dataset.sliderAnimDelay, 0);
+        t.delay = base;
         if (f.filter) t.clearProps = 'filter';
         gsap.fromTo(el, f, t);
       });
@@ -543,10 +716,23 @@
       },
       reset(i) {
         const els = per[i] || [];
+        shown.delete(i);
         gsap.killTweensOf(els);
-        els.forEach((el) => gsap.set(el, from(el)));
+        els.forEach((el) => {
+          const sp = splits.get(el);
+          if (sp) {
+            gsap.killTweensOf(sp.parts);
+            gsap.set(sp.parts, { yPercent: 110 });
+          } else if (!(SPLIT[el.dataset.sliderAnim] && ST)) gsap.set(el, from(el));
+        });
       },
-      destroy: () => gsap.killTweensOf(all),
+      destroy: () => {
+        gsap.killTweensOf(all);
+        splits.forEach((sp) => {
+          gsap.killTweensOf(sp.parts);
+          sp.sp.revert();
+        });
+      },
     };
   };
   /*@end*/
@@ -581,6 +767,8 @@
       pauseHover: ds.sliderPauseHover !== 'false',
       label: ds.sliderLabel,
       for: ds.sliderFor || '',
+      effect: type === 'carousel' ? ds.sliderEffect || '' : '',
+      transition: fade ? ds.sliderTransition || 'fade' : 'fade',
     };
   };
 
@@ -677,7 +865,18 @@
       if (o.autoplay && !pauses.length) issue('Autoplay ohne Pause-Button (data-slider-pause), für Barrierefreiheit empfohlen.');
 
       // Kontext für die Engine
-      const c = { root, track, viewport, slides, o, R, reduce, startSlide: Math.min(o.start, n - 1), onRender: () => {}, onLeave: () => {} };
+      // Letzte Klick-/Tippstelle relativ zum Slider (für den Kreis-Übergang)
+      let pt = null;
+      on(document, 'pointerdown', (e) => (pt = { x: e.clientX, y: e.clientY, t: now() }), { capture: true });
+      const point = () => {
+        if (!pt || now() - pt.t > 1500) return null;
+        const r = viewport.getBoundingClientRect();
+        if (!r.width || !r.height) return null;
+        return `${clamp(((pt.x - r.left) / r.width) * 100, 0, 100).toFixed(1)}% ${clamp(((pt.y - r.top) / r.height) * 100, 0, 100).toFixed(1)}%`;
+      };
+      const c = { root, track, viewport, slides, o, R, reduce, issue, point, startSlide: Math.min(o.start, n - 1), onRender: () => {}, onLeave: () => {} };
+      const fx = o.effect && !reduce ? (F.effects ? F.effects(c, o.effect) : (issue('Effekte sind in dieser Version nicht enthalten.'), null)) : null;
+      if (fx) c.fx = fx.render;
       const eng = engineFn(c);
       inst.eng = eng;
 
@@ -1079,6 +1278,7 @@
         cancelAnimationFrame(raf);
         if (auto) auto.kill();
         if (anim) anim.destroy();
+        if (fx) fx.destroy();
         eng.destroy();
         slides.forEach((s) => s.classList.remove('is-active', 'is-in-view'));
         R.run();
