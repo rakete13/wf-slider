@@ -160,7 +160,7 @@ test/                     Browser-Test der Demo-Seite (Playwright)
 node build.js carousel,autoplay ./ausgabe-ordner
 ```
 
-Typen `carousel`, `fade`, `thumbs`, Bausteine `autoplay` (Autoplay und Pause-Button), `anim` (`data-slider-anim`), `effects` (Carousel-Effekte) und `transitions` (Fade-Übergänge). Ohne Effekte und Übergänge spart man rund 4.500 Zeichen. Ohne Ordnerangabe wird die Vollversion nach `webflow/` und `src/wf-slider.min.js` geschrieben. Benötigt Node.js und esbuild (`npm i -g esbuild`) oder TypeScript.
+Typen `carousel`, `fade`, `thumbs`, Bausteine `autoplay` (Autoplay und Pause-Button), `anim` (`data-slider-anim`), `effects` (Carousel-Effekte) und `transitions` (Fade-Übergänge). Ohne Effekte und Übergänge spart man rund 2.500 Zeichen. Ohne Ordnerangabe wird die Vollversion nach `webflow/` und `src/wf-slider.min.js` geschrieben. Benötigt Node.js und esbuild (`npm i -g esbuild`) oder TypeScript.
 
 ## Versionen
 
