@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.1.1
+ * WF Slider v1.2.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.1.1';
+  const VERSION = '1.2.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -425,10 +425,26 @@
       c.viewport.style.overflow = 'hidden';
     }
     // Reste eines abgebrochenen Übergangs entfernen
+    // Innere Teile einer Slide: Box (data-slider-effect-target oder erstes Kind) und Bild darin
+    const partsMap = new Map();
+    const parts = (s) => {
+      if (!partsMap.has(s)) {
+        const box = s.querySelector('[data-slider-effect-target]') || s.firstElementChild || s;
+        const img = (box !== s && box.querySelector('img')) || box;
+        R.style(box);
+        R.style(img);
+        if (img !== box) box.style.overflow = 'hidden';
+        partsMap.set(s, { box, img });
+      }
+      return partsMap.get(s);
+    };
     const tidy = (s) => {
       if (!T) return;
-      gsap.killTweensOf(s);
+      const p = partsMap.get(s);
+      const els = p ? [s, p.box, p.img] : [s];
+      gsap.killTweensOf(els);
       gsap.set(s, { xPercent: 0, scale: 1, clipPath: 'none', filter: 'none' });
+      if (p) gsap.set([p.box, p.img], { xPercent: 0, scale: 1 });
     };
 
     const go = (i, dir, instant) => {
@@ -461,7 +477,7 @@
         gsap.set(next, { autoAlpha: 1 });
         leave();
       } else if (T) {
-        T({ next, prev, dir, d: o.duration, point: c.point(), done: leave });
+        T({ next, prev, dir, d: o.duration, point: c.point(), done: leave, parts, c });
       } else {
         gsap.fromTo(next, { autoAlpha: 0 }, { autoAlpha: 1, duration: o.duration, ease: 'power2.inOut', onComplete: leave });
       }
@@ -633,6 +649,28 @@
       gsap.fromTo(next, { xPercent: 100 * dir }, { xPercent: 0, duration: d, ease: 'power3.inOut', onComplete: done });
       gsap.to(prev, { xPercent: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
     },
+    // Bild schrumpft und zeigt die Hintergrundfarbe der Slide, Slides wechseln seitlich
+    // mit Parallax im Bild, neues Bild wächst wieder. Text (data-slider-anim) blendet vorher aus.
+    showcase: ({ next, prev, dir, d, done, parts, c }) => {
+      const small = clamp(num(c.root.dataset.sliderScale, 0.6), 0.2, 1);
+      const P = parts(prev);
+      const N = parts(next);
+      const t1 = d * 0.5; // verkleinern
+      const t2 = d * 0.9; // wechseln
+      const t3 = d * 0.55; // vergrößern
+      c.animDelay = t1 + t2 + t3 * 0.6;
+      gsap.to(prev.querySelectorAll('[data-slider-anim]'), { opacity: 0, duration: t1 * 0.6, ease: 'power1.out' });
+      gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
+      gsap.set(N.box, { scale: small });
+      gsap.set(N.img, { xPercent: N.img === N.box ? 0 : 35 * dir });
+      const tl = gsap.timeline({ onComplete: done });
+      tl.to(P.box, { scale: small, duration: t1, ease: 'power2.inOut' })
+        .to(prev, { xPercent: -100 * dir, duration: t2, ease: 'power3.inOut' }, t1)
+        .to(next, { xPercent: 0, duration: t2, ease: 'power3.inOut' }, t1)
+        .to(N.img, { xPercent: 0, duration: t2, ease: 'power3.inOut' }, t1);
+      if (P.img !== P.box) tl.to(P.img, { xPercent: -35 * dir, duration: t2, ease: 'power3.inOut' }, t1);
+      tl.to(N.box, { scale: 1, duration: t3, ease: 'power2.inOut' }, t1 + t2);
+    },
     circle: ({ next, dir, d, point, done }) => {
       const at = point || (dir > 0 ? '100% 50%' : '0% 50%');
       gsap.set(next, { autoAlpha: 1 });
@@ -734,7 +772,8 @@
           if (sp) {
             gsap.killTweensOf(sp.parts);
             gsap.set(sp.parts, { yPercent: 110 });
-          } else if (!(SPLIT[el.dataset.sliderAnim] && ST)) gsap.set(el, from(el));
+            gsap.set(el, { opacity: 1 });
+          } else if (!(SPLIT[el.dataset.sliderAnim] && ST)) gsap.set(el, Object.assign({ opacity: 1 }, from(el)));
         });
       },
       destroy: () => {
@@ -1015,7 +1054,7 @@
         if (staticMode) return;
         const before = eng.index();
         eng.go(i, dir);
-        if (type === 'fade' && anim && eng.index() !== before) anim.play(eng.index(), o.duration * 0.35);
+        if (type === 'fade' && anim && eng.index() !== before) anim.play(eng.index(), c.animDelay !== undefined ? c.animDelay : o.duration * 0.35);
         if (!fromAuto && auto) auto.start();
       }
       const cur = () => (eng.goal ? eng.goal() : eng.index());

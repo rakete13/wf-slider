@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen liegt in [`docs/index.html`](
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.1.1/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.2.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -74,6 +74,9 @@ Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`)
 | `wipe` | Aufdecken aus Richtung der Navigation, die alte Slide rutscht ein Stück mit |
 | `push` | neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab |
 | `circle` | Kreis öffnet sich an der Klick- oder Tippstelle (bei Autoplay und Tastatur vom Rand) |
+| `showcase` | Bild schrumpft und zeigt die Hintergrundfarbe der Slide, Slides wechseln seitlich mit Parallax im Bild, neues Bild wächst wieder. Text mit `data-slider-anim` blendet vorher aus und danach ein. |
+
+**Showcase einrichten:** Die Hintergrundfarbe ist einfach der Background der Slide (in Webflow ein CMS-Farbfeld an die Background Color des Collection Items binden). Die Bild-Box ist das erste Kind der Slide oder das Element mit `data-slider-effect-target`, das Bild darin bekommt den Parallax. Wie klein das Bild beim Wechsel wird: `data-slider-scale` (Standard `0.6`). Titel und Pfeile platziert ihr frei im Designer, Pfeile außerhalb mit Slider-ID.
 
 **Text: `data-slider-anim="lines"`** (oder `words`, `chars`) lässt Text aus einer Maske aufsteigen. Braucht SplitText (*GSAP integration → SplitText* anhaken), sonst wird daraus `fade-up`.
 

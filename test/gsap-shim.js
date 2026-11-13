@@ -112,6 +112,21 @@
     },
     _count: () => tweens.size,
     registerPlugin: () => {},
+    timeline: (v) => {
+      let end = 0;
+      let fin = null;
+      const tl = {
+        to(t, vars, pos) {
+          const at = pos === undefined ? end : pos;
+          make(t, null, Object.assign({}, vars, { delay: at }));
+          end = Math.max(end, at + (vars.duration == null ? 0.5 : vars.duration));
+          if (fin) fin.kill();
+          fin = make({}, null, { duration: 0, delay: end, onComplete: v && v.onComplete });
+          return tl;
+        },
+      };
+      return tl;
+    },
     delayedCall: (sec, fn) => make({}, null, { duration: 0, delay: sec, onComplete: fn }),
     quickTo: (t, prop, v) => {
       let tw = null;

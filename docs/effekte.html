@@ -95,7 +95,19 @@ pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 
 .h-text h3 { font-size: clamp(2rem, 5vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; }
 .h-text p { margin: 0; max-width: 48ch; opacity: .9; }
 
-/* ---------- 3 · Eigener Effekt per CSS-Variable ---------- */
+/* ---------- 3 · Showcase ---------- */
+.sc { border-radius: 14px; overflow: hidden; }
+.sc-slide { position: relative; height: min(78vh, 620px); }
+.sc-box { position: absolute; inset: 0; }
+.sc-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sc-title { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; z-index: 2; pointer-events: none;
+  font: 800 clamp(3rem, 12vw, 9rem)/1 var(--font-display); letter-spacing: -0.03em; color: #fff; text-shadow: 0 4px 30px rgba(0,0,0,.25); }
+.sc-wrap { position: relative; }
+.sc-nav { position: absolute; inset: auto 0 24px 0; display: flex; justify-content: space-between; padding-inline: 24px; z-index: 3; pointer-events: none; }
+.sc-nav .btn { pointer-events: auto; background: rgba(255,255,255,.9); border: 0; color: #141824; }
+.sc-count { position: absolute; top: 20px; left: 24px; z-index: 3; color: #fff; font-family: var(--font-mono); font-size: .85rem; }
+
+/* ---------- 4 · Eigener Effekt per CSS-Variable ---------- */
 .arc-track { display: flex; gap: 16px; padding-block: 40px 70px; }
 .arc-slide { flex: 0 0 min(260px, 56%); }
 .arc-in { aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: #2b2f3a;
@@ -183,6 +195,7 @@ img { color: transparent; }
       <button class="chip" data-v="wipe" aria-pressed="true">wipe</button>
       <button class="chip" data-v="push" aria-pressed="false">push</button>
       <button class="chip" data-v="circle" aria-pressed="false">circle</button>
+      <button class="chip" data-v="showcase" aria-pressed="false">showcase</button>
     </div>
     <div class="chips" data-chips="text">
       <span class="label">Text</span>
@@ -211,9 +224,41 @@ img { color: transparent; }
   </section>
 
   <!-- 3 -->
-  <section id="eigen">
+  <section id="showcase">
     <div class="head">
       <div class="num">03</div>
+      <h2>Showcase</h2>
+      <p>Das Bild schrumpft und gibt die Hintergrundfarbe der Slide frei, dann wechseln die Slides seitlich mit Parallax im Bild, und das neue Bild wächst wieder. Die Farbe ist einfach der Hintergrund der Slide, in Webflow per CMS-Farbfeld gebunden. Die Schrift blendet vorher aus und danach wieder ein.</p>
+    </div>
+    <div class="stage stage-pad">
+      <div class="sc-wrap">
+        <div class="sc" data-slider="fade" data-slider-id="showcase" data-slider-transition="showcase" data-slider-duration="1.1" data-slider-pad="2" data-slider-label="Kollektion">
+          <div data-slider-track>
+            <div class="sc-slide" style="background-color:#d39a85"><div class="sc-box"><img src="https://picsum.photos/id/21/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Rosé</h3></div>
+            <div class="sc-slide" style="background-color:#8e77bd"><div class="sc-box"><img src="https://picsum.photos/id/103/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Lavendel</h3></div>
+            <div class="sc-slide" style="background-color:#8f9a4f"><div class="sc-box"><img src="https://picsum.photos/id/1062/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Olive</h3></div>
+            <div class="sc-slide" style="background-color:#6f8fb3"><div class="sc-box"><img src="https://picsum.photos/id/177/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Fjord</h3></div>
+          </div>
+        </div>
+        <div class="sc-count"><span data-slider-current="showcase"></span> / <span data-slider-total="showcase"></span></div>
+        <div class="sc-nav">
+          <button class="btn" data-slider-prev="showcase">←</button>
+          <button class="btn" data-slider-next="showcase">→</button>
+        </div>
+      </div>
+    </div>
+    <pre>slider-wrapper   data-slider="fade"  data-slider-transition="showcase"  data-slider-id="showcase"
+slide            Hintergrundfarbe aus dem CMS (Farbfeld an Background Color gebunden)
+bild-box         erstes Kind der Slide (oder data-slider-effect-target), das Bild darin bekommt den Parallax
+titel            data-slider-anim="fade-in"   (blendet beim Wechsel aus und wieder ein)
+
+Optional: data-slider-scale="0.6" (wie klein das Bild wird), data-slider-duration="1.1"</pre>
+  </section>
+
+  <!-- 4 -->
+  <section id="eigen">
+    <div class="head">
+      <div class="num">04</div>
       <h2>Eigener Effekt per CSS-Variable</h2>
       <p>Jede Slide bekommt <code>--slide-progress</code>: 0 in der Mitte, −1 links daneben, 1 rechts daneben, stufenlos beim Ziehen. Damit baut ihr eigene Effekte in Webflow (Custom Code im Embed), ohne die Library anzufassen. Hier: ein Bogen mit leichter Drehung.</p>
     </div>
@@ -258,6 +303,7 @@ img { color: transparent; }
       wipe: 'Neue Slide wird aus Richtung der Navigation aufgedeckt, die alte rutscht ein Stück mit.',
       push: 'Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab.',
       circle: 'Öffnet sich als Kreis von der Klick- oder Tippstelle. Ohne Klick (Autoplay, Tastatur) vom Rand.',
+      showcase: 'Bild schrumpft, Slides wechseln seitlich mit Parallax, neues Bild wächst. Siehe eigenes Beispiel weiter unten.',
     },
   };
   const fx = document.getElementById('fx');
