@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WF Slider Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<!-- Head Code der Library (wie im Webflow-Head) -->
+<script>
+document.documentElement.classList.add('js-slider');
+setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+</script>
+<style>
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items){display:grid}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>*{grid-area:1/1/2/2}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child){opacity:0;visibility:hidden}
+.js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}
+[data-slider]{min-width:0}
+</style>
+
+<style>
+:root {
+  --bg: #f3f4f7; --surface: #ffffff; --ink: #141824; --muted: #5d6476; --line: #dde0e8;
+  --accent: #2f4cf5; --accent-ink: #ffffff; --stage: #e9ebf2; --code-bg: #eef0f6;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f121a; --surface: #171b26; --ink: #e8eaf2; --muted: #9aa1b4; --line: #272d3b;
+    --accent: #7f93ff; --accent-ink: #0f121a; --stage: #1d2230; --code-bg: #1d2230; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+code, pre { font-family: var(--font-mono); font-size: 0.84rem; }
+p code, li code, td code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+
+.shell { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: 200px minmax(0, 1fr); gap: 56px; padding-block: 72px 120px; }
+nav.toc { position: sticky; top: 32px; align-self: start; display: grid; gap: 4px; font-size: 0.9rem; }
+nav.toc .label { font-size: 0.72rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+nav.toc a { color: var(--muted); text-decoration: none; padding: 4px 0; display: flex; gap: 10px; }
+nav.toc a span { font-family: var(--font-mono); color: var(--accent); font-size: 0.8rem; width: 1.2em; }
+nav.toc a:hover { color: var(--ink); }
+main { min-width: 0; display: grid; gap: 96px; }
+
+header.hero { display: grid; gap: 20px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); letter-spacing: 0.04em; }
+.hero h1 { font-size: clamp(2.6rem, 6vw, 4.4rem); font-weight: 800; letter-spacing: -0.02em; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { max-width: 62ch; color: var(--muted); margin: 0; font-size: 1.08rem; }
+.notice { border: 1px solid var(--line); background: var(--surface); padding: 12px 16px; border-radius: 6px; font-size: 0.92rem; max-width: 70ch; }
+
+section.cat { display: grid; gap: 28px; scroll-margin-top: 32px; }
+.cat-head { display: grid; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 16px; }
+.cat-head .num { font-family: var(--font-mono); color: var(--accent); font-size: 0.85rem; }
+.cat-head h2 { font-size: clamp(1.7rem, 3vw, 2.2rem); font-weight: 700; }
+.cat-head p { margin: 0; color: var(--muted); max-width: 66ch; }
+.info { display: grid; gap: 10px; }
+.info h3 { font-size: 1.2rem; }
+.info p { margin: 0; color: var(--muted); max-width: 70ch; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px; overflow-x: auto; margin: 0; line-height: 1.55; }
+table { border-collapse: collapse; width: 100%; font-size: 0.9rem; display: block; overflow-x: auto; }
+table tbody, table thead { display: table; width: 100%; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-weight: 600; color: var(--muted); font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; }
+td:first-child { white-space: nowrap; }
+ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 70ch; }
+
+/* ---------- Bühne ---------- */
+.stage { background: var(--stage); border-radius: 12px; padding: 28px; min-width: 0; display: grid; gap: 18px; }
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn { width: 44px; height: 44px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; font-size: 1.1rem; transition: opacity .2s, border-color .2s; }
+.btn:hover { border-color: var(--accent); }
+.btn.is-disabled { opacity: .35; pointer-events: none; }
+.btn-pause { width: auto; padding: 0 16px; font: 600 0.8rem var(--font-body); }
+.btn-pause .play { display: none; }
+.is-paused .btn-pause .play { display: inline; }
+.is-paused .btn-pause .pause { display: none; }
+.dots { display: flex; gap: 8px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 999px; background: var(--ink); opacity: .25; cursor: pointer; transition: width .3s, opacity .3s; }
+.dot.is-active { width: 28px; opacity: 1; background: var(--accent); }
+.counter { font-family: var(--font-mono); font-size: 0.9rem; margin-left: auto; }
+.bar { height: 3px; background: var(--line); border-radius: 3px; overflow: hidden; flex: 1; min-width: 120px; }
+.bar-fill { height: 100%; background: var(--accent); transform: scaleX(0); }
+
+/* Karten (Carousel) */
+.track { display: flex; gap: 16px; }
+.card { flex: 0 0 calc((100% - 32px) / 3); min-height: 230px; border-radius: 10px; padding: 20px; color: #fff; display: flex; flex-direction: column; justify-content: space-between; text-decoration: none; }
+.card .n { font-family: var(--font-mono); font-size: 0.85rem; opacity: .8; }
+.card h4 { margin: 0; font: 700 1.35rem/1.15 var(--font-display); }
+@media (max-width: 991px) { .card { flex-basis: calc((100% - 16px) / 2); } }
+@media (max-width: 600px) { .card { flex-basis: 82%; } }
+.c1 { background: #2f4cf5; } .c2 { background: #e5484d; } .c3 { background: #12a594; } .c4 { background: #f76b15; }
+.c5 { background: #8e4ec6; } .c6 { background: #0090ff; } .c7 { background: #d6409f; } .c8 { background: #3e3e45; }
+
+.center .card { flex-basis: 46%; opacity: .45; transition: opacity .4s; }
+.center .card.is-active { opacity: 1; }
+@media (max-width: 600px) { .center .card { flex-basis: 78%; } }
+
+.mobile-only .track { display: grid; grid-template-columns: repeat(4, 1fr); }
+@media (max-width: 767px) { .mobile-only .track { display: flex; } .mobile-only .card { flex-basis: 80%; } }
+
+/* Hero (Fade) */
+.hero-slider { border-radius: 12px; overflow: hidden; color: #fff; }
+.hero-slide { min-height: 360px; padding: 40px; display: flex; flex-direction: column; justify-content: flex-end; gap: 10px; }
+.hero-slide h4 { margin: 0; font: 800 clamp(1.8rem, 4vw, 3rem)/1.05 var(--font-display); max-width: 16ch; }
+.hero-slide p { margin: 0; max-width: 46ch; opacity: .9; }
+.hero-slide .tag { font-family: var(--font-mono); font-size: .8rem; opacity: .8; }
+.h1 { background: linear-gradient(135deg, #1b2a8f, #2f4cf5); } .h2 { background: linear-gradient(135deg, #7a1f22, #e5484d); }
+.h3 { background: linear-gradient(135deg, #0b5148, #12a594); } .h4 { background: linear-gradient(135deg, #5b2d86, #8e4ec6); }
+
+/* Galerie */
+.gallery-main { border-radius: 12px; overflow: hidden; }
+.g-slide { aspect-ratio: 16 / 9; display: grid; place-items: center; color: #fff; font: 800 3rem var(--font-display); }
+.thumbs .track { gap: 10px; }
+.thumb { flex: 0 0 120px; aspect-ratio: 4 / 3; border-radius: 8px; display: grid; place-items: center; color: #fff; font: 700 1rem var(--font-display); cursor: pointer; opacity: .5; outline-offset: -4px; transition: opacity .3s; }
+.thumb.is-active { opacity: 1; box-shadow: inset 0 0 0 3px var(--ink); }
+
+@media (max-width: 860px) {
+  .shell { grid-template-columns: minmax(0, 1fr); gap: 32px; padding-top: 40px; }
+  nav.toc { position: static; display: flex; flex-wrap: wrap; gap: 4px 16px; }
+  nav.toc .label { width: 100%; margin: 0; }
+  .stage { padding: 18px; }
+  .hero-slide { padding: 24px; min-height: 300px; }
+}
+</style>
+</head>
+<body>
+<div class="shell">
+  <nav class="toc" aria-label="Inhalt">
+    <div class="label">WF Slider</div>
+    <a href="#setup"><span>00</span>Einbau</a>
+    <a href="#carousel"><span>01</span>Carousel</a>
+    <a href="#fade"><span>02</span>Fade</a>
+    <a href="#gallery"><span>03</span>Galerie</a>
+    <a href="#referenz"><span>04</span>Referenz</a>
+  </nav>
+
+  <main>
+    <header class="hero">
+      <div class="eyebrow">WF Slider · v1.0.0 · Begleiter zu WF Anim</div>
+      <h1>Slider per <em>Attribut</em>, für CMS und statische Inhalte.</h1>
+      <p>Wrapper bauen, <code>data-slider="carousel"</code> setzen, fertig. Ob die Slides aus einer Collection List kommen oder von Hand gebaut sind, ist egal. Pfeile, Punkte und Zähler gestaltest du selbst im Designer und markierst sie nur.</p>
+      <div class="notice">Braucht nur GSAP selbst, keine Plugins. Läuft auf der veröffentlichten Seite, nicht im Designer. Mit <code>?wfslider-debug</code> an der Adresse siehst du Hinweise zu jedem Slider in der Konsole.</div>
+    </header>
+
+    <!-- 00 Einbau -->
+    <section class="cat" id="setup">
+      <div class="cat-head">
+        <div class="num">00</div>
+        <h2>Einbau</h2>
+      </div>
+      <ol class="steps">
+        <li><strong>GSAP aktivieren:</strong> Settings → GSAP integration → GSAP einschalten. Weitere Plugins sind nicht nötig.</li>
+        <li><strong>Head Code:</strong> <code>webflow/head-code.html</code> in Site Settings → Custom Code → Head Code (oder nur auf der Seite mit Slider).</li>
+        <li><strong>Footer Code:</strong> <code>webflow/footer-code.html</code> am besten als <em>Page</em> Custom Code auf den Seiten mit Slider. So bleibt das Site-Limit frei für WF Anim.</li>
+        <li>Veröffentlichen.</li>
+      </ol>
+      <div class="info">
+        <h3>Aufbau im Designer</h3>
+        <pre>slider-wrapper          ← data-slider = carousel
+  ├── Collection List Wrapper
+  │     └── Collection List   ← wird automatisch als Track erkannt (Display: flex, Gap)
+  │           └── Collection Item  ← eine Slide (Flex Shrink 0, Breite)
+  └── slider-controls
+        ├── button-prev      ← data-slider-prev
+        ├── dots             ← data-slider-dots (ein gestalteter Punkt als Vorlage darin)
+        ├── button-next      ← data-slider-next
+        └── counter          ← data-slider-current / data-slider-total</pre>
+        <p>Ohne CMS markierst du den Track mit <code>data-slider-track</code>. Die Kinder des Tracks sind die Slides. Sollen nur bestimmte Kinder Slides sein, markierst du sie mit <code>data-slider-slide</code>.</p>
+      </div>
+    </section>
+
+    <!-- 01 Carousel -->
+    <section class="cat" id="carousel">
+      <div class="cat-head">
+        <div class="num">01</div>
+        <h2>Carousel</h2>
+        <p>Ziehen mit Maus, Finger und Trackpad, Snapping auf die Slides, Pfeile, Punkte, Tastatur. Wie viele Slides sichtbar sind, bestimmt die Breite der Slides im Designer, pro Breakpoint.</p>
+      </div>
+
+      <div class="info">
+        <h3>Standard (CMS-Aufbau)</h3>
+        <p>Hier im Webflow-Markup einer Collection List. Am Ende bleibt der Slider stehen, die Pfeile werden blass (<code>is-disabled</code>).</p>
+      </div>
+      <div class="stage">
+        <div data-slider="carousel" data-slider-pad="2" data-slider-label="Projekte">
+          <div class="w-dyn-list">
+            <div class="track w-dyn-items" role="list">
+              <a href="#carousel" class="card c1 w-dyn-item" role="listitem"><span class="n">01</span><h4>Markenauftritt Nordlicht</h4></a>
+              <a href="#carousel" class="card c2 w-dyn-item" role="listitem"><span class="n">02</span><h4>Shop-Relaunch Kaffeerösterei</h4></a>
+              <a href="#carousel" class="card c3 w-dyn-item" role="listitem"><span class="n">03</span><h4>Kampagne Stadtwerke</h4></a>
+              <a href="#carousel" class="card c4 w-dyn-item" role="listitem"><span class="n">04</span><h4>Website Architekturbüro</h4></a>
+              <a href="#carousel" class="card c5 w-dyn-item" role="listitem"><span class="n">05</span><h4>Messestand Fintech</h4></a>
+              <a href="#carousel" class="card c6 w-dyn-item" role="listitem"><span class="n">06</span><h4>App-Onboarding</h4></a>
+              <a href="#carousel" class="card c7 w-dyn-item" role="listitem"><span class="n">07</span><h4>Jahresbericht Stiftung</h4></a>
+              <a href="#carousel" class="card c8 w-dyn-item" role="listitem"><span class="n">08</span><h4>Packaging Manufaktur</h4></a>
+            </div>
+          </div>
+          <div class="controls" style="margin-top:18px">
+            <button class="btn" data-slider-prev aria-label="Zurück">←</button>
+            <div class="dots" data-slider-dots><div class="dot"></div></div>
+            <button class="btn" data-slider-next aria-label="Weiter">→</button>
+            <div class="counter"><span data-slider-current>01</span> / <span data-slider-total>08</span></div>
+          </div>
+        </div>
+      </div>
+      <pre>slider-wrapper   data-slider="carousel"  data-slider-pad="2"
+button-prev      data-slider-prev
+dots             data-slider-dots     (darin ein gestalteter Punkt, Klasse is-active für den aktiven)
+button-next      data-slider-next
+counter          data-slider-current · data-slider-total</pre>
+
+      <div class="info">
+        <h3>Loop, zentriert, mit Autoplay</h3>
+        <p>Endlos ohne Klone: Die echten Slides werden umsortiert, Webflow Interactions und Lightboxen bleiben intakt. Autoplay pausiert bei Hover, Tastatur-Fokus, außerhalb des Bildschirms und im Hintergrund-Tab. Die aktive Slide hat <code>is-active</code>, hier zum Hervorheben genutzt.</p>
+      </div>
+      <div class="stage">
+        <div class="center" data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-autoplay="4">
+          <div class="track" data-slider-track>
+            <div class="card c6"><span class="n">A</span><h4>Loop ohne Klone</h4></div>
+            <div class="card c3"><span class="n">B</span><h4>Zentriert ausgerichtet</h4></div>
+            <div class="card c5"><span class="n">C</span><h4>Autoplay mit Pause</h4></div>
+            <div class="card c4"><span class="n">D</span><h4>Fortschrittsbalken</h4></div>
+            <div class="card c2"><span class="n">E</span><h4>Trackpad-Wischen</h4></div>
+          </div>
+          <div class="controls" style="margin-top:18px">
+            <button class="btn" data-slider-prev aria-label="Zurück">←</button>
+            <button class="btn" data-slider-next aria-label="Weiter">→</button>
+            <div class="bar"><div class="bar-fill" data-slider-progress></div></div>
+            <button class="btn btn-pause" data-slider-pause><span class="pause">Pause</span><span class="play">Play</span></button>
+          </div>
+        </div>
+      </div>
+      <pre>slider-wrapper   data-slider="carousel"  data-slider-loop  data-slider-align="center"  data-slider-autoplay="4"
+track            data-slider-track
+bar-fill         data-slider-progress   (wird von links nach rechts skaliert)
+button-pause     data-slider-pause      (Wrapper bekommt is-paused)</pre>
+
+      <div class="info">
+        <h3>Nur auf Mobile ein Slider</h3>
+        <p>Auf dem Desktop ein normales Grid, unter 768 px ein Slider. Im Designer gestaltest du beides wie gewohnt pro Breakpoint. Verkleinere das Fenster, um es zu sehen.</p>
+      </div>
+      <div class="stage">
+        <div class="mobile-only" data-slider="carousel" data-slider-media="(max-width: 767px)">
+          <div class="track" data-slider-track>
+            <div class="card c1"><span class="n">01</span><h4>Beratung</h4></div>
+            <div class="card c7"><span class="n">02</span><h4>Konzept</h4></div>
+            <div class="card c3"><span class="n">03</span><h4>Design</h4></div>
+            <div class="card c8"><span class="n">04</span><h4>Entwicklung</h4></div>
+          </div>
+          <div class="controls" style="margin-top:18px">
+            <div class="dots" data-slider-dots><div class="dot"></div></div>
+          </div>
+        </div>
+      </div>
+      <pre>slider-wrapper   data-slider="carousel"  data-slider-media="(max-width: 767px)"</pre>
+    </section>
+
+    <!-- 02 Fade -->
+    <section class="cat" id="fade">
+      <div class="cat-head">
+        <div class="num">02</div>
+        <h2>Fade</h2>
+        <p>Überblenden für Hero-Bereiche und Testimonials. Wischen funktioniert trotzdem. Inhalte in der Slide animieren mit <code>data-slider-anim</code> bei jedem Wechsel neu.</p>
+      </div>
+      <div class="stage">
+        <div class="hero-slider" data-slider="fade" data-slider-id="hero" data-slider-autoplay="5" data-slider-label="Highlights">
+          <div data-slider-track>
+            <div class="hero-slide h1">
+              <span class="tag" data-slider-anim="fade-in">Neu</span>
+              <h4 data-slider-anim="fade-up">Slider, die sich an euer CMS halten.</h4>
+              <p data-slider-anim="fade-up">Collection List rein, Attribut dran, fertig.</p>
+            </div>
+            <div class="hero-slide h2">
+              <span class="tag" data-slider-anim="fade-in">Barrierefrei</span>
+              <h4 data-slider-anim="fade-up">Tastatur, Screenreader, Bewegung reduzieren.</h4>
+              <p data-slider-anim="fade-up">Alles eingebaut, ohne dass ihr daran denken müsst.</p>
+            </div>
+            <div class="hero-slide h3">
+              <span class="tag" data-slider-anim="fade-in">Leicht</span>
+              <h4 data-slider-anim="clip-up">Nur GSAP, keine Plugins.</h4>
+              <p data-slider-anim="fade-up">Kein Swiper, kein externer Server.</p>
+            </div>
+            <div class="hero-slide h4">
+              <span class="tag" data-slider-anim="fade-in">Flexibel</span>
+              <h4 data-slider-anim="blur-in">Pfeile, Punkte, Zähler: alles im Designer.</h4>
+              <p data-slider-anim="fade-up">Die Library markiert nur, gestaltet wird bei euch.</p>
+            </div>
+          </div>
+        </div>
+        <div class="controls" data-fade-controls>
+          <button class="btn" data-slider-prev="hero" aria-label="Zurück">←</button>
+          <div class="dots" data-slider-dots="hero"><div class="dot"></div></div>
+          <button class="btn" data-slider-next="hero" aria-label="Weiter">→</button>
+          <button class="btn btn-pause" data-slider-pause="hero"><span class="pause">Pause</span><span class="play">Play</span></button>
+        </div>
+      </div>
+      <pre>slider-wrapper   data-slider="fade"  data-slider-id="hero"  data-slider-autoplay="5"
+headline         data-slider-anim="fade-up"     (fade-in, fade-up, fade-down, fade-left, fade-right, scale-in, blur-in, clip-up)
+
+Bedienelemente außerhalb des Wrappers bekommen die ID als Wert:
+button-prev      data-slider-prev="hero"
+dots             data-slider-dots="hero"</pre>
+    </section>
+
+    <!-- 03 Galerie -->
+    <section class="cat" id="gallery">
+      <div class="cat-head">
+        <div class="num">03</div>
+        <h2>Galerie mit Thumbnails</h2>
+        <p>Ein Haupt-Slider (fade oder carousel) bekommt eine ID, die Thumbnails steuern ihn mit <code>data-slider-for</code>. Beide können aus derselben Collection kommen. Das aktive Thumbnail hat <code>is-active</code> und wird bei Bedarf ins Bild geholt.</p>
+      </div>
+      <div class="stage">
+        <div class="gallery-main" data-slider="fade" data-slider-id="galerie" data-slider-label="Galerie">
+          <div data-slider-track>
+            <div class="g-slide c1">1</div><div class="g-slide c2">2</div><div class="g-slide c3">3</div><div class="g-slide c4">4</div>
+            <div class="g-slide c5">5</div><div class="g-slide c6">6</div><div class="g-slide c7">7</div><div class="g-slide c8">8</div>
+          </div>
+        </div>
+        <div class="thumbs" data-slider="thumbs" data-slider-for="galerie">
+          <div class="track" data-slider-track>
+            <div class="thumb c1">1</div><div class="thumb c2">2</div><div class="thumb c3">3</div><div class="thumb c4">4</div>
+            <div class="thumb c5">5</div><div class="thumb c6">6</div><div class="thumb c7">7</div><div class="thumb c8">8</div>
+          </div>
+        </div>
+      </div>
+      <pre>haupt-slider     data-slider="fade"    data-slider-id="galerie"
+thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
+    </section>
+
+    <!-- 04 Referenz -->
+    <section class="cat" id="referenz">
+      <div class="cat-head">
+        <div class="num">04</div>
+        <h2>Referenz</h2>
+      </div>
+
+      <div class="info"><h3>Einstellungen am Wrapper</h3></div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Wirkung</th></tr></thead>
+        <tbody>
+          <tr><td><code>data-slider</code></td><td><code>carousel</code>, <code>fade</code> oder <code>thumbs</code></td></tr>
+          <tr><td><code>data-slider-id</code></td><td>Name für Bedienelemente außerhalb, Thumbnails und die API</td></tr>
+          <tr><td><code>data-slider-loop</code></td><td>Endlos (carousel). Fade ist standardmäßig endlos, <code>="false"</code> schaltet ab</td></tr>
+          <tr><td><code>data-slider-align</code></td><td><code>start</code> (Standard), <code>center</code>, <code>end</code></td></tr>
+          <tr><td><code>data-slider-autoplay</code></td><td>Automatisch weiter, Wert in Sekunden (ohne Wert 5)</td></tr>
+          <tr><td><code>data-slider-step</code></td><td>Slides pro Klick, Zahl oder <code>page</code> (alle sichtbaren)</td></tr>
+          <tr><td><code>data-slider-start</code></td><td>Start-Slide, ab 1</td></tr>
+          <tr><td><code>data-slider-rewind</code></td><td>Ohne Loop: am Ende wieder zum Anfang</td></tr>
+          <tr><td><code>data-slider-duration</code> / <code>-ease</code></td><td>Dauer und Easing der Bewegung</td></tr>
+          <tr><td><code>data-slider-snap="false"</code></td><td>Freies Ziehen ohne Einrasten</td></tr>
+          <tr><td><code>data-slider-drag="false"</code></td><td>Kein Ziehen/Wischen</td></tr>
+          <tr><td><code>data-slider-wheel="false"</code></td><td>Kein waagerechtes Trackpad-Wischen</td></tr>
+          <tr><td><code>data-slider-keyboard="false"</code></td><td>Keine Pfeiltasten</td></tr>
+          <tr><td><code>data-slider-pause-hover="false"</code></td><td>Autoplay läuft beim Hover weiter</td></tr>
+          <tr><td><code>data-slider-overflow="visible"</code></td><td>Slides über den Rand hinaus zeigen (Clip dann an einem Eltern-Element)</td></tr>
+          <tr><td><code>data-slider-media</code></td><td>Nur aktiv bei dieser Media Query, z. B. <code>(max-width: 991px)</code></td></tr>
+          <tr><td><code>data-slider-mobile="false"</code></td><td>Unter 768 px kein Slider</td></tr>
+          <tr><td><code>data-slider-pad</code></td><td>Zähler mit führenden Nullen, z. B. <code>2</code> → 03</td></tr>
+          <tr><td><code>data-slider-label</code></td><td>Name für Screenreader</td></tr>
+          <tr><td><code>data-slider-for</code></td><td>Nur bei <code>thumbs</code>: ID des gesteuerten Sliders</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info"><h3>Markierte Elemente</h3></div>
+      <table>
+        <thead><tr><th>Attribut</th><th>Element</th></tr></thead>
+        <tbody>
+          <tr><td><code>data-slider-track</code></td><td>Reihe der Slides (bei Collection Lists automatisch)</td></tr>
+          <tr><td><code>data-slider-slide</code></td><td>Optional: nur diese Kinder sind Slides</td></tr>
+          <tr><td><code>data-slider-viewport</code></td><td>Optional: Element, das abschneidet (sonst Eltern-Element des Tracks)</td></tr>
+          <tr><td><code>data-slider-prev</code> / <code>-next</code></td><td>Pfeile. Div, Link Block oder Button</td></tr>
+          <tr><td><code>data-slider-dots</code></td><td>Container für Punkte. Das erste Kind ist die Vorlage</td></tr>
+          <tr><td><code>data-slider-current</code> / <code>-total</code></td><td>Zähler</td></tr>
+          <tr><td><code>data-slider-progress</code></td><td>Fortschritt (Autoplay-Zeit, sonst Position)</td></tr>
+          <tr><td><code>data-slider-pause</code></td><td>Pause/Play für Autoplay</td></tr>
+          <tr><td><code>data-slider-anim</code></td><td>Inhalt in einer Slide animieren. Dazu <code>-delay</code>, <code>-duration</code>, <code>-distance</code>, <code>-stagger</code>, <code>-ease</code></td></tr>
+          <tr><td><code>data-slider-nodrag</code></td><td>In diesem Element startet kein Ziehen (z. B. Video-Steuerung)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info"><h3>Klassen zum Gestalten</h3></div>
+      <table>
+        <tbody>
+          <tr><td><code>is-active</code></td><td>Aktive Slide, aktiver Punkt, aktives Thumbnail</td></tr>
+          <tr><td><code>is-in-view</code></td><td>Slides, die gerade sichtbar sind</td></tr>
+          <tr><td><code>is-disabled</code></td><td>Pfeil am Anfang/Ende ohne Loop</td></tr>
+          <tr><td><code>is-dragging</code></td><td>Wrapper, während gezogen wird</td></tr>
+          <tr><td><code>is-paused</code></td><td>Wrapper, wenn Autoplay per Button pausiert ist</td></tr>
+          <tr><td><code>is-static</code></td><td>Wrapper, wenn alle Slides hineinpassen (Bedienelemente werden ausgeblendet)</td></tr>
+          <tr><td><code>is-empty</code></td><td>Wrapper bei leerer Collection</td></tr>
+        </tbody>
+      </table>
+
+      <div class="info">
+        <h3>API</h3>
+        <pre>const s = WFSlider.get('hero');          // per ID oder Element
+s.next(); s.prev(); s.goTo(2);           // Index ab 0
+s.play(); s.pause(); s.index; s.length;
+s.on('change', ({ index, slide }) => {});
+document.querySelector('[data-slider-id="hero"]')
+  .addEventListener('wfslider:change', (e) => console.log(e.detail.index));
+
+WFSlider.init(scope);   // neue Slider starten (z. B. nachgeladene Inhalte)
+WFSlider.refresh();     // neu messen
+WFSlider.destroy(scope);</pre>
+      </div>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="../src/wf-slider.js"></script>
+</body>
+</html>
