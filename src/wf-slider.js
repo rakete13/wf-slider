@@ -346,7 +346,7 @@
           render();
         },
         end(dx, v, startIdx) {
-          const proj = st.p - v * 0.28; // Schwung
+          const proj = st.p - clamp(v * 0.28, -vpW, vpW); // Schwung, höchstens eine Breite weiter
           if (!o.snap) {
             animate(loopOn ? proj : clamp(proj, 0, maxPos), 0.9, 'power3.out');
             return;
