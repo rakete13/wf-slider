@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.1.0
+ * WF Slider v1.1.1
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.1.0';
+  const VERSION = '1.1.1';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -74,6 +74,17 @@
 
   // Elemente, die zu genau diesem Slider gehören (nicht zu einem verschachtelten)
   const own = (root, sel) => Array.from(root.querySelectorAll(sel)).filter((el) => el.closest('[data-slider]') === root);
+
+  // Der einzige Slider im nächsten gemeinsamen Eltern-Element, sonst null (mehrdeutig)
+  const nearestRoot = (el) => {
+    for (let p = el.parentElement; p; p = p.parentElement) {
+      const rs = p.querySelectorAll('[data-slider]');
+      if (rs.length === 1) return rs[0];
+      if (rs.length > 1) return null;
+    }
+    return null;
+  };
+  const CTRL = ['prev', 'next', 'dots', 'current', 'total', 'progress', 'pause'];
 
   const finePointer = () => window.matchMedia('(hover: hover) and (pointer: fine)').matches;
   const isEditable = (t) => t && t.closest && t.closest('input, textarea, select, [contenteditable="true"]');
@@ -823,6 +834,8 @@
         const list = own(root, `[${attr}]`).filter((el) => !el.getAttribute(attr) || el.getAttribute(attr) === inst.id);
         if (inst.id)
           document.querySelectorAll(`[${attr}="${CSS.escape(inst.id)}"]`).forEach((el) => list.includes(el) || list.push(el));
+        // ohne Wert und außerhalb jedes Sliders: zum nächstgelegenen Slider (z. B. Navigation neben dem Wrapper)
+        document.querySelectorAll(`[${attr}=""]`).forEach((el) => !el.closest('[data-slider]') && nearestRoot(el) === root && !list.includes(el) && list.push(el));
         return list;
       };
       const prevs = ctrl('prev');
@@ -1370,8 +1383,17 @@
       })
     );
     if (!rows.length) return;
+    const count = rows.length;
+    // Bedienelemente, die keinem Slider zugeordnet werden konnten
+    CTRL.forEach((n) =>
+      document.querySelectorAll(`[data-slider-${n}=""]`).forEach((el) => {
+        if (!el.closest('[data-slider]') && !nearestRoot(el)) {
+          rows.push({ Slider: '–', Slides: 0, Zustand: 'Bedienelement ohne Slider', Element: el, Hinweise: `data-slider-${n} liegt außerhalb und ist nicht eindeutig: In den Wrapper legen oder data-slider-id am Slider und hier als Wert setzen.` });
+        }
+      })
+    );
     const bad = rows.filter((r) => r.Hinweise !== '–').length;
-    console.groupCollapsed(`[WFSlider] Debug · ${rows.length} Slider · ${bad} mit Hinweisen`);
+    console.groupCollapsed(`[WFSlider] Debug · ${count} Slider · ${bad} mit Hinweisen`);
     console.table(rows.map((r) => ({ Slider: r.Slider, Slides: r.Slides, Zustand: r.Zustand, Hinweise: r.Hinweise })));
     rows.forEach((r) => r.Hinweise !== '–' && console.log(r.Slider, r.Element, r.Hinweise));
     console.groupEnd();
@@ -1384,7 +1406,7 @@
       badge.setAttribute('style', 'position:fixed;right:12px;bottom:12px;z-index:2147483647;font:600 12px/1.4 system-ui,sans-serif;color:#fff;padding:8px 12px;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,.3);pointer-events:none');
       document.body.appendChild(badge);
     }
-    badge.textContent = `WF Slider Debug · ${rows.length} Slider · ${bad ? bad + ' mit Hinweisen (Konsole)' : 'keine Hinweise'}`;
+    badge.textContent = `WF Slider Debug · ${count} Slider · ${bad ? bad + ' mit Hinweisen (Konsole)' : 'keine Hinweise'}`;
     badge.style.background = bad ? '#b4231b' : '#141824';
   };
 

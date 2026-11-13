@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen liegt in [`docs/index.html`](
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.1.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.1.1/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -37,7 +37,7 @@ slider-wrapper            ← data-slider = carousel
 
 - **Ohne CMS** markierst du den Track mit `data-slider-track`. Seine Kinder sind die Slides, oder nur die mit `data-slider-slide`.
 - **Wie viele Slides sichtbar sind**, bestimmt allein die Breite der Slides im Designer. Pro Breakpoint frei gestaltbar, die Library misst nach.
-- **Bedienelemente außerhalb des Wrappers** bekommen die Slider-ID als Wert: Wrapper `data-slider-id="hero"`, Pfeil irgendwo auf der Seite `data-slider-next="hero"`.
+- **Bedienelemente außerhalb des Wrappers:** Liegen sie direkt daneben (z. B. eine `slider-nav` im selben Container) und gibt es dort nur einen Slider, ordnet die Library sie automatisch zu. Sonst bekommen sie die Slider-ID als Wert: Wrapper `data-slider-id="hero"`, Pfeil irgendwo auf der Seite `data-slider-next="hero"`.
 - **Passen alle Slides hinein**, bleibt der Slider ruhig (`is-static`) und die Bedienelemente werden ausgeblendet. **Leere Collection:** `is-empty`, Bedienelemente aus.
 
 ## Typen
