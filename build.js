@@ -90,5 +90,9 @@ ${code}
 
 fs.writeFileSync(path.join(outDir, 'head-code.html'), head);
 fs.writeFileSync(path.join(outDir, 'footer-code.html'), footer);
-if (!used && !process.argv[3]) fs.writeFileSync(path.join(__dirname, 'src', 'wf-slider.min.js'), header + '\n' + code + '\n');
+if (!used && !process.argv[3]) {
+  fs.writeFileSync(path.join(__dirname, 'src', 'wf-slider.min.js'), header + '\n' + code + '\n');
+  // Kopie für die Doku-Seite (GitHub Pages veröffentlicht den Ordner docs)
+  fs.writeFileSync(path.join(__dirname, 'docs', 'wf-slider.min.js'), header + '\n' + code + '\n');
+}
 console.log(JSON.stringify({ version, kept, headChars: head.length, footerChars: footer.length, total: head.length + footer.length }));
