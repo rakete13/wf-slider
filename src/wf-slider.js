@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.4.4
+ * WF Slider v1.5.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.4.4';
+  const VERSION = '1.5.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -655,58 +655,64 @@
       gsap.fromTo(next, { xPercent: 100 * dir }, { xPercent: 0, duration: d, ease: 'power3.inOut', onComplete: done });
       gsap.to(prev, { xPercent: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
     },
-    // 1. Fenster (clip-path) und Bild werden gemeinsam kleiner, beides von der Mitte aus.
-    //    Drumherum bleibt ein Rahmen in der Farbe der Slide.
-    // 2. Die Slide schiebt zur Seite, das Fenster fährt mit ihr. Das Bild darunter läuft
-    //    langsamer: Im neuen Slide ist zuerst das Fenster da, dann fährt das Bild hinein (Parallax).
-    // 3. Dann öffnen sich Fenster und Bild gemeinsam wieder, gleich lang wie beim Schließen.
+    // Passepartout-Prinzip: Über dem Bild liegt ein Rahmen in der Farbe der Slide (clip-path
+    // an der Bild-Box). Sein Ausschnitt ist immer vom Bild gefüllt.
+    // 1. Der Rahmen wird breiter (an allen Seiten gleich dick), das Bild wird etwas kleiner,
+    //    füllt den Ausschnitt aber weiter.
+    // 2. Das Passepartout schiebt mit der Slide zur Seite, das Bild darunter bewegt sich mit,
+    //    nur langsamer (Parallax). Es entsteht nie eine Lücke.
+    // 3. Rahmen und Bild öffnen sich wieder, gleich lang wie beim Schließen.
     // Text (data-slider-anim) blendet vorher aus und danach ein.
     showcase: ({ next, prev, dir, d, done, parts, c }) => {
       const ds = c.root.dataset;
-      const win = clamp(num(ds.sliderScale, 0.6), 0.2, 1); // Größe des Fensters
-      // Bildgröße: Standard gleich dem Fenster, dann laufen Rahmen und Bildkante gleich schnell
-      const imgS = clamp(num(ds.sliderImageScale, win), win, 1);
-      const px = clamp(num(ds.sliderParallax, 0.3), 0, 1) * 100; // Nachlauf des Bilds (Anteil der Breite)
-      const ins = ((1 - win) / 2) * 100;
-      const ease = ds.sliderEase || 'power3.inOut'; // Wechsel der Slide
-      const fEase = ds.sliderFrameEase || 'power2.inOut'; // Rahmen und Bild
       const P = parts(prev);
       const N = parts(next);
       const hasImg = N.img !== N.box && P.img !== P.box;
-      const t1 = d * 0.5; // schließen
-      const t2 = d * 0.9; // Wechsel der Slide
-      const lag = t2 * 0.6; // so viel später als das Fenster kommt das Bild an
-      const open = t1 + t2 + lag;
+      const ease = ds.sliderEase || 'power3.inOut'; // Wechsel der Slide
+      const fEase = ds.sliderFrameEase || 'power2.inOut'; // Rahmen und Bild
+      const t1 = d * 0.5; // schließen und öffnen
+      const t2 = d * 0.9; // Wechsel
+      const open = t1 + t2;
       c.animDelay = open + t1 * 0.6;
-      // clip-path über eine Zahl steuern, damit es in beide Richtungen gleich weich läuft
+      gsap.to(prev.querySelectorAll('[data-slider-anim]'), { opacity: 0, duration: t1 * 0.6, ease: 'power1.out' });
+
+      // Maße: Rahmendicke in px aus der kürzeren Seite, Bildgröße so, dass der Ausschnitt gefüllt bleibt
+      const w = P.box.offsetWidth || 1;
+      const h = P.box.offsetHeight || 1;
+      const win = clamp(num(ds.sliderScale, 0.75), 0.2, 1); // Größe des Ausschnitts
+      const frame = ((1 - win) / 2) * Math.min(w, h); // Rahmendicke in px
+      const minImg = 1 - (2 * frame) / Math.max(w, h); // kleiner darf das Bild nicht werden
+      const imgS = clamp(num(ds.sliderImageScale, (1 + minImg) / 2), minImg, 1);
+      const spare = frame - ((1 - imgS) / 2) * w; // so viel px darf das Bild verrutschen
+      // Nachlauf: Anteil, um den das Bild langsamer ist als das Passepartout (0 = gleich schnell)
+      const lag = clamp(num(ds.sliderParallax, clamp((spare / frame) * 0.9, 0, 0.6)), 0, 0.95);
+
       const clip = (pt, v) => {
         pt.clip.v = v;
-        pt.box.style.clipPath = `inset(${v.toFixed(3)}%)`;
+        pt.box.style.clipPath = `inset(${v.toFixed(2)}px)`;
       };
-      const clipTo = (pt, v, at) =>
-        tl.to(pt.clip, { v, duration: t1, ease: fEase, onUpdate: () => clip(pt, pt.clip.v) }, at);
+      const tl = gsap.timeline({ onComplete: done });
+      const clipTo = (pt, v, at) => tl.to(pt.clip, { v, duration: t1, ease: fEase, onUpdate: () => clip(pt, pt.clip.v) }, at);
 
-      gsap.to(prev.querySelectorAll('[data-slider-anim]'), { opacity: 0, duration: t1 * 0.6, ease: 'power1.out' });
-      if (hasImg) clip(P, 0);
       gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
       if (hasImg) {
-        clip(N, ins);
-        gsap.set(N.img, { scale: imgS, xPercent: px * dir });
-      } else gsap.set(N.box, { scale: win, xPercent: px * dir });
+        clip(P, 0);
+        clip(N, frame);
+        // Bild der neuen Slide liegt schon unter dem Fenster, leicht voraus (es ist langsamer)
+        gsap.set(N.img, { scale: imgS, xPercent: -lag * 100 * dir });
+      } else gsap.set(N.box, { scale: win });
 
-      const tl = gsap.timeline({ onComplete: done });
-      // 1 · schließen
+      // 1 · Rahmen wird breiter, Bild etwas kleiner
       if (hasImg) {
-        clipTo(P, ins, 0);
+        clipTo(P, frame, 0);
         tl.to(P.img, { scale: imgS, duration: t1, ease: fEase }, 0);
       } else tl.to(P.box, { scale: win, duration: t1, ease: fEase }, 0);
-      // 2 · wechseln: Fenster fährt mit der Slide, das Bild darunter hängt hinterher
-      const PI = hasImg ? P.img : P.box;
-      const NI = hasImg ? N.img : N.box;
-      tl.to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1)
-        .to(PI, { xPercent: px * dir, duration: t2, ease: 'power2.inOut' }, t1)
-        .to(next, { xPercent: 0, duration: t2, ease }, t1)
-        .to(NI, { xPercent: 0, duration: t2 + lag, ease: 'power2.inOut' }, t1);
+      // 2 · Passepartout schiebt, Bild darunter folgt langsamer (gleiche Kurve, kleinerer Weg)
+      tl.to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1).to(next, { xPercent: 0, duration: t2, ease }, t1);
+      if (hasImg) {
+        tl.to(P.img, { xPercent: lag * 100 * dir, duration: t2, ease }, t1);
+        tl.to(N.img, { xPercent: 0, duration: t2, ease }, t1);
+      }
       // 3 · öffnen
       if (hasImg) {
         clipTo(N, 0, open);
