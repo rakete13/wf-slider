@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.5.0
+ * WF Slider v1.5.1
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -445,6 +445,10 @@
       const els = p ? [s, p.box, p.img] : [s];
       gsap.killTweensOf(els);
       gsap.set(s, { xPercent: 0, scale: 1, clipPath: 'none', filter: 'none' });
+      if (p && p.bg !== undefined) {
+        s.style.backgroundColor = p.bg;
+        p.bg = undefined;
+      }
       if (p) {
         gsap.killTweensOf(p.clip);
         p.clip.v = 0;
@@ -662,6 +666,9 @@
     // 2. Das Passepartout schiebt mit der Slide zur Seite, das Bild darunter bewegt sich mit,
     //    nur langsamer (Parallax). Es entsteht nie eine Lücke.
     // 3. Rahmen und Bild öffnen sich wieder, gleich lang wie beim Schließen.
+    // Farbe: Während des Schiebens sind die Slides durchsichtig, eine gemeinsame Fläche (das
+    // Element, das die Slides abschneidet) blendet von der alten zur neuen Farbe über – so
+    // gibt es keine harte Kante zwischen den Slides.
     // Text (data-slider-anim) blendet vorher aus und danach ein.
     showcase: ({ next, prev, dir, d, done, parts, c }) => {
       const ds = c.root.dataset;
@@ -691,7 +698,45 @@
         pt.clip.v = v;
         pt.box.style.clipPath = `inset(${v.toFixed(2)}px)`;
       };
-      const tl = gsap.timeline({ onComplete: done });
+      // Farbe überblenden: gemeinsame Fläche statt zwei Slide-Hintergründen
+      const stage = c.viewport;
+      if (c.stageBg === undefined) c.stageBg = stage.style.backgroundColor;
+      const see = (el) => {
+        const v = getComputedStyle(el).backgroundColor;
+        return /^rgba\(.*,\s*0\)$|transparent/.test(v) ? null : v;
+      };
+      const from = see(prev);
+      const to = see(next) || from;
+      const blend = !!from;
+      const keep = (el) => {
+        const pt = parts(el);
+        if (pt.bg === undefined) pt.bg = el.style.backgroundColor;
+      };
+      const restoreBg = () => {
+        [prev, next].forEach((el) => {
+          const pt = parts(el);
+          if (pt.bg !== undefined) {
+            el.style.backgroundColor = pt.bg;
+            pt.bg = undefined;
+          }
+        });
+        gsap.killTweensOf(stage, 'backgroundColor');
+        stage.style.backgroundColor = c.stageBg;
+      };
+      // Ein noch laufender Wechsel (schnelles Klicken) wird beendet, sonst räumt er später
+      // die falsche Slide weg
+      if (c.showTl) {
+        c.showTl.kill();
+        stage.style.backgroundColor = c.stageBg;
+      }
+      const tl = gsap.timeline({
+        onComplete: () => {
+          c.showTl = null;
+          if (blend) restoreBg();
+          done();
+        },
+      });
+      c.showTl = tl;
       const clipTo = (pt, v, at) => tl.to(pt.clip, { v, duration: t1, ease: fEase, onUpdate: () => clip(pt, pt.clip.v) }, at);
 
       gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
@@ -709,6 +754,20 @@
       } else tl.to(P.box, { scale: win, duration: t1, ease: fEase }, 0);
       // 2 · Passepartout schiebt, Bild darunter folgt langsamer (gleiche Kurve, kleinerer Weg)
       tl.to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1).to(next, { xPercent: 0, duration: t2, ease }, t1);
+      if (blend) {
+        tl.call(
+          () => {
+            keep(prev);
+            keep(next);
+            stage.style.backgroundColor = from;
+            prev.style.backgroundColor = 'transparent';
+            next.style.backgroundColor = 'transparent';
+          },
+          null,
+          t1
+        );
+        tl.fromTo(stage, { backgroundColor: from }, { backgroundColor: to, duration: t2, ease }, t1);
+      }
       if (hasImg) {
         tl.to(P.img, { xPercent: lag * 100 * dir, duration: t2, ease }, t1);
         tl.to(N.img, { xPercent: 0, duration: t2, ease }, t1);

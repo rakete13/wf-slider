@@ -115,10 +115,24 @@
     timeline: (v) => {
       let end = 0;
       let fin = null;
+      const kids = [];
       const tl = {
+        kill() {
+          kids.forEach((k) => k.kill());
+          if (fin) fin.kill();
+        },
+        call(fn, args, pos) {
+          kids.push(make({}, null, { duration: 0, delay: pos || 0, onComplete: fn }));
+          return tl;
+        },
+        fromTo(t, f, vars, pos) {
+          kids.push(make(t, f, Object.assign({}, vars, { delay: pos === undefined ? end : pos })));
+          end = Math.max(end, (pos || 0) + (vars.duration || 0.5));
+          return tl;
+        },
         to(t, vars, pos) {
           const at = pos === undefined ? end : pos;
-          make(t, null, Object.assign({}, vars, { delay: at }));
+          kids.push(make(t, null, Object.assign({}, vars, { delay: at })));
           end = Math.max(end, at + (vars.duration == null ? 0.5 : vars.duration));
           if (fin) fin.kill();
           fin = make({}, null, { duration: 0, delay: end, onComplete: v && v.onComplete });
