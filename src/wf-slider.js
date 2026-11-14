@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.2.0
+ * WF Slider v1.3.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -680,6 +680,172 @@
   /*@end*/
 
   /* ------------------------------------------------------------------ */
+  /*  Farbe aus dem Bild: data-slider-bg="auto | auto-light | auto-dark" */
+  /*  Dominante Farbe des ersten Bilds der Slide als Hintergrund der      */
+  /*  Slide (oder von data-slider-bg-target). Eine Inline-Farbe (z. B.    */
+  /*  per CMS-Farbfeld gebunden) gewinnt.                                 */
+  /* ------------------------------------------------------------------ */
+  /*@block bg*/
+  const bgCache = new Map(); // Bildadresse → Promise mit [r, g, b]
+
+  // Kleinste brauchbare Variante aus srcset (Webflow: -p-500 usw.), spart Daten
+  const smallSrc = (img) => {
+    const set = img.getAttribute('srcset');
+    if (set) {
+      const c = set
+        .split(',')
+        .map((p) => p.trim().split(/\s+/))
+        .map(([u, w]) => ({ u, w: parseFloat(w) || 0 }))
+        .filter((x) => x.u && x.w)
+        .sort((a, b) => a.w - b.w);
+      const pick = c.find((x) => x.w >= 200) || c[c.length - 1];
+      if (pick) return new URL(pick.u, location.href).href;
+    }
+    return img.currentSrc || img.src;
+  };
+
+  // Dominante Farbe: ähnliche Pixel bündeln, kräftige zählen mehr, fast Weiß/Schwarz kaum
+  const dominant = (d) => {
+    const bins = new Map();
+    let best = null;
+    for (let i = 0; i < d.length; i += 4) {
+      if (d[i + 3] < 128) continue;
+      const r = d[i];
+      const g = d[i + 1];
+      const b = d[i + 2];
+      const mx = Math.max(r, g, b);
+      const mn = Math.min(r, g, b);
+      const l = (mx + mn) / 510;
+      const sat = mx === mn ? 0 : (mx - mn) / (255 - Math.abs(mx + mn - 255));
+      let w = 1 + sat * 3;
+      if (l > 0.92 || l < 0.08) w *= 0.15;
+      const k = ((r >> 5) << 6) | ((g >> 5) << 3) | (b >> 5);
+      const e = bins.get(k) || { w: 0, r: 0, g: 0, b: 0 };
+      e.w += w;
+      e.r += r * w;
+      e.g += g * w;
+      e.b += b * w;
+      bins.set(k, e);
+      if (!best || e.w > best.w) best = e;
+    }
+    return best ? [best.r / best.w, best.g / best.w, best.b / best.w] : [128, 128, 128];
+  };
+
+  const readColor = (src) => {
+    if (!bgCache.has(src))
+      bgCache.set(
+        src,
+        new Promise((res, rej) => {
+          const im = new Image();
+          im.crossOrigin = 'anonymous';
+          im.decoding = 'async';
+          im.onload = () => {
+            try {
+              const S = 32;
+              const cv = document.createElement('canvas');
+              cv.width = cv.height = S;
+              const x = cv.getContext('2d', { willReadFrequently: true });
+              x.drawImage(im, 0, 0, S, S);
+              res(dominant(x.getImageData(0, 0, S, S).data));
+            } catch (e) {
+              rej(e);
+            }
+          };
+          im.onerror = () => rej(new Error('Bild nicht ladbar'));
+          im.src = src;
+        })
+      );
+    return bgCache.get(src);
+  };
+
+  // Farbe in einen ruhigen Bereich bringen: auto = gedeckt, light = pastellig, dark = dunkel
+  const toneColor = ([r, g, b], mode) => {
+    r /= 255;
+    g /= 255;
+    b /= 255;
+    const mx = Math.max(r, g, b);
+    const mn = Math.min(r, g, b);
+    let h = 0;
+    const dd = mx - mn;
+    if (dd) h = mx === r ? ((g - b) / dd) % 6 : mx === g ? (b - r) / dd + 2 : (r - g) / dd + 4;
+    h = (h * 60 + 360) % 360;
+    const l0 = (mx + mn) / 2;
+    const s0 = dd ? dd / (1 - Math.abs(2 * l0 - 1)) : 0;
+    const [lo, hi, l] = mode === 'auto-light' ? [0.2, 0.6, 0.88] : mode === 'auto-dark' ? [0.15, 0.5, 0.2] : [0.15, 0.55, 0.6];
+    const s = s0 < 0.08 ? s0 : clamp(s0 * 0.85, lo, hi);
+    const k = (n) => (n + h / 30) % 12;
+    const a = s * Math.min(l, 1 - l);
+    const f = (n) => Math.round(255 * (l - a * Math.max(-1, Math.min(k(n) - 3, 9 - k(n), 1))));
+    return `rgb(${f(0)}, ${f(8)}, ${f(4)})`;
+  };
+
+  F.bg = (c, mode) => {
+    const { slides, R, o } = c;
+    let alive = true;
+    const items = slides.map((s) => {
+      const t = s.querySelector('[data-slider-bg-target]') || s;
+      return { s, t, img: s.querySelector('img'), own: !!t.style.backgroundColor, state: 0 };
+    });
+    items.forEach((it) => !it.own && R.style(it.t));
+    if (items.some((it) => !it.own && !it.img)) c.issue('data-slider-bg: Mindestens eine Slide hat kein Bild.');
+
+    const color = (i) => {
+      const it = items[i];
+      if (!it || it.own || !it.img || it.state) return;
+      it.state = 1;
+      readColor(smallSrc(it.img))
+        .then((rgb) => {
+          if (!alive) return;
+          it.state = 2;
+          const col = toneColor(rgb, mode);
+          if (it.s.classList.contains('is-in-view') && !c.reduce) gsap.to(it.t, { backgroundColor: col, duration: 0.6, ease: 'power1.out' });
+          else gsap.set(it.t, { backgroundColor: col });
+        })
+        .catch(() => {
+          it.state = 2;
+          c.issue('data-slider-bg: Farbe nicht lesbar, der Bild-Server erlaubt kein Auslesen (CORS).');
+        });
+    };
+    // Bild einer Nachbar-Slide rechtzeitig laden (Webflow lädt sonst erst beim Anzeigen)
+    const warm = (i) => {
+      const it = items[i];
+      if (it && it.img && it.img.loading === 'lazy') it.img.loading = 'eager';
+    };
+
+    if (!c.fade)
+      // carousel/thumbs: Farbe berechnen, sobald das Bild der Slide geladen ist
+      items.forEach((it, i) => {
+        if (!it.img || it.own) return;
+        if (it.img.complete && it.img.naturalWidth) color(i);
+        else it.img.addEventListener('load', () => alive && color(i), { once: true });
+      });
+
+    const n = items.length;
+    return {
+      // fade: aktive Slide sofort, Nachbarn nach dem Laden der Seite vorbereiten
+      near(i) {
+        color(i);
+        if (!c.fade) return;
+        const run = () => {
+          if (!alive) return;
+          [i + 1, i - 1].forEach((j) => {
+            if (o.loop) j = mod(j, n);
+            if (j < 0 || j >= n) return;
+            warm(j);
+            color(j);
+          });
+        };
+        document.readyState === 'complete' ? run() : window.addEventListener('load', run, { once: true });
+      },
+      destroy() {
+        alive = false;
+        gsap.killTweensOf(items.map((it) => it.t));
+      },
+    };
+  };
+  /*@end*/
+
+  /* ------------------------------------------------------------------ */
   /*  Inhalts-Animationen in Slides: data-slider-anim="fade-up" …        */
   /*  fade: bei jedem Wechsel neu · carousel: einmal, wenn sichtbar       */
   /* ------------------------------------------------------------------ */
@@ -819,6 +985,7 @@
       for: ds.sliderFor || '',
       effect: type === 'carousel' ? ds.sliderEffect || '' : '',
       transition: fade ? ds.sliderTransition || 'fade' : 'fade',
+      bg: ds.sliderBg === undefined || ds.sliderBg === 'false' ? '' : ['auto-light', 'auto-dark'].includes(ds.sliderBg) ? ds.sliderBg : 'auto',
     };
   };
 
@@ -927,6 +1094,8 @@
         return `${clamp(((pt.x - r.left) / r.width) * 100, 0, 100).toFixed(1)}% ${clamp(((pt.y - r.top) / r.height) * 100, 0, 100).toFixed(1)}%`;
       };
       const c = { root, track, viewport, slides, o, R, reduce, issue, point, startSlide: Math.min(o.start, n - 1), onRender: () => {}, onLeave: () => {} };
+      c.fade = type === 'fade';
+      const bgc = o.bg ? (F.bg ? F.bg(c, o.bg) : (issue('data-slider-bg ist in dieser Version nicht enthalten.'), null)) : null;
       const fx = o.effect && !reduce ? (F.effects ? F.effects(c, o.effect) : (issue('Effekte sind in dieser Version nicht enthalten.'), null)) : null;
       if (fx) c.fx = fx.render;
       const eng = engineFn(c);
@@ -1043,6 +1212,7 @@
         // gekoppelte Thumbnails nachziehen
         if (type !== 'thumbs' && inst.id)
           instances.forEach((t) => t.type === 'thumbs' && t.o.for === inst.id && t.setThumb && t.setThumb(slide));
+        if (bgc) bgc.near(slide);
         emit('change', { index: slide, slide: slides[slide], slider: inst.api });
       };
       c.onRender = update;
@@ -1330,6 +1500,7 @@
         cancelAnimationFrame(raf);
         if (auto) auto.kill();
         if (anim) anim.destroy();
+        if (bgc) bgc.destroy();
         if (fx) fx.destroy();
         eng.destroy();
         slides.forEach((s) => s.classList.remove('is-active', 'is-in-view'));

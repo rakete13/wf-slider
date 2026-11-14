@@ -11,12 +11,12 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 3. **Footer Code:** Inhalt von [`webflow/footer-code.html`](webflow/footer-code.html) am besten in den **Page Settings → Custom Code → Before </body>** der Seiten mit Slider einfügen.
 4. Veröffentlichen. Custom Code läuft nur auf der veröffentlichten Seite, nicht im Designer.
 
-**Warum Page Code?** Die Vollversion hat rund 28.500 Zeichen, WF Anim rund 42.000. Webflow erlaubt 50.000 pro Feld. Beides zusammen passt nicht in den Site-Footer, jede Seite hat aber ihr eigenes Feld. Alternativ mit `build.js` ausdünnen oder aus GitHub laden.
+**Warum Page Code?** Die Vollversion hat rund 33.500 Zeichen, WF Anim rund 42.000. Webflow erlaubt 50.000 pro Feld. Beides zusammen passt nicht in den Site-Footer, jede Seite hat aber ihr eigenes Feld. Alternativ mit `build.js` ausdünnen oder aus GitHub laden.
 
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.2.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.3.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -78,6 +78,19 @@ Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`)
 
 **Showcase einrichten:** Die Hintergrundfarbe ist einfach der Background der Slide (in Webflow ein CMS-Farbfeld an die Background Color des Collection Items binden). Die Bild-Box ist das erste Kind der Slide oder das Element mit `data-slider-effect-target`, das Bild darin bekommt den Parallax. Wie klein das Bild beim Wechsel wird: `data-slider-scale` (Standard `0.6`). Titel und Pfeile platziert ihr frei im Designer, Pfeile außerhalb mit Slider-ID.
 
+**Farbe aus dem Bild: `data-slider-bg`** (ab 1.3), für alle Slider-Typen. Jede Slide bekommt die dominante Farbe ihres ersten Bilds als Hintergrund:
+
+| Wert | Wirkung |
+|---|---|
+| `auto` | gedeckt (Standard, ohne Wert) |
+| `auto-light` | hell und pastellig |
+| `auto-dark` | dunkel, gut für weiße Schrift |
+
+- Die Farbe landet auf der Slide oder auf dem Element mit `data-slider-bg-target` (z. B. eine Fläche hinter der Karte).
+- Hat das Element schon eine Inline-Farbe (CMS-Farbfeld an die Background Color gebunden), gewinnt diese. `auto` greift nur bei Slides ohne eigene Farbe.
+- Bei `fade` werden die Nachbar-Slides nach dem Laden der Seite vorgeladen (Bild und Farbe), beim `carousel` wird die Farbe berechnet, sobald das Bild geladen ist.
+- Das Bild muss vom Server ausgelesen werden dürfen (CORS). Das Webflow-CDN erlaubt das. Bei Bildern von anderen Servern meldet der Debug-Modus, wenn es nicht geht.
+
 **Text: `data-slider-anim="lines"`** (oder `words`, `chars`) lässt Text aus einer Maske aufsteigen. Braucht SplitText (*GSAP integration → SplitText* anhaken), sonst wird daraus `fade-up`.
 
 **Eigene Effekte: `--slide-progress`.** Jede Carousel-Slide hat diese CSS-Variable: 0 an der Ausrichtung, −1 eine Slide links, 1 eine Slide rechts, stufenlos. Beispiel als Custom CSS:
@@ -88,7 +101,7 @@ Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`)
 
 ## Einstellungen am Wrapper
 
-`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` (bei thumbs), `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` (bei fade).
+`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` (bei thumbs), `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` (bei fade), `data-slider-bg` (alle Typen).
 
 ## Markierte Elemente
 
@@ -102,6 +115,7 @@ Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`)
 | `data-slider-current` / `data-slider-total` | Zähler |
 | `data-slider-progress` | Fortschritt, wird mit `scaleX` von links gefüllt (Autoplay-Zeit, sonst Position) |
 | `data-slider-pause` | Pause/Play für Autoplay |
+| `data-slider-bg-target` | optional: Element, das die Farbe aus dem Bild bekommt |
 | `data-slider-effect-target` | optional: Element, auf das der Carousel-Effekt wirkt |
 | `data-slider-anim` | Inhalt in einer Slide animieren: `fade-in` `fade-up` `fade-down` `fade-left` `fade-right` `scale-in` `blur-in` `clip-up`, mit SplitText auch `lines` `words` `chars`, dazu `-delay` `-duration` `-distance` `-stagger` `-ease` |
 | `data-slider-nodrag` | darin startet kein Ziehen (z. B. Video-Steuerung) |
@@ -163,7 +177,7 @@ test/                     Browser-Test der Demo-Seite (Playwright)
 node build.js carousel,autoplay ./ausgabe-ordner
 ```
 
-Typen `carousel`, `fade`, `thumbs`, Bausteine `autoplay` (Autoplay und Pause-Button), `anim` (`data-slider-anim`), `effects` (Carousel-Effekte) und `transitions` (Fade-Übergänge). Ohne Effekte und Übergänge spart man rund 2.500 Zeichen. Ohne Ordnerangabe wird die Vollversion nach `webflow/` und `src/wf-slider.min.js` geschrieben. Benötigt Node.js und esbuild (`npm i -g esbuild`) oder TypeScript.
+Typen `carousel`, `fade`, `thumbs`, Bausteine `autoplay` (Autoplay und Pause-Button), `anim` (`data-slider-anim`), `effects` (Carousel-Effekte), `transitions` (Fade-Übergänge) und `bg` (Farbe aus dem Bild). Ohne Effekte und Übergänge spart man rund 2.500 Zeichen. Ohne Ordnerangabe wird die Vollversion nach `webflow/` und `src/wf-slider.min.js` geschrieben. Benötigt Node.js und esbuild (`npm i -g esbuild`) oder TypeScript.
 
 ## Versionen
 

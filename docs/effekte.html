@@ -107,7 +107,16 @@ pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 
 .sc-nav .btn { pointer-events: auto; background: rgba(255,255,255,.9); border: 0; color: #141824; }
 .sc-count { position: absolute; top: 20px; left: 24px; z-index: 3; color: #fff; font-family: var(--font-mono); font-size: .85rem; }
 
-/* ---------- 4 · Eigener Effekt per CSS-Variable ---------- */
+/* ---------- 4 · Farbe aus dem Bild ---------- */
+.bg-sc .sc-slide { background: #2b2f3a; }
+.bgc-track { display: flex; gap: 16px; }
+.bgc-card { flex: 0 0 min(320px, 70%); }
+.bgc-in { padding: 18px 18px 16px; border-radius: 14px; background: var(--surface); display: grid; gap: 12px; transition: background-color .4s; }
+.bgc-in img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 8px; display: block; background: rgba(0,0,0,.08); }
+.bgc-in strong { font-family: var(--font-display); font-size: 1.1rem; color: #141824; }
+[data-slider-bg="auto-dark"] .bgc-in strong { color: #fff; }
+
+/* ---------- 5 · Eigener Effekt per CSS-Variable ---------- */
 .arc-track { display: flex; gap: 16px; padding-block: 40px 70px; }
 .arc-slide { flex: 0 0 min(260px, 56%); }
 .arc-in { aspect-ratio: 3 / 4; border-radius: 14px; overflow: hidden; background: #2b2f3a;
@@ -256,9 +265,53 @@ Optional: data-slider-scale="0.6" (wie klein das Bild wird), data-slider-duratio
   </section>
 
   <!-- 4 -->
-  <section id="eigen">
+  <section id="farbe">
     <div class="head">
       <div class="num">04</div>
+      <h2>Farbe aus dem Bild</h2>
+      <p>Mit <code>data-slider-bg</code> am Wrapper bekommt jede Slide die dominante Farbe ihres Bilds als Hintergrund. Hat eine Slide schon eine eigene Farbe (z. B. aus dem CMS gebunden), gewinnt diese. Beim Fade werden die Nachbar-Slides vorgeladen, damit Bild und Farbe beim Wechsel schon da sind.</p>
+    </div>
+    <div class="chips" data-chips="bg">
+      <span class="label">Variante</span>
+      <button class="chip" data-v="auto" aria-pressed="true">auto</button>
+      <button class="chip" data-v="auto-light" aria-pressed="false">auto-light</button>
+      <button class="chip" data-v="auto-dark" aria-pressed="false">auto-dark</button>
+    </div>
+    <div class="stage stage-pad">
+      <div class="sc-wrap">
+        <div class="sc bg-sc" id="bg-sc" data-slider="fade" data-slider-id="farbe" data-slider-transition="showcase" data-slider-bg="auto" data-slider-label="Farbe aus dem Bild">
+          <div data-slider-track>
+            <div class="sc-slide"><div class="sc-box"><img src="https://picsum.photos/id/1080/1600/1000" alt=""></div><h3 class="sc-title" data-slider-anim="fade-in">Beere</h3></div>
+            <div class="sc-slide"><div class="sc-box"><img src="https://picsum.photos/id/1067/1600/1000" alt="" loading="lazy"></div><h3 class="sc-title" data-slider-anim="fade-in">Stadt</h3></div>
+            <div class="sc-slide"><div class="sc-box"><img src="https://picsum.photos/id/1069/1600/1000" alt="" loading="lazy"></div><h3 class="sc-title" data-slider-anim="fade-in">Qualle</h3></div>
+            <div class="sc-slide"><div class="sc-box"><img src="https://picsum.photos/id/1084/1600/1000" alt="" loading="lazy"></div><h3 class="sc-title" data-slider-anim="fade-in">Walross</h3></div>
+          </div>
+        </div>
+        <div class="sc-nav">
+          <button class="btn" data-slider-prev="farbe">←</button>
+          <button class="btn" data-slider-next="farbe">→</button>
+        </div>
+      </div>
+    </div>
+    <div class="stage">
+      <div id="bg-cards" data-slider="carousel" data-slider-bg="auto" data-slider-label="Karten mit Farbe aus dem Bild">
+        <div class="bgc-track stage-pad" data-slider-track>
+          <div class="bgc-card"><div class="bgc-in" data-slider-bg-target><img src="https://picsum.photos/id/292/800/600" alt="" loading="lazy"><strong>Gemüse</strong></div></div>
+          <div class="bgc-card"><div class="bgc-in" data-slider-bg-target><img src="https://picsum.photos/id/312/800/600" alt="" loading="lazy"><strong>Honig</strong></div></div>
+          <div class="bgc-card"><div class="bgc-in" data-slider-bg-target><img src="https://picsum.photos/id/429/800/600" alt="" loading="lazy"><strong>Himbeeren</strong></div></div>
+          <div class="bgc-card"><div class="bgc-in" data-slider-bg-target><img src="https://picsum.photos/id/493/800/600" alt="" loading="lazy"><strong>Zitronen</strong></div></div>
+          <div class="bgc-card"><div class="bgc-in" data-slider-bg-target><img src="https://picsum.photos/id/1060/800/600" alt="" loading="lazy"><strong>Kaffee</strong></div></div>
+          <div class="bgc-card"><div class="bgc-in" data-slider-bg-target><img src="https://picsum.photos/id/1039/800/600" alt="" loading="lazy"><strong>Wasserfall</strong></div></div>
+        </div>
+      </div>
+    </div>
+    <pre data-code="bg"></pre>
+  </section>
+
+  <!-- 5 -->
+  <section id="eigen">
+    <div class="head">
+      <div class="num">05</div>
       <h2>Eigener Effekt per CSS-Variable</h2>
       <p>Jede Slide bekommt <code>--slide-progress</code>: 0 in der Mitte, −1 links daneben, 1 rechts daneben, stufenlos beim Ziehen. Damit baut ihr eigene Effekte in Webflow (Custom Code im Embed), ohne die Library anzufassen. Hier: ein Bogen mit leichter Drehung.</p>
     </div>
@@ -316,6 +369,7 @@ Optional: data-slider-scale="0.6" (wie klein das Bild wird), data-slider-duratio
     const a = (el, n) => (el.hasAttribute(n) ? `  ${n}${el.getAttribute(n) ? `="${el.getAttribute(n)}"` : ''}` : '');
     document.querySelector('[data-code="fx"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-loop', 'data-slider-align', 'data-slider-effect', 'data-slider-effect-strength'].map((n) => a(fx, n)).join('');
     document.querySelector('[data-code="hero"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-transition', 'data-slider-duration'].map((n) => a(hero, n)).join('') + '\nheadline        data-slider-anim="' + hero.querySelector('h3').getAttribute('data-slider-anim') + '"';
+    document.querySelector('[data-code="bg"]').textContent = 'slider-wrapper   data-slider-bg="' + document.getElementById('bg-sc').getAttribute('data-slider-bg') + '"\nfarbflaeche      data-slider-bg-target   (optional, sonst die Slide selbst)\nslide mit CMS-Farbe (inline) → behält ihre Farbe';
     document.querySelector('[data-note="effect"]').textContent = NOTES.effect[fx.getAttribute('data-slider-effect') || ''];
     document.querySelector('[data-note="transition"]').textContent = NOTES.transition[hero.getAttribute('data-slider-transition')];
   };
@@ -335,6 +389,11 @@ Optional: data-slider-scale="0.6" (wie klein das Bild wird), data-slider-duratio
       } else if (kind === 'transition') {
         hero.setAttribute('data-slider-transition', v);
         restart(hero);
+      } else if (kind === 'bg') {
+        [document.getElementById('bg-sc'), document.getElementById('bg-cards')].forEach((el) => {
+          el.setAttribute('data-slider-bg', v);
+          restart(el);
+        });
       } else if (kind === 'text') {
         hero.querySelectorAll('h3').forEach((h) => h.setAttribute('data-slider-anim', v));
         restart(hero);
