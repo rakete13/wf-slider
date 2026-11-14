@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.4.2/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.4.3/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -74,9 +74,9 @@ Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`)
 | `wipe` | Aufdecken aus Richtung der Navigation, die alte Slide rutscht ein Stück mit |
 | `push` | neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab |
 | `circle` | Kreis öffnet sich an der Klick- oder Tippstelle (bei Autoplay und Tastatur vom Rand) |
-| `showcase` | Ausschnitt wird per clip-path zum Fenster mit Rahmen in der Farbe der Slide, gleichzeitig wird das Bild kleiner. Beim Wechsel läuft das Bild langsamer als die Slide und kommt nach dem Rahmen an (Parallax), dann öffnen sich Fenster und Bild wieder. Text mit `data-slider-anim` blendet vorher aus und danach ein. |
+| `showcase` | Ausschnitt wird per clip-path zum Fenster mit Rahmen in der Farbe der Slide, gleichzeitig wird das Bild kleiner. Beim Wechsel läuft das Fenster mit dem Bild langsamer als die Slide und kommt nach dem Rahmen an (Parallax), dann öffnen sich Fenster und Bild wieder. Text mit `data-slider-anim` blendet vorher aus und danach ein. |
 
-**Showcase einrichten:** Der Rahmen hat die Hintergrundfarbe der Slide (in Webflow ein CMS-Farbfeld an die Background Color des Collection Items binden, oder `data-slider-bg`). Die Bild-Box ist das erste Kind der Slide oder das Element mit `data-slider-effect-target`, darin liegt das Bild. Fenstergröße: `data-slider-scale` (Standard `0.6`). Bildgröße im Fenster: `data-slider-image-scale` (Standard Mitte zwischen Fenster und 1, bei `0.6` also `0.8`). Nachlauf des Bilds: `data-slider-parallax` (Anteil der Bildbreite, Standard `0.15`). Easing: `data-slider-ease` für den Wechsel der Slide (Standard `power3.inOut`) und `data-slider-frame-ease` für Rahmen und Bild (Standard `power2.inOut`), jeweils jedes GSAP-Easing wie `expo.inOut` oder `sine.inOut`. Schließen und Öffnen dauern gleich lang. Titel und Pfeile platziert ihr frei im Designer, Pfeile außerhalb mit Slider-ID.
+**Showcase einrichten:** Der Rahmen hat die Hintergrundfarbe der Slide (in Webflow ein CMS-Farbfeld an die Background Color des Collection Items binden, oder `data-slider-bg`). Die Bild-Box ist das erste Kind der Slide oder das Element mit `data-slider-effect-target`, darin liegt das Bild. Fenstergröße: `data-slider-scale` (Standard `0.6`). Bildgröße: `data-slider-image-scale` (Standard wie das Fenster, dann laufen Rahmen und Bildkante gleich schnell; größer = das Bild wird im Fenster angeschnitten). Nachlauf des Bilds: `data-slider-parallax` (Anteil der Bildbreite, Standard `0.15`). Easing: `data-slider-ease` für den Wechsel der Slide (Standard `power3.inOut`) und `data-slider-frame-ease` für Rahmen und Bild (Standard `power2.inOut`), jeweils jedes GSAP-Easing wie `expo.inOut` oder `sine.inOut`. Schließen und Öffnen dauern gleich lang. Titel und Pfeile platziert ihr frei im Designer, Pfeile außerhalb mit Slider-ID.
 
 **Farbe aus dem Bild: `data-slider-bg`** (ab 1.3), für alle Slider-Typen. Jede Slide bekommt die dominante Farbe ihres ersten Bilds als Hintergrund:
 
