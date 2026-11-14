@@ -167,7 +167,7 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
 
   <main>
     <header class="hero">
-      <div class="eyebrow">WF Slider · v1.4.3 · Begleiter zu WF Anim</div>
+      <div class="eyebrow">WF Slider · v1.4.4 · Begleiter zu WF Anim</div>
       <h1>Slider per <em>Attribut</em>, für CMS und statische Inhalte.</h1>
       <p>Wrapper bauen, <code>data-slider="carousel"</code> setzen, fertig. Ob die Slides aus einer Collection List kommen oder von Hand gebaut sind, ist egal. Pfeile, Punkte und Zähler gestaltest du selbst im Designer und markierst sie nur.</p>
       <div class="notice">Braucht nur GSAP selbst, keine Plugins. Läuft auf der veröffentlichten Seite, nicht im Designer. Mit <code>?wfslider-debug</code> an der Adresse siehst du Hinweise zu jedem Slider in der Konsole.</div>
@@ -364,7 +364,7 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
       <div class="cat-head">
         <div class="num">04</div>
         <h2>Showcase</h2>
-        <p>Ein <code>fade</code>-Slider mit dem Übergang <code>showcase</code>: Der Ausschnitt schrumpft per clip-path zu einem Fenster mit Rahmen in der Farbe der Slide, gleichzeitig wird das Bild kleiner. Beim Wechsel schiebt die Slide zur Seite, das Fenster mit dem Bild läuft langsamer hinterher und kommt nach dem Rahmen an (Parallax). Dann öffnet sich das Fenster wieder und das Bild wächst. Die Schrift blendet vorher aus und danach ein.</p>
+        <p>Ein <code>fade</code>-Slider mit dem Übergang <code>showcase</code>: Der Ausschnitt schrumpft per clip-path zu einem Fenster mit Rahmen in der Farbe der Slide, gleichzeitig wird das Bild kleiner. Beim Wechsel schiebt die Slide zur Seite, das Fenster fährt mit, das Bild darunter läuft langsamer hinterher und fährt erst danach ins Fenster (Parallax). Dann öffnet sich das Fenster wieder und das Bild wächst. Die Schrift blendet vorher aus und danach ein.</p>
       </div>
       <div class="stage">
         <div class="sc-wrap">
@@ -391,7 +391,7 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
 button-prev      data-slider-prev="showcase"  (Position frei im Designer)
 button-next      data-slider-next="showcase"
 
-Optional: data-slider-scale="0.6" (Größe des Fensters) · data-slider-image-scale="0.6" (Größe des Bilds, Standard wie das Fenster) · data-slider-parallax="0.15" (wie weit das Bild hinterherläuft) · data-slider-duration="1.1"
+Optional: data-slider-scale="0.6" (Größe des Fensters) · data-slider-image-scale="0.6" (Größe des Bilds, Standard wie das Fenster) · data-slider-parallax="0.3" (wie weit das Bild hinter dem Fenster herläuft) · data-slider-duration="1.1"
 Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame-ease="power2.inOut" (Rahmen und Bild)</pre>
       <div class="info">
         <h3>Farbe automatisch aus dem Bild</h3>
@@ -455,7 +455,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>wipe</code></td><td>Aufdecken aus Richtung der Navigation, die alte Slide rutscht ein Stück mit</td></tr>
           <tr><td><code>push</code></td><td>Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab</td></tr>
           <tr><td><code>circle</code></td><td>Kreis öffnet sich an der Klick- oder Tippstelle (bei Autoplay und Tastatur vom Rand)</td></tr>
-          <tr><td><code>showcase</code></td><td>Ausschnitt wird per clip-path zum Fenster mit Rahmen in der Farbe der Slide, gleichzeitig wird das Bild kleiner. Beim Wechsel läuft das Fenster mit dem Bild langsamer als die Slide und kommt nach dem Rahmen an, dann öffnen sich Fenster und Bild wieder. Text mit <code>data-slider-anim</code> blendet vorher aus. Bild-Box = erstes Kind der Slide oder <code>data-slider-effect-target</code>, darin ein Bild. Fenstergröße: <code>data-slider-scale</code> (Standard 0.6), Bildgröße: <code>data-slider-image-scale</code> (Standard wie das Fenster), Nachlauf: <code>data-slider-parallax</code> (Standard 0.15), Easing: <code>data-slider-ease</code> (Wechsel) und <code>data-slider-frame-ease</code> (Rahmen und Bild)</td></tr>
+          <tr><td><code>showcase</code></td><td>Ausschnitt wird per clip-path zum Fenster mit Rahmen in der Farbe der Slide, gleichzeitig wird das Bild kleiner. Beim Wechsel fährt das Fenster mit der Slide, das Bild darunter läuft langsamer und fährt erst danach ins Fenster, dann öffnen sich Fenster und Bild wieder. Text mit <code>data-slider-anim</code> blendet vorher aus. Bild-Box = erstes Kind der Slide oder <code>data-slider-effect-target</code>, darin ein Bild. Fenstergröße: <code>data-slider-scale</code> (Standard 0.6), Bildgröße: <code>data-slider-image-scale</code> (Standard wie das Fenster), Nachlauf: <code>data-slider-parallax</code> (Standard 0.3), Easing: <code>data-slider-ease</code> (Wechsel) und <code>data-slider-frame-ease</code> (Rahmen und Bild)</td></tr>
         </tbody>
       </table>
       <div class="info">

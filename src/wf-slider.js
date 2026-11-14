@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.4.3
+ * WF Slider v1.4.4
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.4.3';
+  const VERSION = '1.4.4';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -657,8 +657,8 @@
     },
     // 1. Fenster (clip-path) und Bild werden gemeinsam kleiner, beides von der Mitte aus.
     //    Drumherum bleibt ein Rahmen in der Farbe der Slide.
-    // 2. Die Slide schiebt zur Seite, das Fenster mit dem Bild läuft hinterher und kommt nach
-    //    dem Rahmen an (Parallax).
+    // 2. Die Slide schiebt zur Seite, das Fenster fährt mit ihr. Das Bild darunter läuft
+    //    langsamer: Im neuen Slide ist zuerst das Fenster da, dann fährt das Bild hinein (Parallax).
     // 3. Dann öffnen sich Fenster und Bild gemeinsam wieder, gleich lang wie beim Schließen.
     // Text (data-slider-anim) blendet vorher aus und danach ein.
     showcase: ({ next, prev, dir, d, done, parts, c }) => {
@@ -666,7 +666,7 @@
       const win = clamp(num(ds.sliderScale, 0.6), 0.2, 1); // Größe des Fensters
       // Bildgröße: Standard gleich dem Fenster, dann laufen Rahmen und Bildkante gleich schnell
       const imgS = clamp(num(ds.sliderImageScale, win), win, 1);
-      const px = clamp(num(ds.sliderParallax, 0.15), 0, 1) * 100; // Nachlauf (Anteil der Breite)
+      const px = clamp(num(ds.sliderParallax, 0.3), 0, 1) * 100; // Nachlauf des Bilds (Anteil der Breite)
       const ins = ((1 - win) / 2) * 100;
       const ease = ds.sliderEase || 'power3.inOut'; // Wechsel der Slide
       const fEase = ds.sliderFrameEase || 'power2.inOut'; // Rahmen und Bild
@@ -675,7 +675,7 @@
       const hasImg = N.img !== N.box && P.img !== P.box;
       const t1 = d * 0.5; // schließen
       const t2 = d * 0.9; // Wechsel der Slide
-      const lag = t2 * 0.3; // so viel später kommt das Fenster mit Bild an
+      const lag = t2 * 0.6; // so viel später als das Fenster kommt das Bild an
       const open = t1 + t2 + lag;
       c.animDelay = open + t1 * 0.6;
       // clip-path über eine Zahl steuern, damit es in beide Richtungen gleich weich läuft
@@ -689,11 +689,10 @@
       gsap.to(prev.querySelectorAll('[data-slider-anim]'), { opacity: 0, duration: t1 * 0.6, ease: 'power1.out' });
       if (hasImg) clip(P, 0);
       gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
-      gsap.set(N.box, { xPercent: px * dir });
       if (hasImg) {
         clip(N, ins);
-        gsap.set(N.img, { scale: imgS });
-      } else gsap.set(N.box, { scale: win });
+        gsap.set(N.img, { scale: imgS, xPercent: px * dir });
+      } else gsap.set(N.box, { scale: win, xPercent: px * dir });
 
       const tl = gsap.timeline({ onComplete: done });
       // 1 · schließen
@@ -701,11 +700,13 @@
         clipTo(P, ins, 0);
         tl.to(P.img, { scale: imgS, duration: t1, ease: fEase }, 0);
       } else tl.to(P.box, { scale: win, duration: t1, ease: fEase }, 0);
-      // 2 · wechseln, Fenster mit Bild läuft hinterher
+      // 2 · wechseln: Fenster fährt mit der Slide, das Bild darunter hängt hinterher
+      const PI = hasImg ? P.img : P.box;
+      const NI = hasImg ? N.img : N.box;
       tl.to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1)
-        .to(P.box, { xPercent: px * dir, duration: t2, ease }, t1)
+        .to(PI, { xPercent: px * dir, duration: t2, ease: 'power2.inOut' }, t1)
         .to(next, { xPercent: 0, duration: t2, ease }, t1)
-        .to(N.box, { xPercent: 0, duration: t2 + lag, ease }, t1);
+        .to(NI, { xPercent: 0, duration: t2 + lag, ease: 'power2.inOut' }, t1);
       // 3 · öffnen
       if (hasImg) {
         clipTo(N, 0, open);
