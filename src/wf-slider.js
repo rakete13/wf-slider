@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.3.0
+ * WF Slider v1.3.1
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.3.0';
+  const VERSION = '1.3.1';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -434,6 +434,7 @@
         R.style(box);
         R.style(img);
         if (img !== box) box.style.overflow = 'hidden';
+        if (box !== s) s.style.overflow = 'hidden'; // Bild-Box bleibt in ihrer Farbfläche
         partsMap.set(s, { box, img });
       }
       return partsMap.get(s);
@@ -652,24 +653,28 @@
     // Bild schrumpft und zeigt die Hintergrundfarbe der Slide, Slides wechseln seitlich
     // mit Parallax im Bild, neues Bild wächst wieder. Text (data-slider-anim) blendet vorher aus.
     showcase: ({ next, prev, dir, d, done, parts, c }) => {
-      const small = clamp(num(c.root.dataset.sliderScale, 0.6), 0.2, 1);
+      const ds = c.root.dataset;
+      const small = clamp(num(ds.sliderScale, 0.6), 0.2, 1);
+      // Parallax: die Bild-Box läuft langsamer als ihre Slide. Standard: von der Kante der
+      // Farbfläche bis zur Mitte, so bleibt sie immer in ihrer Slide (Anteil der Slide-Breite)
+      const px = clamp(num(ds.sliderParallax, (1 - small) / 2), 0, 1) * 100;
       const P = parts(prev);
       const N = parts(next);
       const t1 = d * 0.5; // verkleinern
       const t2 = d * 0.9; // wechseln
       const t3 = d * 0.55; // vergrößern
+      const ease = 'power3.inOut';
       c.animDelay = t1 + t2 + t3 * 0.6;
       gsap.to(prev.querySelectorAll('[data-slider-anim]'), { opacity: 0, duration: t1 * 0.6, ease: 'power1.out' });
       gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
-      gsap.set(N.box, { scale: small });
-      gsap.set(N.img, { xPercent: N.img === N.box ? 0 : 35 * dir });
+      gsap.set(N.box, { scale: small, xPercent: -px * dir });
       const tl = gsap.timeline({ onComplete: done });
       tl.to(P.box, { scale: small, duration: t1, ease: 'power2.inOut' })
-        .to(prev, { xPercent: -100 * dir, duration: t2, ease: 'power3.inOut' }, t1)
-        .to(next, { xPercent: 0, duration: t2, ease: 'power3.inOut' }, t1)
-        .to(N.img, { xPercent: 0, duration: t2, ease: 'power3.inOut' }, t1);
-      if (P.img !== P.box) tl.to(P.img, { xPercent: -35 * dir, duration: t2, ease: 'power3.inOut' }, t1);
-      tl.to(N.box, { scale: 1, duration: t3, ease: 'power2.inOut' }, t1 + t2);
+        .to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1)
+        .to(P.box, { xPercent: px * dir, duration: t2, ease }, t1)
+        .to(next, { xPercent: 0, duration: t2, ease }, t1)
+        .to(N.box, { xPercent: 0, duration: t2, ease }, t1)
+        .to(N.box, { scale: 1, duration: t3, ease: 'power2.inOut' }, t1 + t2);
     },
     circle: ({ next, dir, d, point, done }) => {
       const at = point || (dir > 0 ? '100% 50%' : '0% 50%');
