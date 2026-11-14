@@ -237,7 +237,7 @@ img { color: transparent; }
     <div class="head">
       <div class="num">03</div>
       <h2>Showcase</h2>
-      <p>Das Bild schrumpft und gibt die Hintergrundfarbe der Slide frei, dann wechseln die Slides seitlich mit Parallax im Bild, und das neue Bild wächst wieder. Die Farbe ist einfach der Hintergrund der Slide, in Webflow per CMS-Farbfeld gebunden. Die Schrift blendet vorher aus und danach wieder ein.</p>
+      <p>Der Bildausschnitt verkleinert sich zu einem Fenster, drumherum bleibt ein Rahmen in der Farbe der Slide. Beim Wechsel fährt das Fenster mit seiner Slide zur Seite, das Bild darin hängt hinterher (Parallax). Danach öffnet sich das Fenster wieder. Die Farbe ist einfach der Hintergrund der Slide, in Webflow per CMS-Farbfeld gebunden. Die Schrift blendet vorher aus und danach wieder ein.</p>
     </div>
     <div class="stage stage-pad">
       <div class="sc-wrap">
@@ -258,10 +258,10 @@ img { color: transparent; }
     </div>
     <pre>slider-wrapper   data-slider="fade"  data-slider-transition="showcase"  data-slider-id="showcase"
 slide            Hintergrundfarbe aus dem CMS (Farbfeld an Background Color gebunden)
-bild-box         erstes Kind der Slide (oder data-slider-effect-target), schrumpft und läuft beim Wechsel langsamer als die Slide (Parallax)
+bild-box         erstes Kind der Slide (oder data-slider-effect-target), wird zum Fenster, das Bild darin hängt beim Wechsel hinterher
 titel            data-slider-anim="fade-in"   (blendet beim Wechsel aus und wieder ein)
 
-Optional: data-slider-scale="0.6" (wie klein das Bild wird), data-slider-parallax="0.2" (Parallax, 0 bis 1), data-slider-duration="1.1"</pre>
+Optional: data-slider-scale="0.6" (Größe des Fensters), data-slider-parallax="0.2" (Parallax, 0 bis 1), data-slider-duration="1.1"</pre>
   </section>
 
   <!-- 4 -->
@@ -356,7 +356,7 @@ Optional: data-slider-scale="0.6" (wie klein das Bild wird), data-slider-paralla
       wipe: 'Neue Slide wird aus Richtung der Navigation aufgedeckt, die alte rutscht ein Stück mit.',
       push: 'Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab.',
       circle: 'Öffnet sich als Kreis von der Klick- oder Tippstelle. Ohne Klick (Autoplay, Tastatur) vom Rand.',
-      showcase: 'Bild schrumpft, Slides wechseln seitlich mit Parallax, neues Bild wächst. Siehe eigenes Beispiel weiter unten.',
+      showcase: 'Bildausschnitt wird zum Fenster mit Farbrahmen, beim Wechsel hängt das Bild hinter dem Fenster her. Eigenes Beispiel weiter unten.',
     },
   };
   const fx = document.getElementById('fx');
