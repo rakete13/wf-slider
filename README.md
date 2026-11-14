@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.5.1/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.6.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -77,6 +77,18 @@ Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`)
 | `showcase` | Über dem Bild liegt ein Passepartout in der Farbe der Slide. Beim Wechsel wird der Rahmen breiter und das Bild etwas kleiner, der Ausschnitt bleibt aber immer gefüllt. Dann schiebt das Passepartout mit der Slide zur Seite, das Bild darunter bewegt sich langsamer mit (Parallax). Zum Schluss öffnen sich Rahmen und Bild wieder. Während des Schiebens blendet die Farbe des Passepartouts weich von der alten zur neuen Slide über, ohne harte Kante zwischen den Slides. Text mit `data-slider-anim` blendet vorher aus und danach ein. |
 
 **Showcase einrichten:** Das Passepartout hat die Hintergrundfarbe der Slide (in Webflow ein CMS-Farbfeld an die Background Color des Collection Items binden, oder `data-slider-bg`). Die Bild-Box ist das erste Kind der Slide oder das Element mit `data-slider-effect-target`, darin liegt das Bild. Einstellungen am Wrapper: `data-slider-scale` (Größe des Ausschnitts, Standard `0.75`; der Rahmen ist an allen Seiten gleich dick), `data-slider-parallax` (wie viel langsamer das Bild ist als das Passepartout, 0 bis 0.95; Standard wird so berechnet, dass nie eine Lücke entsteht), `data-slider-image-scale` (Bildgröße während des Wechsels, Standard so, dass der Ausschnitt gefüllt bleibt), `data-slider-ease` (Wechsel) und `data-slider-frame-ease` (Rahmen und Bild). Titel und Pfeile platziert ihr frei im Designer, Pfeile außerhalb mit Slider-ID.
+
+**Form des Fensters: `data-slider-shape`** (ab 1.6)
+
+| Wert | Form |
+|---|---|
+| `rect` | Rechteck (Standard) |
+| `rounded` | abgerundetes Rechteck, Radius mit `data-slider-shape-radius` (px, Standard `24`) |
+| `circle` | Kreis |
+| `triangle` | Dreieck, Spitze oben |
+| SVG-Datei | eigene Form, z. B. `https://…/logo.svg` oder `url(…)`. Die Form schrumpft als Maske von „größer als das Bild“ auf den Ausschnitt. Die Datei muss von derselben Domain kommen oder Auslesen erlauben (CORS); Webflow-Assets erlauben das. Die Form sollte in der Mitte gefüllt sein. |
+
+Größe über `data-slider-scale`, Tempo über `data-slider-duration`, Easing über `data-slider-frame-ease`.
 
 **Farbe aus dem Bild: `data-slider-bg`** (ab 1.3), für alle Slider-Typen. Jede Slide bekommt die dominante Farbe ihres ersten Bilds als Hintergrund:
 

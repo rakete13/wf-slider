@@ -167,7 +167,7 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
 
   <main>
     <header class="hero">
-      <div class="eyebrow">WF Slider · v1.5.1 · Begleiter zu WF Anim</div>
+      <div class="eyebrow">WF Slider · v1.6.0 · Begleiter zu WF Anim</div>
       <h1>Slider per <em>Attribut</em>, für CMS und statische Inhalte.</h1>
       <p>Wrapper bauen, <code>data-slider="carousel"</code> setzen, fertig. Ob die Slides aus einer Collection List kommen oder von Hand gebaut sind, ist egal. Pfeile, Punkte und Zähler gestaltest du selbst im Designer und markierst sie nur.</p>
       <div class="notice">Braucht nur GSAP selbst, keine Plugins. Läuft auf der veröffentlichten Seite, nicht im Designer. Mit <code>?wfslider-debug</code> an der Adresse siehst du Hinweise zu jedem Slider in der Konsole.</div>
@@ -366,6 +366,15 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
         <h2>Showcase</h2>
         <p>Ein <code>fade</code>-Slider mit dem Übergang <code>showcase</code>: Über dem Bild liegt ein Passepartout in der Farbe der Slide. Beim Wechsel wird der Rahmen breiter und das Bild etwas kleiner, der Ausschnitt bleibt aber immer gefüllt. Dann schiebt das Passepartout mit der Slide zur Seite, das Bild darunter bewegt sich langsamer mit (Parallax). Zum Schluss öffnen sich Rahmen und Bild wieder. Während des Schiebens blendet die Farbe des Passepartouts weich von der alten zur neuen Slide über, ohne harte Kante zwischen den Slides. Die Schrift blendet vorher aus und danach ein.</p>
       </div>
+      <div class="chips" data-shape-chips>
+        <span class="label">Form</span>
+        <button class="chip" data-v="rect" aria-pressed="true">rect</button>
+        <button class="chip" data-v="rounded" aria-pressed="false">rounded</button>
+        <button class="chip" data-v="circle" aria-pressed="false">circle</button>
+        <button class="chip" data-v="triangle" aria-pressed="false">triangle</button>
+        <button class="chip" data-v="shapes/stern.svg" aria-pressed="false">eigene Form: Stern</button>
+        <button class="chip" data-v="shapes/blob.svg" aria-pressed="false">eigene Form: Blob</button>
+      </div>
       <div class="stage">
         <div class="sc-wrap">
           <div class="sc" data-slider="fade" data-slider-id="showcase" data-slider-transition="showcase" data-slider-duration="1.1" data-slider-pad="2" data-slider-label="Kollektion">
@@ -391,6 +400,8 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
 button-prev      data-slider-prev="showcase"  (Position frei im Designer)
 button-next      data-slider-next="showcase"
 
+Form: data-slider-shape="rect" (Standard) | "rounded" | "circle" | "triangle" | eigene SVG-Datei, z. B. "https://…/form.svg"
+      bei rounded: data-slider-shape-radius="24" (px)
 Optional: data-slider-scale="0.75" (Größe des Ausschnitts, Rahmen an allen Seiten gleich dick) · data-slider-parallax="0.45" (wie viel langsamer das Bild ist, 0 bis 0.95) · data-slider-image-scale (Bildgröße, Standard so, dass der Ausschnitt gefüllt bleibt) · data-slider-duration="1.1"
 Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame-ease="power2.inOut" (Rahmen und Bild)</pre>
       <div class="info">
@@ -455,7 +466,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>wipe</code></td><td>Aufdecken aus Richtung der Navigation, die alte Slide rutscht ein Stück mit</td></tr>
           <tr><td><code>push</code></td><td>Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab</td></tr>
           <tr><td><code>circle</code></td><td>Kreis öffnet sich an der Klick- oder Tippstelle (bei Autoplay und Tastatur vom Rand)</td></tr>
-          <tr><td><code>showcase</code></td><td>Passepartout in der Farbe der Slide legt sich über das Bild (clip-path an der Bild-Box), das Bild wird etwas kleiner und füllt den Ausschnitt weiter. Beim Wechsel schiebt das Passepartout mit der Slide, das Bild darunter bewegt sich langsamer (Parallax). Text mit <code>data-slider-anim</code> blendet vorher aus. Einstellungen: <code>data-slider-scale</code> (Ausschnitt, Standard 0.75), <code>data-slider-parallax</code>, <code>data-slider-image-scale</code>, <code>data-slider-ease</code>, <code>data-slider-frame-ease</code></td></tr>
+          <tr><td><code>showcase</code></td><td>Passepartout in der Farbe der Slide legt sich über das Bild (clip-path an der Bild-Box), das Bild wird etwas kleiner und füllt den Ausschnitt weiter. Beim Wechsel schiebt das Passepartout mit der Slide, das Bild darunter bewegt sich langsamer (Parallax). Text mit <code>data-slider-anim</code> blendet vorher aus. Form: <code>data-slider-shape</code> (<code>rect</code>, <code>rounded</code>, <code>circle</code>, <code>triangle</code> oder eine SVG-Datei). Einstellungen: <code>data-slider-scale</code> (Ausschnitt, Standard 0.75), <code>data-slider-parallax</code>, <code>data-slider-image-scale</code>, <code>data-slider-ease</code>, <code>data-slider-frame-ease</code></td></tr>
         </tbody>
       </table>
       <div class="info">
@@ -559,6 +570,20 @@ WFSlider.destroy(scope);</pre>
 
 <script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
 <script src="wf-slider.min.js"></script>
+<script>
+  // Demo: Form des Fensters umschalten
+  (() => {
+    const group = document.querySelector('[data-shape-chips]');
+    const el = document.querySelector('#showcase [data-slider]');
+    group.addEventListener('click', (e) => {
+      const b = e.target.closest('.chip');
+      if (!b) return;
+      group.querySelectorAll('.chip').forEach((c) => c.setAttribute('aria-pressed', String(c === b)));
+      el.setAttribute('data-slider-shape', b.dataset.v);
+      WFSlider.get(el).next();
+    });
+  })();
+</script>
 <script>
   // Demo: Variante der Farbe aus dem Bild umschalten
   (() => {

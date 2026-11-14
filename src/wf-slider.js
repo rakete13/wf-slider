@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.5.1
+ * WF Slider v1.6.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.5.1';
+  const VERSION = '1.6.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -453,7 +453,11 @@
         gsap.killTweensOf(p.clip);
         p.clip.v = 0;
         gsap.set([p.box, p.img], { xPercent: 0, scale: 1 });
-        if (p.box !== s) p.box.style.clipPath = '';
+        if (p.box !== s) {
+        const st = p.box.style;
+        st.clipPath = '';
+        st.maskImage = st.webkitMaskImage = st.maskSize = st.webkitMaskSize = '';
+      }
       }
     };
 
@@ -694,10 +698,71 @@
       // Nachlauf: Anteil, um den das Bild langsamer ist als das Passepartout (0 = gleich schnell)
       const lag = clamp(num(ds.sliderParallax, clamp((spare / frame) * 0.9, 0, 0.6)), 0, 0.95);
 
+      // Form des Fensters: v = 0 volles Bild, v = 1 Fenster (data-slider-shape)
+      const shape = (ds.sliderShape || 'rect').trim();
+      const radius = num(ds.sliderShapeRadius, 24);
+      const custom = /^url\(|\.svg(\?|$)/i.test(shape) ? (shape.startsWith('url(') ? shape : `url("${shape}")`) : null;
       const clip = (pt, v) => {
         pt.clip.v = v;
-        pt.box.style.clipPath = `inset(${v.toFixed(2)}px)`;
+        const st = pt.box.style;
+        if (v <= 0.0001) {
+          st.clipPath = '';
+          if (custom) st.maskImage = st.webkitMaskImage = '';
+          return;
+        }
+        const bw = pt.box.offsetWidth || w;
+        const bh = pt.box.offsetHeight || h;
+        const f = frame * v; // Rahmendicke jetzt
+        if (custom) {
+          // Maske startet riesig (bedeckt alles) und schrumpft auf den Ausschnitt
+          const k = 1 + (1 - v) * 9;
+          st.maskImage = st.webkitMaskImage = custom;
+          st.maskRepeat = st.webkitMaskRepeat = 'no-repeat';
+          st.maskPosition = st.webkitMaskPosition = 'center';
+          st.maskSize = st.webkitMaskSize = `${((bw - 2 * frame) * k).toFixed(1)}px ${((bh - 2 * frame) * k).toFixed(1)}px`;
+        } else if (shape === 'circle') {
+          const r0 = Math.hypot(bw, bh) / 2; // bedeckt das ganze Bild
+          const r1 = Math.min(bw, bh) / 2 - frame; // passt in den Ausschnitt
+          st.clipPath = `circle(${(r0 + (r1 - r0) * v).toFixed(2)}px at 50% 50%)`;
+        } else if (shape === 'triangle') {
+          // Spitze oben, im Ausschnitt; zum vollen Bild hin um die Mitte vergrößert
+          const cx = bw / 2;
+          const cy = bh / 2;
+          const pts = [
+            [cx, frame],
+            [bw - frame, bh - frame],
+            [frame, bh - frame],
+          ];
+          const k = 1 + (pt.triK - 1) * (1 - v);
+          st.clipPath = `polygon(${pts.map(([x, y]) => `${(cx + (x - cx) * k).toFixed(1)}px ${(cy + (y - cy) * k).toFixed(1)}px`).join(', ')})`;
+        } else if (shape === 'rounded') {
+          st.clipPath = `inset(${f.toFixed(2)}px round ${(radius * v).toFixed(2)}px)`;
+        } else st.clipPath = `inset(${f.toFixed(2)}px)`;
       };
+      // Dreieck: wie stark vergrößern, damit es das ganze Bild bedeckt
+      const triCover = (pt) => {
+        const bw = pt.box.offsetWidth || w;
+        const bh = pt.box.offsetHeight || h;
+        const cx = bw / 2;
+        const cy = bh / 2;
+        const T = [
+          [cx, frame],
+          [bw - frame, bh - frame],
+          [frame, bh - frame],
+        ];
+        const inside = (k, [x, y]) => {
+          const q = T.map(([a, b]) => [cx + (a - cx) * k, cy + (b - cy) * k]);
+          const sgn = (p1, p2) => (x - p2[0]) * (p1[1] - p2[1]) - (p1[0] - p2[0]) * (y - p2[1]);
+          const d1 = sgn(q[0], q[1]);
+          const d2 = sgn(q[1], q[2]);
+          const d3 = sgn(q[2], q[0]);
+          return !((d1 < 0 || d2 < 0 || d3 < 0) && (d1 > 0 || d2 > 0 || d3 > 0));
+        };
+        let k = 1;
+        while (k < 20 && ![[0, 0], [bw, 0], [0, bh], [bw, bh]].every((c) => inside(k, c))) k += 0.1;
+        return k + 0.1;
+      };
+      if (shape === 'triangle') [P, N].forEach((pt) => (pt.triK = triCover(pt)));
       // Farbe überblenden: gemeinsame Fläche statt zwei Slide-Hintergründen
       const stage = c.viewport;
       if (c.stageBg === undefined) c.stageBg = stage.style.backgroundColor;
@@ -742,14 +807,14 @@
       gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
       if (hasImg) {
         clip(P, 0);
-        clip(N, frame);
+        clip(N, 1);
         // Bild der neuen Slide liegt schon unter dem Fenster, leicht voraus (es ist langsamer)
         gsap.set(N.img, { scale: imgS, xPercent: -lag * 100 * dir });
       } else gsap.set(N.box, { scale: win });
 
       // 1 · Rahmen wird breiter, Bild etwas kleiner
       if (hasImg) {
-        clipTo(P, frame, 0);
+        clipTo(P, 1, 0);
         tl.to(P.img, { scale: imgS, duration: t1, ease: fEase }, 0);
       } else tl.to(P.box, { scale: win, duration: t1, ease: fEase }, 0);
       // 2 · Passepartout schiebt, Bild darunter folgt langsamer (gleiche Kurve, kleinerer Weg)
