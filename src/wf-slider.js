@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.4.0
+ * WF Slider v1.4.1
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.4.0';
+  const VERSION = '1.4.1';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -653,38 +653,48 @@
       gsap.fromTo(next, { xPercent: 100 * dir }, { xPercent: 0, duration: d, ease: 'power3.inOut', onComplete: done });
       gsap.to(prev, { xPercent: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
     },
-    // Der sichtbare Bildausschnitt schrumpft per clip-path zu einem Fenster, drumherum bleibt
-    // ein Rahmen in der Farbe der Slide. Beim Wechsel fährt das Fenster mit seiner Slide zur
-    // Seite, das Bild darin hängt hinterher (Parallax). Danach öffnet sich das Fenster wieder.
+    // 1. Der Ausschnitt schrumpft per clip-path zu einem Fenster (Rahmen in der Farbe der Slide),
+    //    gleichzeitig wird das Bild kleiner, beides von der Mitte aus.
+    // 2. Die Slide schiebt zur Seite, das Bild läuft langsamer hinterher und kommt nach dem
+    //    Rahmen an (Parallax).
+    // 3. Erst dann öffnet sich das Fenster wieder und das Bild wird gleichzeitig größer.
     // Text (data-slider-anim) blendet vorher aus und danach ein.
     showcase: ({ next, prev, dir, d, done, parts, c }) => {
       const ds = c.root.dataset;
       const win = clamp(num(ds.sliderScale, 0.6), 0.2, 1); // Größe des Fensters
+      const imgS = clamp(num(ds.sliderImageScale, (1 + win) / 2), win, 1); // Größe des Bilds
+      const px = clamp(num(ds.sliderParallax, 0.15), 0, 1) * 100; // Nachlauf des Bilds
       const ins = ((1 - win) / 2) * 100;
       const SMALL = `inset(${ins}% ${ins}% ${ins}% ${ins}%)`;
       const FULL = 'inset(0% 0% 0% 0%)';
-      // Wie weit das Bild hinterherhängt (Anteil der Bildbreite). Standard: so weit, dass das
-      // Fenster immer gefüllt bleibt.
-      const px = clamp(num(ds.sliderParallax, (1 - win) / 2), 0, 1) * 100;
       const P = parts(prev);
       const N = parts(next);
-      const t1 = d * 0.5; // Fenster schließt sich
-      const t2 = d * 0.9; // Wechsel
-      const t3 = d * 0.55; // Fenster öffnet sich
+      const hasImg = N.img !== N.box && P.img !== P.box;
+      const t1 = d * 0.5; // schließen
+      const t2 = d * 0.9; // Wechsel der Slide
+      const lag = hasImg ? t2 * 0.3 : 0; // so viel später kommt das Bild an
+      const t3 = d * 0.55; // öffnen
       const ease = 'power3.inOut';
-      c.animDelay = t1 + t2 + t3 * 0.6;
+      const open = t1 + t2 + lag;
+      c.animDelay = open + t3 * 0.6;
       gsap.to(prev.querySelectorAll('[data-slider-anim]'), { opacity: 0, duration: t1 * 0.6, ease: 'power1.out' });
       gsap.set(P.box, { clipPath: FULL });
       gsap.set(next, { autoAlpha: 1, xPercent: 100 * dir });
       gsap.set(N.box, { clipPath: SMALL });
-      if (N.img !== N.box) gsap.set(N.img, { xPercent: px * dir });
+      if (hasImg) gsap.set(N.img, { xPercent: px * dir, scale: imgS });
       const tl = gsap.timeline({ onComplete: done });
-      tl.to(P.box, { clipPath: SMALL, duration: t1, ease: 'power2.inOut' })
-        .to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1)
-        .to(next, { xPercent: 0, duration: t2, ease }, t1);
-      if (P.img !== P.box) tl.to(P.img, { xPercent: px * dir, duration: t2, ease }, t1);
-      if (N.img !== N.box) tl.to(N.img, { xPercent: 0, duration: t2, ease }, t1);
-      tl.to(N.box, { clipPath: FULL, duration: t3, ease: 'power2.inOut' }, t1 + t2);
+      // 1 · schließen
+      tl.to(P.box, { clipPath: SMALL, duration: t1, ease: 'power2.inOut' }, 0);
+      if (hasImg) tl.to(P.img, { scale: imgS, duration: t1, ease: 'power2.inOut' }, 0);
+      // 2 · wechseln, Bild läuft hinterher
+      tl.to(prev, { xPercent: -100 * dir, duration: t2, ease }, t1).to(next, { xPercent: 0, duration: t2, ease }, t1);
+      if (hasImg) {
+        tl.to(P.img, { xPercent: px * dir, duration: t2, ease }, t1);
+        tl.to(N.img, { xPercent: 0, duration: t2 + lag, ease }, t1);
+      }
+      // 3 · öffnen, Bild wächst
+      tl.to(N.box, { clipPath: FULL, duration: t3, ease: 'power2.inOut' }, open);
+      if (hasImg) tl.to(N.img, { scale: 1, duration: t3, ease: 'power2.inOut' }, open);
     },
     circle: ({ next, dir, d, point, done }) => {
       const at = point || (dir > 0 ? '100% 50%' : '0% 50%');
