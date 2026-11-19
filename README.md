@@ -113,7 +113,7 @@ Größe über `data-slider-scale`, Tempo über `data-slider-duration`, Easing ü
 
 ## Liste steuert Slider, Typ pro Breakpoint (ab 1.7)
 
-Live: [`docs/liste.html`](docs/liste.html). Beispiel: Links eine Namensliste aus dem CMS, rechts die Zitate. Auf Desktop springt der Slider beim Überfahren eines Namens zum passenden Zitat und blendet über. Ab Tablet ist die Liste weg und die Zitate sind ein normales Carousel.
+Live: [Abschnitt 04 der Demo-Seite](https://rakete13.github.io/wf-slider/#liste). Beispiel: Links eine Namensliste aus dem CMS, rechts die Zitate. Auf Desktop springt der Slider beim Überfahren eines Namens zum passenden Zitat und blendet über. Ab Tablet ist die Liste weg und die Zitate sind ein normales Carousel.
 
 ```
 Collection List Wrapper (Namen)  data-slider="thumbs"  data-slider-for="zitate"  data-slider-trigger="hover"  data-slider-hide="tablet"
