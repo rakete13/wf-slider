@@ -150,6 +150,21 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
   .stage { padding: 18px; }
   .hero-slide { padding: 24px; min-height: 300px; }
 }
+/* ---------- Liste steuert Slider ---------- */
+.q-layout { display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: center; }
+.q-list { display: grid; gap: 4px; }
+.q-name { font: 700 1.25rem var(--font-display); padding: 10px 14px; border-radius: 10px; cursor: pointer; color: var(--muted); transition: color .25s, background .25s; }
+.q-name.is-active { color: var(--ink); background: var(--surface); }
+.q-viewport { overflow: hidden; border-radius: 14px; min-width: 0; }
+.q-track { display: flex; gap: 16px; }
+.q-slide { flex: 0 0 100%; min-height: 320px; border-radius: 14px; color: #fff; padding: 40px; display: grid; align-content: end; gap: 16px; }
+.q-slide blockquote { margin: 0; font: 700 clamp(1.4rem, 2.6vw, 2rem)/1.2 var(--font-display); }
+.q-mobile { display: none; }
+@media (max-width: 991px) {
+  .q-layout { grid-template-columns: 1fr; }
+  .q-slide { flex-basis: 85%; min-height: 280px; padding: 28px; }
+  .q-mobile { display: flex; }
+}
 </style>
 </head>
 <body>
@@ -160,9 +175,10 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
     <a href="#carousel"><span>01</span>Carousel</a>
     <a href="#fade"><span>02</span>Fade</a>
     <a href="#gallery"><span>03</span>Galerie</a>
-    <a href="#showcase"><span>04</span>Showcase</a>
-    <a href="#effekte"><span>05</span>Effekte</a>
-    <a href="#referenz"><span>06</span>Referenz</a>
+    <a href="#liste"><span>04</span>Liste</a>
+    <a href="#showcase"><span>05</span>Showcase</a>
+    <a href="#effekte"><span>06</span>Effekte</a>
+    <a href="#referenz"><span>07</span>Referenz</a>
   </nav>
 
   <main>
@@ -171,7 +187,7 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
       <h1>Slider per <em>Attribut</em>, für CMS und statische Inhalte.</h1>
       <p>Wrapper bauen, <code>data-slider="carousel"</code> setzen, fertig. Ob die Slides aus einer Collection List kommen oder von Hand gebaut sind, ist egal. Pfeile, Punkte und Zähler gestaltest du selbst im Designer und markierst sie nur.</p>
       <div class="notice">Braucht nur GSAP selbst, keine Plugins. Läuft auf der veröffentlichten Seite, nicht im Designer. Mit <code>?wfslider-debug</code> an der Adresse siehst du Hinweise zu jedem Slider in der Konsole.</div>
-      <div class="notice">Neu in 1.7: <a href="liste.html">Liste steuert Slider</a> (Hover) und Typwechsel ab Tablet.</div>
+      <div class="notice">Neu in 1.7: <a href="#liste">Liste steuert Slider</a> (Hover) und Typwechsel ab Tablet.</div>
       <div class="notice">Neu in 1.1: <a href="effekte.html">Effekte und Übergänge</a> zum Ausprobieren und Vergleichen.</div>
     </header>
 
@@ -360,10 +376,65 @@ dots             data-slider-dots="hero"</pre>
 thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
     </section>
 
-    <!-- 04 Showcase -->
-    <section class="cat" id="showcase">
+    <!-- 04 Liste -->
+    <section class="cat" id="liste">
       <div class="cat-head">
         <div class="num">04</div>
+        <h2>Liste steuert Slider</h2>
+        <p>Eine Namensliste aus dem CMS als <code>thumbs</code> mit <code>data-slider-trigger="hover"</code>: Beim Überfahren springt der Slider zum passenden Zitat und blendet über. Ab Tablet ist die Liste mit <code>data-slider-hide="tablet"</code> ausgeblendet, und <code>data-slider-tablet="carousel"</code> macht aus den Zitaten ein Carousel zum Wischen. Zum Ausprobieren das Fenster schmaler ziehen; die aktuelle Slide bleibt erhalten.</p>
+      </div>
+      <div class="stage">
+      <div class="q-layout">
+        <div data-slider="thumbs" data-slider-for="zitate" data-slider-trigger="hover" data-slider-hide="tablet">
+        <div class="q-list" data-slider-track>
+        <div class="q-name">Maria Lindqvist</div>
+        <div class="q-name">Jonas Feld</div>
+        <div class="q-name">Aylin Demir</div>
+        <div class="q-name">Tom Becker</div>
+        <div class="q-name">Lea Hoffmann</div>
+        </div></div>
+        <div data-slider="fade" data-slider-id="zitate" data-slider-tablet="carousel" data-slider-label="Zitate">
+          <div class="q-viewport" data-slider-viewport>
+            <div class="q-track" data-slider-track>
+        <div class="q-slide" style="background:#2f4cf5">
+          <blockquote data-slider-anim="fade-up">„Die Zusammenarbeit war so klar und ruhig, dass wir am Ende mehr Zeit für die eigentliche Idee hatten.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Maria Lindqvist</strong> · Studio Nord</div>
+        </div>
+        <div class="q-slide" style="background:#e4572e">
+          <blockquote data-slider-anim="fade-up">„Endlich eine Website, die wir selbst pflegen können, ohne Angst, etwas kaputtzumachen.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Jonas Feld</strong> · Feld & Partner</div>
+        </div>
+        <div class="q-slide" style="background:#17a589">
+          <blockquote data-slider-anim="fade-up">„Jede Animation hat einen Grund. Nichts zappelt, alles führt.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Aylin Demir</strong> · Kollektiv Ost</div>
+        </div>
+        <div class="q-slide" style="background:#8e44ad">
+          <blockquote data-slider-anim="fade-up">„Vom ersten Gespräch bis zum Launch in sechs Wochen, ohne Hektik.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Tom Becker</strong> · Becker Bau</div>
+        </div>
+        <div class="q-slide" style="background:#d4a017">
+          <blockquote data-slider-anim="fade-up">„Unsere Projekte sehen online endlich so gut aus wie in echt.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Lea Hoffmann</strong> · Atelier Hoffmann</div>
+        </div>
+            </div>
+          </div>
+          <div class="controls q-mobile" style="margin-top:16px">
+            <button class="btn" data-slider-prev aria-label="Zurück">←</button>
+            <div class="dots" data-slider-dots><span class="dot"></span></div>
+            <button class="btn" data-slider-next aria-label="Weiter">→</button>
+          </div>
+        </div>
+      </div>
+      </div>
+      <pre>namensliste   data-slider="thumbs"  data-slider-for="zitate"  data-slider-trigger="hover"  data-slider-hide="tablet"
+zitate        data-slider="fade"    data-slider-id="zitate"    data-slider-tablet="carousel"</pre>
+      <p class="note">Liste und Slider aus derselben Collection, gleich sortiert und gefiltert: Der erste Name gehört zur ersten Slide. Slides im Designer wie für ein Carousel anlegen (Flex, Slide-Breite pro Breakpoint), beim Überblenden stapelt die Library sie selbst.</p>
+    </section>
+
+    <!-- 05 Showcase -->
+    <section class="cat" id="showcase">
+      <div class="cat-head">
+        <div class="num">05</div>
         <h2>Showcase</h2>
         <p>Ein <code>fade</code>-Slider mit dem Übergang <code>showcase</code>: Über dem Bild liegt ein Passepartout in der Farbe der Slide. Beim Wechsel wird der Rahmen breiter und das Bild etwas kleiner, der Ausschnitt bleibt aber immer gefüllt. Dann schiebt das Passepartout mit der Slide zur Seite, das Bild darunter bewegt sich langsamer mit (Parallax). Zum Schluss öffnen sich Rahmen und Bild wieder. Während des Schiebens blendet die Farbe des Passepartouts weich von der alten zur neuen Slide über, ohne harte Kante zwischen den Slides. Die Schrift blendet vorher aus und danach ein.</p>
       </div>
@@ -436,10 +507,10 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
   slide          ohne eigene Farbe → bekommt die Farbe aus dem Bild</pre>
     </section>
 
-    <!-- 05 Effekte -->
+    <!-- 06 Effekte -->
     <section class="cat" id="effekte">
       <div class="cat-head">
-        <div class="num">05</div>
+        <div class="num">06</div>
         <h2>Effekte und Übergänge</h2>
         <p>Alle Effekte live zum Umschalten auf der <a href="effekte.html">Effekt-Demo</a>. Bei „Bewegung reduzieren“ fallen sie automatisch weg.</p>
       </div>
@@ -483,10 +554,10 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
       </div>
     </section>
 
-    <!-- 06 Referenz -->
+    <!-- 07 Referenz -->
     <section class="cat" id="referenz">
       <div class="cat-head">
-        <div class="num">06</div>
+        <div class="num">07</div>
         <h2>Referenz</h2>
       </div>
 
@@ -514,6 +585,9 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>data-slider-pad</code></td><td>Zähler mit führenden Nullen, z. B. <code>2</code> → 03</td></tr>
           <tr><td><code>data-slider-label</code></td><td>Name für Screenreader</td></tr>
           <tr><td><code>data-slider-for</code></td><td>Nur bei <code>thumbs</code>: ID des gesteuerten Sliders</td></tr>
+          <tr><td><code>data-slider-trigger</code></td><td>Nur bei <code>thumbs</code>: <code>click</code> (Standard) oder <code>hover</code> (Wechsel beim Überfahren, 80 ms Verzögerung)</td></tr>
+          <tr><td><code>data-slider-hide</code></td><td>Ab dieser Breite ausgeblendet und abgeschaltet: <code>tablet</code> (991 px), <code>landscape</code> (767), <code>portrait</code> (479) oder eine Media Query</td></tr>
+          <tr><td><code>data-slider-tablet</code> · <code>-landscape</code> · <code>-portrait</code></td><td>Anderer Typ ab dieser Breite abwärts, z. B. <code>carousel</code>. Die aktuelle Slide bleibt beim Umbau</td></tr>
           <tr><td><code>data-slider-effect</code></td><td>Nur bei <code>carousel</code>: <code>parallax</code>, <code>focus</code>, <code>tilt</code>, <code>coverflow</code>. Dazu <code>-strength</code></td></tr>
           <tr><td><code>data-slider-bg</code></td><td>Hintergrundfarbe jeder Slide aus ihrem Bild: <code>auto</code>, <code>auto-light</code>, <code>auto-dark</code>. Eine eigene Farbe der Slide (z. B. aus dem CMS) gewinnt</td></tr>
           <tr><td><code>data-slider-transition</code></td><td>Nur bei <code>fade</code>: <code>fade</code>, <code>zoom</code>, <code>wipe</code>, <code>push</code>, <code>circle</code>, <code>showcase</code></td></tr>
