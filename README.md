@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.7.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.7.1/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -127,6 +127,7 @@ slider-wrapper (Zitate)          data-slider="fade"    data-slider-id="zitate"  
 | `data-slider-tablet` · `-landscape` · `-portrait` | Slider | `carousel`, `fade` | Ab dieser Breite abwärts läuft der Slider als dieser Typ. Beim Wechsel der Fensterbreite wird umgebaut, die aktuelle Slide bleibt |
 
 - Jeder Eintrag der Liste gehört zur Slide mit derselben Position: Liste und Slider aus derselben Collection, mit gleicher Sortierung und gleichem Filter.
+- Enthält ein Eintrag selbst einen Link (z. B. Themenliste, die zu Leistungen verlinkt), bleibt der Link der Bedienpunkt: Hover und Tastatur-Fokus wechseln die Slide, der Klick folgt dem Link.
 - Der aktive Eintrag hat die Klasse `is-active`. Die Liste darf senkrecht stehen, sie wird dann nicht verschoben.
 - Für den Typwechsel die Slides im Designer so anlegen, wie das Carousel sie braucht: Track Display flex, Slide-Breite pro Breakpoint (Desktop z. B. 100 %, Tablet 85 %). Beim Überblenden stapelt die Library die Slides selbst.
 - Pfeile und Punkte, die es nur auf Tablet geben soll, in Webflow auf Desktop ausblenden.

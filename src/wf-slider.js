@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.7.0
+ * WF Slider v1.7.1
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.7.0';
+  const VERSION = '1.7.1';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -1638,7 +1638,12 @@
         };
         let ht = 0;
         slides.forEach((s, i) => {
-          makeButton(s, L.goto.replace('{n}', i + 1), () => goMain(i), R, on);
+          // Eintrag mit eigenem Link/Button (z. B. Themenliste mit Links): nicht selbst zum Button machen,
+          // sonst steckt ein Link in einem Button und jeder Eintrag hat zwei Tab-Stopps
+          if (s.querySelector('a[href], button')) {
+            on(s, 'click', () => goMain(i));
+            on(s, 'focusin', () => goMain(i));
+          } else makeButton(s, L.goto.replace('{n}', i + 1), () => goMain(i), R, on);
           if (o.trigger === 'hover') {
             // kurze Verzögerung: Wer schnell über die Liste streicht, springt nicht durch alle Slides
             on(s, 'pointerenter', (e) => {
