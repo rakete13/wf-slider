@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.6.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.7.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -111,9 +111,29 @@ Größe über `data-slider-scale`, Tempo über `data-slider-duration`, Easing ü
 .slide-inner { transform: rotate(calc(var(--slide-progress) * 6deg)); }
 ```
 
+## Liste steuert Slider, Typ pro Breakpoint (ab 1.7)
+
+Live: [`docs/liste.html`](docs/liste.html). Beispiel: Links eine Namensliste aus dem CMS, rechts die Zitate. Auf Desktop springt der Slider beim Überfahren eines Namens zum passenden Zitat und blendet über. Ab Tablet ist die Liste weg und die Zitate sind ein normales Carousel.
+
+```
+Collection List Wrapper (Namen)  data-slider="thumbs"  data-slider-for="zitate"  data-slider-trigger="hover"  data-slider-hide="tablet"
+slider-wrapper (Zitate)          data-slider="fade"    data-slider-id="zitate"    data-slider-tablet="carousel"
+```
+
+| Attribut | Wo | Werte | Wirkung |
+|---|---|---|---|
+| `data-slider-trigger` | thumbs | `click` (Standard), `hover` | Bei `hover` wechselt der Slider beim Überfahren, nach 80 ms (`WFSliderConfig.hoverDelay`), damit schnelles Drüberstreichen nicht durch alle Slides springt. Tastatur-Fokus wechselt auch, Tippen auf Touch-Geräten ebenso. Beim Verlassen bleibt die Slide stehen. |
+| `data-slider-hide` | jeder Slider, z. B. thumbs | `tablet` (991 px und schmaler), `landscape` (767), `portrait` (479) oder eine Media Query | Ab dieser Breite ausgeblendet (`display: none`) und abgeschaltet |
+| `data-slider-tablet` · `-landscape` · `-portrait` | Slider | `carousel`, `fade` | Ab dieser Breite abwärts läuft der Slider als dieser Typ. Beim Wechsel der Fensterbreite wird umgebaut, die aktuelle Slide bleibt |
+
+- Jeder Eintrag der Liste gehört zur Slide mit derselben Position: Liste und Slider aus derselben Collection, mit gleicher Sortierung und gleichem Filter.
+- Der aktive Eintrag hat die Klasse `is-active`. Die Liste darf senkrecht stehen, sie wird dann nicht verschoben.
+- Für den Typwechsel die Slides im Designer so anlegen, wie das Carousel sie braucht: Track Display flex, Slide-Breite pro Breakpoint (Desktop z. B. 100 %, Tablet 85 %). Beim Überblenden stapelt die Library die Slides selbst.
+- Pfeile und Punkte, die es nur auf Tablet geben soll, in Webflow auf Desktop ausblenden.
+
 ## Einstellungen am Wrapper
 
-`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` (bei thumbs), `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` (bei fade), `data-slider-bg` (alle Typen).
+`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` und `data-slider-trigger` (bei thumbs), `data-slider-hide`, `data-slider-tablet` / `-landscape` / `-portrait`, `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` (bei fade), `data-slider-bg` (alle Typen).
 
 ## Markierte Elemente
 
@@ -169,7 +189,7 @@ el.addEventListener('wfslider:change', (e) => e.detail.index);
 WFSlider.init(scope); WFSlider.refresh(); WFSlider.destroy(scope);
 ```
 
-Globale Voreinstellungen vor dem Footer Code über `window.WFSliderConfig = { duration, fadeDuration, ease, autoplay, distance, mobileBreakpoint, labels: { … } }`. Die Texte für Screenreader (`labels`) lassen sich so auch auf Englisch umstellen.
+Globale Voreinstellungen vor dem Footer Code über `window.WFSliderConfig = { duration, fadeDuration, ease, autoplay, distance, mobileBreakpoint, hoverDelay, labels: { … } }`. Die Texte für Screenreader (`labels`) lassen sich so auch auf Englisch umstellen.
 
 ## Aufbau
 

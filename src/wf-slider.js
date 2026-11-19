@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.6.0
+ * WF Slider v1.7.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.6.0';
+  const VERSION = '1.7.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -26,6 +26,7 @@
       autoplay: 5, // Sekunden, wenn data-slider-autoplay ohne Wert gesetzt ist
       distance: '2rem', // Weg der Inhalts-Animationen (data-slider-anim)
       mobileBreakpoint: 768,
+      hoverDelay: 80, // ms, Thumbnails mit data-slider-trigger="hover"
       autoInit: true,
       debug: false,
     },
@@ -1129,6 +1130,18 @@
   /*  Slider-Instanz                                                     */
   /* ------------------------------------------------------------------ */
   const instances = new Map();
+  // Webflow-Breakpoints (Desktop zuerst): gilt ab dieser Breite abwärts
+  const BP = { tablet: '(max-width: 991px)', landscape: '(max-width: 767px)', portrait: '(max-width: 479px)' };
+  const SWITCH = ['tablet', 'landscape', 'portrait'];
+  const switches = new Map();
+  const typeFor = (r) => {
+    let t = (r.dataset.slider || '').trim();
+    SWITCH.forEach((k) => {
+      const v = r.dataset['slider' + k[0].toUpperCase() + k.slice(1)];
+      if (v && window.matchMedia(BP[k]).matches) t = v.trim();
+    });
+    return t;
+  };
   const byId = (id) => {
     for (const i of instances.values()) if (i.id === id) return i;
     return null;
@@ -1155,6 +1168,7 @@
       pauseHover: ds.sliderPauseHover !== 'false',
       label: ds.sliderLabel,
       for: ds.sliderFor || '',
+      trigger: type === 'thumbs' && ds.sliderTrigger === 'hover' ? 'hover' : 'click',
       effect: type === 'carousel' ? ds.sliderEffect || '' : '',
       transition: fade ? ds.sliderTransition || 'fade' : 'fade',
       bg: ds.sliderBg === undefined || ds.sliderBg === 'false' ? '' : ['auto-light', 'auto-dark'].includes(ds.sliderBg) ? ds.sliderBg : 'auto',
@@ -1177,15 +1191,16 @@
     return { track, slides, viewport };
   };
 
-  function create(root) {
+  function create(root, typeOverride, startAt) {
     const ds = root.dataset;
-    const type = (ds.slider || '').trim();
+    const type = (typeOverride || ds.slider || '').trim();
     const engineFn = ENGINES[type === 'thumbs' ? 'carousel' : type];
     if (!engineFn) {
       warn(`Unbekannter Slider-Typ "${type}"`, root);
       return null;
     }
     const o = options(ds, type);
+    if (startAt !== undefined) o.start = Math.max(0, startAt);
     const L = cfg.labels;
     const inst = { root, type, id: ds.sliderId || '', o, enabled: false, issues: [], handlers: {} };
 
@@ -1247,6 +1262,17 @@
       }
       const { track, slides, viewport } = parts;
       const n = slides.length;
+      // data-slider="fade", läuft hier aber als carousel (Typwechsel pro Breakpoint): Vorab-CSS aus dem Head aufheben
+      if (type !== 'fade' && (ds.slider || '').trim() === 'fade') {
+        R.style(track);
+        track.style.display = 'flex';
+        slides.forEach((s) => {
+          R.style(s);
+          s.style.gridArea = 'auto';
+          s.style.opacity = '1';
+          s.style.visibility = 'visible';
+        });
+      }
       inst.track = track;
       inst.slides = slides;
 
@@ -1383,7 +1409,7 @@
         });
         // gekoppelte Thumbnails nachziehen
         if (type !== 'thumbs' && inst.id)
-          instances.forEach((t) => t.type === 'thumbs' && t.o.for === inst.id && t.setThumb && t.setThumb(slide));
+          instances.forEach((t) => t.type === 'thumbs' && t.enabled && t.o.for === inst.id && t.setThumb && t.setThumb(slide));
         if (bgc) bgc.near(slide);
         emit('change', { index: slide, slide: slides[slide], slider: inst.api });
       };
@@ -1606,12 +1632,25 @@
       if (type === 'thumbs') {
         if (!o.for) issue('data-slider-for fehlt: Welcher Slider soll gesteuert werden?');
         else if (!main()) issue(`Kein Slider mit data-slider-id="${o.for}" gefunden.`);
+        const goMain = (i) => {
+          const m = main();
+          if (m && m.api && m.api.index !== i) m.api.goTo(i);
+        };
+        let ht = 0;
         slides.forEach((s, i) => {
-          makeButton(s, L.goto.replace('{n}', i + 1), () => {
-            const m = main();
-            if (m && m.api) m.api.goTo(i);
-          }, R, on);
+          makeButton(s, L.goto.replace('{n}', i + 1), () => goMain(i), R, on);
+          if (o.trigger === 'hover') {
+            // kurze Verzögerung: Wer schnell über die Liste streicht, springt nicht durch alle Slides
+            on(s, 'pointerenter', (e) => {
+              if (e.pointerType === 'touch') return;
+              clearTimeout(ht);
+              ht = setTimeout(() => goMain(i), cfg.hoverDelay);
+            });
+            on(s, 'pointerleave', () => clearTimeout(ht));
+            on(s, 'focusin', () => goMain(i));
+          }
         });
+        R.add(() => clearTimeout(ht));
         inst.setThumb = (i) => {
           inst.thumb = i;
           slides.forEach((s, k) => {
@@ -1643,7 +1682,7 @@
         if (type === 'thumbs' && inst.thumb !== undefined) eng.reveal(inst.thumb, true);
         if (c.info) {
           if (c.info.loopBlocked) issue('Zu wenige oder zu schmale Slides für den Loop, er ist deshalb aus.');
-          if (c.info.wraps) issue('Slides brechen in eine neue Zeile um. Track auf Display flex und Wrap: don\'t wrap stellen.');
+          if (c.info.wraps && !(type === 'thumbs' && staticMode)) issue('Slides brechen in eine neue Zeile um. Track auf Display flex und Wrap: don\'t wrap stellen.');
           const moving = eng.loop() ? slides : [track];
           if (moving.some((el) => /(^|,\s*)(all|transform)\b/.test(getComputedStyle(el).transitionProperty) && parseFloat(getComputedStyle(el).transitionDuration) > 0))
             issue(eng.loop() ? 'Slides haben eine CSS-Transition auf transform. Im Loop bewegt die Library die Slides selbst: Transition und Hover-Transforms an ein inneres Element legen.' : 'Track hat eine CSS-Transition auf transform. Bitte entfernen, sonst läuft die Bewegung nach.');
@@ -1723,18 +1762,29 @@
     // Nur in bestimmten Breiten aktiv: data-slider-media="(max-width: 991px)" oder data-slider-mobile="false"
     const mq = ds.sliderMedia || (ds.sliderMobile === 'false' ? `(min-width: ${cfg.mobileBreakpoint}px)` : '');
     const mql = mq ? window.matchMedia(mq) : null;
+    // Ausblenden ab einem Breakpoint: data-slider-hide="tablet" | "landscape" | "portrait" | Media Query
+    const hq = ds.sliderHide ? BP[ds.sliderHide] || ds.sliderHide : '';
+    const hql = hq ? window.matchMedia(hq) : null;
+    const hideStyle = root.style.display;
     const check = () => {
-      const want = !mql || mql.matches;
+      const hidden = !!(hql && hql.matches);
+      const want = (!mql || mql.matches) && !hidden;
       if (want && !inst.enabled) {
         root.classList.remove('wfs-off');
         enable();
       } else if (!want && inst.enabled) disable();
       else if (!want) root.classList.add('wfs-off');
+      if (hql) root.style.display = hidden ? 'none' : hideStyle;
     };
     if (mql) mql.addEventListener('change', check);
+    if (hql) hql.addEventListener('change', check);
     inst.refresh = () => refreshFn();
     inst.kill = () => {
       if (mql) mql.removeEventListener('change', check);
+      if (hql) {
+        hql.removeEventListener('change', check);
+        root.style.display = hideStyle;
+      }
       disable();
     };
     check();
@@ -1813,8 +1863,28 @@
     roots.sort((a, b) => (a.dataset.slider === 'thumbs') - (b.dataset.slider === 'thumbs'));
     roots.forEach((r) => {
       try {
-        const i = create(r);
+        const i = create(r, typeFor(r));
         if (i) instances.set(r, i);
+        // Typwechsel pro Breakpoint: data-slider-tablet="carousel" usw.
+        const keys = SWITCH.filter((k) => r.hasAttribute('data-slider-' + k));
+        if (keys.length) {
+          const swap = () => {
+            const t = typeFor(r);
+            const cur = instances.get(r);
+            if (cur && cur.type === t) return;
+            const at = cur ? cur.api.index : undefined;
+            if (cur) cur.kill();
+            const ni = create(r, t, at);
+            if (ni) instances.set(r, ni);
+            else instances.delete(r);
+            // gekoppelte Thumbnails auf den Stand bringen
+            if (ni && ni.id && ni.enabled)
+              instances.forEach((x) => x.type === 'thumbs' && x.enabled && x.o.for === ni.id && x.setThumb && x.setThumb(ni.api.index));
+          };
+          const mqls = keys.map((k) => window.matchMedia(BP[k]));
+          mqls.forEach((m) => m.addEventListener('change', swap));
+          switches.set(r, () => mqls.forEach((m) => m.removeEventListener('change', swap)));
+        }
       } catch (err) {
         warn('Fehler beim Start', r, err);
       }
@@ -1827,6 +1897,10 @@
       if (!scope || scope === document || scope === r || scope.contains(r)) {
         inst.kill();
         instances.delete(r);
+        if (switches.has(r)) {
+          switches.get(r)();
+          switches.delete(r);
+        }
       }
     });
   }

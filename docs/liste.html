@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WF Slider · Liste steuert Slider (Demo)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<!-- Head Code der Library -->
+<script>
+document.documentElement.classList.add('js-slider');
+setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+</script>
+<style>
+[data-slider]{min-width:0}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items){display:grid}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>*{grid-area:1/1/2/2}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child){opacity:0;visibility:hidden}
+.js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}
+</style>
+
+<style>
+:root {
+  --bg: #f3f4f7; --surface: #ffffff; --ink: #141824; --muted: #5d6476; --line: #dde0e8;
+  --accent: #2f4cf5; --accent-ink: #ffffff; --stage: #e9ebf2; --code-bg: #eef0f6;
+  --font-display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #0f121a; --surface: #171b26; --ink: #e8eaf2; --muted: #9aa1b4; --line: #272d3b;
+    --accent: #7f93ff; --accent-ink: #0f121a; --stage: #1d2230; --code-bg: #1d2230; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.1; margin: 0; }
+code, pre { font-family: var(--font-mono); font-size: 0.84rem; }
+p code { background: var(--code-bg); padding: 1px 6px; border-radius: 4px; }
+
+.wrap { max-width: 1180px; margin: 0 auto; padding-block: 56px 120px; display: grid; gap: 88px; }
+header.hero { display: grid; gap: 16px; }
+.eyebrow { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent); }
+.hero h1 { font-size: clamp(2.4rem, 5.5vw, 4rem); font-weight: 800; letter-spacing: -0.02em; }
+.hero h1 em { font-style: normal; color: var(--accent); }
+.hero p { max-width: 64ch; color: var(--muted); margin: 0; font-size: 1.05rem; }
+
+section { display: grid; gap: 20px; min-width: 0; }
+.head { display: grid; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 14px; }
+.head .num { font-family: var(--font-mono); color: var(--accent); font-size: 0.85rem; }
+.head h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); }
+.head p { margin: 0; color: var(--muted); max-width: 70ch; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.chips .label { font-size: 0.78rem; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-right: 4px; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 7px 14px; font: 600 0.85rem var(--font-body); cursor: pointer; }
+.chip:hover { border-color: var(--accent); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.note { font-size: 0.9rem; color: var(--muted); margin: 0; min-height: 1.5em; max-width: 80ch; }
+
+.stage { background: var(--stage); border-radius: 14px; padding: 32px 0; min-width: 0; overflow: hidden; display: grid; gap: 20px; }
+.stage-pad { padding-inline: 32px; }
+pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 8px; padding: 12px 16px; overflow-x: auto; margin: 0; line-height: 1.55; }
+
+.controls { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.btn { width: 46px; height: 46px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: grid; place-items: center; cursor: pointer; font-size: 1.1rem; }
+.btn:hover { border-color: var(--accent); }
+.btn.is-disabled { opacity: .35; pointer-events: none; }
+.dots { display: flex; gap: 8px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 999px; background: var(--ink); opacity: .25; cursor: pointer; transition: width .3s, opacity .3s; }
+.dot.is-active { width: 28px; opacity: 1; background: var(--accent); }
+.counter { font-family: var(--font-mono); margin-left: auto; }
+
+/* ---------- Liste steuert Slider ---------- */
+.q-layout { display: grid; grid-template-columns: 260px 1fr; gap: 32px; align-items: center; padding-inline: 32px; }
+.q-list { display: grid; gap: 4px; }
+.q-name { font: 700 1.25rem var(--font-display); padding: 10px 14px; border-radius: 10px; cursor: pointer; color: var(--muted); transition: color .25s, background .25s; }
+.q-name.is-active { color: var(--ink); background: var(--surface); }
+.q-viewport { overflow: hidden; border-radius: 14px; min-width: 0; }
+.q-track { display: flex; gap: 16px; }
+.q-slide { flex: 0 0 100%; min-height: 320px; border-radius: 14px; color: #fff; padding: 40px; display: grid; align-content: end; gap: 16px; }
+.q-slide blockquote { margin: 0; font: 700 clamp(1.4rem, 2.6vw, 2rem)/1.2 var(--font-display); }
+.q-mobile { display: none; }
+@media (max-width: 991px) {
+  .q-layout { grid-template-columns: 1fr; padding-inline: 20px; }
+  .q-slide { flex-basis: 85%; min-height: 280px; padding: 28px; }
+  .q-mobile { display: flex; }
+}
+.size { font-family: var(--font-mono); font-size: .85rem; color: var(--muted); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="hero">
+    <div class="eyebrow">WF Slider · ab 1.7</div>
+    <h1>Liste <em>steuert</em> Slider.</h1>
+    <p>Desktop: Namen überfahren, die Zitate blenden über. Ab Tablet (991 px und schmaler) verschwindet die Liste und die Zitate werden ein normales Carousel zum Wischen. Zum Ausprobieren das Fenster schmaler ziehen. Die aktuelle Slide bleibt beim Umschalten erhalten.</p>
+    <p class="size" id="size"></p>
+  </header>
+
+  <section>
+    <div class="head"><span class="num">Beispiel</span><h2>Zitate mit Namensliste</h2></div>
+    <div class="stage">
+      <div class="q-layout">
+        <div data-slider="thumbs" data-slider-for="zitate" data-slider-trigger="hover" data-slider-hide="tablet">
+        <div class="q-list" data-slider-track>
+        <div class="q-name">Maria Lindqvist</div>
+        <div class="q-name">Jonas Feld</div>
+        <div class="q-name">Aylin Demir</div>
+        <div class="q-name">Tom Becker</div>
+        <div class="q-name">Lea Hoffmann</div>
+        </div></div>
+        <div data-slider="fade" data-slider-id="zitate" data-slider-tablet="carousel" data-slider-label="Zitate">
+          <div class="q-viewport" data-slider-viewport>
+            <div class="q-track" data-slider-track>
+        <div class="q-slide" style="background:#2f4cf5">
+          <blockquote data-slider-anim="fade-up">„Die Zusammenarbeit war so klar und ruhig, dass wir am Ende mehr Zeit für die eigentliche Idee hatten.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Maria Lindqvist</strong> · Studio Nord</div>
+        </div>
+        <div class="q-slide" style="background:#e4572e">
+          <blockquote data-slider-anim="fade-up">„Endlich eine Website, die wir selbst pflegen können, ohne Angst, etwas kaputtzumachen.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Jonas Feld</strong> · Feld & Partner</div>
+        </div>
+        <div class="q-slide" style="background:#17a589">
+          <blockquote data-slider-anim="fade-up">„Jede Animation hat einen Grund. Nichts zappelt, alles führt.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Aylin Demir</strong> · Kollektiv Ost</div>
+        </div>
+        <div class="q-slide" style="background:#8e44ad">
+          <blockquote data-slider-anim="fade-up">„Vom ersten Gespräch bis zum Launch in sechs Wochen, ohne Hektik.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Tom Becker</strong> · Becker Bau</div>
+        </div>
+        <div class="q-slide" style="background:#d4a017">
+          <blockquote data-slider-anim="fade-up">„Unsere Projekte sehen online endlich so gut aus wie in echt.“</blockquote>
+          <div class="q-who" data-slider-anim="fade-up" data-slider-anim-delay="0.1"><strong>Lea Hoffmann</strong> · Atelier Hoffmann</div>
+        </div>
+            </div>
+          </div>
+          <div class="controls q-mobile" style="margin-top:16px">
+            <button class="btn" data-slider-prev aria-label="Zurück">←</button>
+            <div class="dots" data-slider-dots><span class="dot"></span></div>
+            <button class="btn" data-slider-next aria-label="Weiter">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <pre>Liste (Collection List)  data-slider="thumbs"  data-slider-for="zitate"  data-slider-trigger="hover"  data-slider-hide="tablet"
+Slider                   data-slider="fade"    data-slider-id="zitate"    data-slider-tablet="carousel"</pre>
+  </section>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="wf-slider.min.js"></script>
+<script>
+(() => {
+  const el = document.getElementById('size');
+  const up = () => {
+    const s = WFSlider.get('zitate');
+    el.textContent = `Fensterbreite ${innerWidth}px · Slider läuft als ${innerWidth <= 991 ? 'carousel' : 'fade'}`;
+  };
+  addEventListener('resize', up); up();
+})();
+</script>
+</body>
+</html>
