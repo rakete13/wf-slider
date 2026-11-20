@@ -80,7 +80,8 @@ pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 
 #cy { overflow: hidden; min-width: 0; }
 .cy-track { display: flex; gap: 6px; align-items: center; padding: 150px 0; }
 .cy-slide { flex: 0 0 clamp(60px, 7vw, 120px); }
-.cy-in { border-radius: 10px; overflow: hidden; }
+.cy-in { border-radius: 10px; overflow: hidden; cursor: pointer; transition: box-shadow .25s; }
+.cy-in:hover { box-shadow: 0 0 0 3px var(--accent, #3b5bff); }
 .cy-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .cy-controls { justify-content: center; margin-top: 8px; }
 .fx-track { display: flex; gap: 20px; }
@@ -203,7 +204,7 @@ img { color: transparent; }
     <div class="head">
       <div class="num">02</div>
       <h2>3D-Zylinder</h2>
-      <p>Carousel mit <code>data-slider-effect="cylinder"</code>: Die Karten laufen im Kreis um einen herum. In der Mitte sind sie klein und weit weg, zum Rand hin kommen sie näher und werden größer, jede Karte bleibt gerade zur Kamera ausgerichtet. Mit <code>data-slider-face="wall"</code> liegen sie stattdessen an der Zylinderwand und drehen sich zum Rand hin. Ziehen, Pfeile, Mausrad und Autoplay funktionieren wie bei jedem Carousel. Stärke = wie stark die Bahn gebogen ist.</p>
+      <p>Carousel mit <code>data-slider-effect="cylinder"</code> und <code>data-slider-flow</code> (läuft von selbst, hält an, solange die Maus auf einer Karte ist): Die Karten laufen im Kreis um einen herum. In der Mitte sind sie klein und weit weg, zum Rand hin kommen sie näher und werden größer, jede Karte bleibt gerade zur Kamera ausgerichtet. Mit <code>data-slider-face="wall"</code> liegen sie stattdessen an der Zylinderwand und drehen sich zum Rand hin. Ziehen, Pfeile, Mausrad und Autoplay funktionieren wie bei jedem Carousel. Stärke = wie stark die Bahn gebogen ist.</p>
     </div>
     <div class="chips" data-chips="cy-strength">
       <span class="label">Krümmung</span>
@@ -216,8 +217,15 @@ img { color: transparent; }
       <button class="chip" data-v="" aria-pressed="true">zur Kamera</button>
       <button class="chip" data-v="wall" aria-pressed="false">an der Wand</button>
     </div>
+    <div class="chips" data-chips="cy-flow">
+      <span class="label">Laufen</span>
+      <button class="chip" data-v="0" aria-pressed="false">aus</button>
+      <button class="chip" data-v="25" aria-pressed="false">langsam</button>
+      <button class="chip" data-v="40" aria-pressed="true">normal</button>
+      <button class="chip" data-v="90" aria-pressed="false">schnell</button>
+    </div>
     <div class="cy-stage">
-      <div id="cy" data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-effect="cylinder" data-slider-id="cy-demo" data-slider-label="Arbeiten">
+      <div id="cy" data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-effect="cylinder" data-slider-flow="40" data-slider-id="cy-demo" data-slider-label="Arbeiten">
         <div class="cy-track" data-slider-track>
           <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#1b2a8f,#5b7cff)"><img src="https://picsum.photos/id/1018/600/750" alt=""></div></div>
           <div class="cy-slide"><div class="cy-in" style="aspect-ratio:3/4;background:linear-gradient(135deg,#7a1f22,#ff7a59)"><img src="https://picsum.photos/id/1036/600/750" alt=""></div></div>
@@ -238,11 +246,14 @@ img { color: transparent; }
       <div class="controls stage-pad cy-controls">
         <button class="btn" data-slider-prev="cy-demo">←</button>
         <button class="btn" data-slider-next="cy-demo">→</button>
+        <button class="btn" data-slider-pause="cy-demo">❚❚</button>
       </div>
     </div>
     <pre data-code="cy">slider-wrapper   data-slider="carousel"  data-slider-loop  data-slider-align="center"  data-slider-effect="cylinder"
                  data-slider-effect-strength="1"   (optional: Krümmung, 0.7 bis 1.4)
                  data-slider-face="wall"           (optional: Karten an der Zylinderwand statt gerade)
+                 data-slider-flow="40"             (optional: läuft fließend, px pro Sekunde; Hover auf Karte = Stopp)
+pause-button     data-slider-pause="cy-demo"       (für Barrierefreiheit empfohlen)
 slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)</pre>
   </section>
 
@@ -458,6 +469,10 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
       } else if (kind === 'direction') {
         v ? hero.setAttribute('data-slider-direction', v) : hero.removeAttribute('data-slider-direction');
         restart(hero);
+      } else if (kind === 'cy-flow') {
+        const cy = document.getElementById('cy');
+        v === '0' ? cy.removeAttribute('data-slider-flow') : cy.setAttribute('data-slider-flow', v);
+        restart(cy);
       } else if (kind === 'cy-face') {
         const cy = document.getElementById('cy');
         v ? cy.setAttribute('data-slider-face', v) : cy.removeAttribute('data-slider-face');

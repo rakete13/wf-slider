@@ -386,6 +386,13 @@
           animate(t, clamp(dist / 1600 + 0.35, 0.4, o.duration), 'power3.out', i);
         },
       },
+      // fließend weiterlaufen (data-slider-flow): px pro Frame, nicht während einer Animation
+      drift(px) {
+        if (!active || !loopOn || tween) return false;
+        st.p += px;
+        render();
+        return true;
+      },
       wheel(dx) {
         if (tween) tween.kill();
         tween = null;
@@ -1227,6 +1234,7 @@
       overflowVisible: ds.sliderOverflow === 'visible',
       keyboard: ds.sliderKeyboard !== 'false',
       pauseHover: ds.sliderPauseHover !== 'false',
+      flow: type === 'carousel' && ds.sliderFlow !== undefined && ds.sliderFlow !== 'false' ? num(ds.sliderFlow, 40) : 0,
       label: ds.sliderLabel,
       for: ds.sliderFor || '',
       trigger: type === 'thumbs' && ds.sliderTrigger === 'hover' ? 'hover' : 'click',
@@ -1341,6 +1349,7 @@
       if (slides.some((s) => s.querySelector('[data-anim]'))) issue('data-anim in Slides: wf-anim startet beim Scrollen, nicht beim Slide-Wechsel. Besser data-slider-anim verwenden.');
       if (slides.some((s) => s.querySelector('[data-slider]'))) issue('Verschachtelter Slider in einer Slide.');
       if (o.autoplay && !pauses.length) issue('Autoplay ohne Pause-Button (data-slider-pause), für Barrierefreiheit empfohlen.');
+      if (o.flow && !o.autoplay && !pauses.length) issue('data-slider-flow ohne Pause-Button (data-slider-pause), für Barrierefreiheit empfohlen.');
 
       // Kontext für die Engine
       // Letzte Klick-/Tippstelle relativ zum Slider (für den Kreis-Übergang)
@@ -1364,7 +1373,7 @@
       if (!root.hasAttribute('role')) R.attr(root, 'role', type === 'thumbs' ? 'group' : 'region');
       R.attr(root, 'aria-roledescription', type === 'thumbs' ? L.thumbs : L.slider);
       if (!root.hasAttribute('aria-label') && !root.hasAttribute('aria-labelledby')) R.attr(root, 'aria-label', o.label || (type === 'thumbs' ? L.thumbs : L.slider));
-      if (type !== 'thumbs') R.attr(track, 'aria-live', o.autoplay && !reduce ? 'off' : 'polite');
+      if (type !== 'thumbs') R.attr(track, 'aria-live', (o.autoplay || o.flow) && !reduce ? 'off' : 'polite');
       slides.forEach((s, i) => {
         if (type === 'thumbs') return;
         if (!s.hasAttribute('role')) R.attr(s, 'role', 'group');
@@ -1536,10 +1545,73 @@
         auto.start();
       } else setHidden(pauses, true);
 
+      /* ---------- Fließend laufen: data-slider-flow="40" (px pro Sekunde, negativ = andere Richtung) ---------- */
+      let flow = null;
+      if (o.flow && !reduce && n > 1) {
+        if (!eng.loop || !eng.loop()) issue('data-slider-flow braucht data-slider-loop (und mehr Slides, als ins Bild passen).');
+        const why = new Set(['offscreen']);
+        const sp = { f: 1 }; // weich anhalten und anfahren
+        let ease = null;
+        const setF = () => {
+          if (ease) ease.kill();
+          ease = gsap.to(sp, { f: why.size ? 0 : 1, duration: why.size ? 0.45 : 0.8, ease: why.size ? 'power2.out' : 'power2.inOut' });
+        };
+        const stop = (r) => {
+          if (!why.has(r)) (why.add(r), setF());
+        };
+        const go = (r) => {
+          if (why.delete(r)) setF();
+        };
+        let raf = 0;
+        let last = 0;
+        const tick = (t) => {
+          const dt = last ? Math.min(t - last, 64) : 0;
+          last = t;
+          if (sp.f > 0.001 && eng.drift) eng.drift((o.flow * sp.f * dt) / 1000);
+          raf = requestAnimationFrame(tick);
+        };
+        raf = requestAnimationFrame(tick);
+        R.add(() => {
+          cancelAnimationFrame(raf);
+          if (ease) ease.kill();
+        });
+        // Anhalten, solange die Maus auf einer Slide ist – dann kann man sie anklicken
+        if (o.pauseHover) {
+          slides.forEach((sl) => {
+            on(sl, 'pointerenter', (e) => e.pointerType !== 'touch' && stop('hover'));
+            on(sl, 'pointerleave', (e) => e.pointerType !== 'touch' && go('hover'));
+          });
+        }
+        on(viewport, 'pointerdown', () => stop('drag'));
+        on(window, 'pointerup', () => go('drag'));
+        on(window, 'pointercancel', () => go('drag'));
+        on(root, 'focusin', (e) => e.target.matches(':focus-visible') && stop('focus'));
+        on(root, 'focusout', (e) => !root.contains(e.relatedTarget) && go('focus'));
+        on(document, 'visibilitychange', () => (document.hidden ? stop('hidden') : go('hidden')));
+        const setUser = (p) => {
+          p ? stop('user') : go('user');
+          root.classList.toggle('is-paused', p);
+          pauses.forEach((b) => {
+            b.setAttribute('aria-pressed', String(p));
+            b.setAttribute('aria-label', p ? L.play : L.pause);
+          });
+        };
+        if (!auto) {
+          setHidden(pauses, false);
+          pauses.forEach((b) => makeButton(b, L.pause, () => setUser(!why.has('user')), R, on));
+          pauses.forEach((b) => {
+            R.attr(b, 'aria-pressed', 'false');
+            R.attr(b, 'aria-label', L.pause);
+          });
+        }
+        flow = { stop, go };
+      }
+
       // erst animieren, wenn der Slider im Bild ist
       const io = new IntersectionObserver((entries) => {
         const vis = entries[entries.length - 1].isIntersecting;
         rootVisible = vis;
+        if (flow) vis ? flow.go('offscreen') : flow.stop('offscreen');
         if (auto) vis ? auto.resume('offscreen') : auto.pause('offscreen');
         if (vis && anim) {
           if (type === 'fade') anim.once(eng.index(), 0.15);
@@ -1737,7 +1809,7 @@
         root.classList.toggle('is-static', staticMode);
         if (staticMode !== wasStatic || lastCount < 0) {
           setHidden(hideable, staticMode);
-          if (!auto) setHidden(pauses, true);
+          if (!auto) setHidden(pauses, !flow || staticMode);
         }
         if (eng.count() !== lastCount) {
           lastCount = eng.count();
