@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.9.0
+ * WF Slider v1.10.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.9.0';
+  const VERSION = '1.10.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -247,8 +247,9 @@
       slides.forEach((s, i) => s.style.setProperty('--slide-progress', pr[i].toFixed(3)));
       if (c.fx) {
         // Lage im sichtbaren Bereich: -1 = gerade links raus, 0 = Mitte, 1 = gerade rechts rein
-        const pv = slides.map((_, i) => (active ? clamp((xOf(i) + W[i] / 2 - (vpW / 2 - off)) / (vpW / 2 + W[i] / 2), -1, 1) : 0));
-        c.fx(pr, pv, st.p);
+        const dx = slides.map((_, i) => (active ? xOf(i) + W[i] / 2 - (vpW / 2 - off) : L[i] + W[i] / 2 - vpW / 2));
+        const pv = dx.map((d, i) => (active ? clamp(d / (vpW / 2 + W[i] / 2), -1, 1) : 0));
+        c.fx(pr, pv, st.p, dx, vpW);
       }
       c.onRender();
     };
@@ -572,7 +573,7 @@
   /*@block effects*/
   F.effects = (c, name) => {
     const { slides, R } = c;
-    if (!['parallax', 'focus', 'tilt', 'coverflow'].includes(name)) {
+    if (!['parallax', 'focus', 'tilt', 'coverflow', 'cylinder'].includes(name)) {
       c.issue(`Unbekannter Effekt "${name}".`);
       return null;
     }
@@ -592,6 +593,10 @@
       }
     });
     const own = T.filter((t, i) => t !== slides[i]);
+    if (name === 'cylinder') {
+      slides.forEach((s) => R.style(s));
+      own.forEach((t) => (t.style.backfaceVisibility = 'hidden'));
+    }
     const set = (i, tf, op) => {
       const t = T[i];
       if (t === slides[i]) return;
@@ -619,8 +624,35 @@
     }
 
     return {
-      render(pr, pv, pos) {
+      render(pr, pv, pos, dx, vpW) {
         if (tilt) return tilt(pos);
+        if (name === 'cylinder') {
+          // Karten auf der Innenseite eines Zylinders, der Betrachter steht auf der Achse:
+          // Abstand auf der Bahn = Bogenlänge. Die Karte in der Mitte wirkt am kleinsten, zum Rand hin
+          // werden sie größer und drehen sich zum Betrachter (Bildschirm-X = r·tan θ, Größe 1/cos θ).
+          // Stärke = Krümmung (kleinerer Radius).
+          const r = (vpW * 0.35) / clamp(k, 0.3, 3);
+          const P = r;
+          dx.forEach((d, i) => {
+            const th = d / r;
+            const s = slides[i];
+            if (Math.abs(th) > Math.PI * 0.44) {
+              set(i, 'none', '0');
+              s.style.visibility = 'hidden';
+              return;
+            }
+            s.style.visibility = '';
+            const X = r * Math.sin(th) - d; // Verschiebung gegenüber der flachen Lage
+            const Z = r * (1 - Math.cos(th));
+            s.style.zIndex = String(1 + Math.round(Math.abs(th) * 100));
+            set(
+              i,
+              `translateX(${(-d).toFixed(1)}px) perspective(${P.toFixed(0)}px) translate3d(${(X + d).toFixed(1)}px,0,${Z.toFixed(1)}px) rotateY(${((-th * 180) / Math.PI).toFixed(2)}deg)`,
+              '1'
+            );
+          });
+          return;
+        }
         pr.forEach((p, i) => {
           const d = Math.min(Math.abs(p), 1);
           if (name === 'parallax') {

@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.9.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.10.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -62,6 +62,7 @@ Live zum Umschalten: [`docs/effekte.html`](docs/effekte.html). Bei „Bewegung r
 | `focus` | Mitte voll da, Nachbarn kleiner und blasser, am besten mit `data-slider-align="center"` |
 | `tilt` | Neigung je nach Tempo, richtet sich beim Anhalten wieder auf |
 | `coverflow` | seitliche Slides drehen sich in die Tiefe |
+| `cylinder` | (ab 1.10) 3D-Zylinder: Die Slides stehen auf der Innenseite eines Zylinders, man steht in der Mitte. Die Slide in der Mitte wirkt am kleinsten, zum Rand hin werden sie größer und drehen sich zum Betrachter. Stärke = Krümmung (`0.5` flach bis `1.5` stark). Am besten mit `data-slider-loop`, `data-slider-align="center"`, schmalen Slides und vollem Viewport-Breite; Platz nach oben und unten lassen, die Randkarten werden größer. |
 
 Stärke mit `data-slider-effect-strength` (Standard `1`, z. B. `0.5` oder `1.6`). Der Effekt wirkt auf ein **inneres Element** der Slide: das erste Kind, bei `parallax` das erste Bild, oder das Element mit `data-slider-effect-target`. Nie auf die Slide selbst, die bewegt im Loop die Library.
 

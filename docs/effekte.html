@@ -76,6 +76,13 @@ pre { background: var(--code-bg); border: 1px solid var(--line); border-radius: 
 .counter { font-family: var(--font-mono); margin-left: auto; }
 
 /* ---------- 1 · Carousel-Effekte ---------- */
+.cy-stage { padding: 30px 0 10px; min-width: 0; }
+#cy { overflow: hidden; min-width: 0; }
+.cy-track { display: flex; gap: 6px; align-items: center; padding: 150px 0; }
+.cy-slide { flex: 0 0 clamp(60px, 7vw, 120px); }
+.cy-in { border-radius: 10px; overflow: hidden; }
+.cy-in img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cy-controls { justify-content: center; margin-top: 8px; }
 .fx-track { display: flex; gap: 20px; }
 .fx-slide { flex: 0 0 min(440px, 72%); }
 .fx-in { display: grid; gap: 12px; transform-origin: center center; }
@@ -162,6 +169,7 @@ img { color: transparent; }
       <button class="chip" data-v="focus" aria-pressed="false">focus</button>
       <button class="chip" data-v="tilt" aria-pressed="false">tilt</button>
       <button class="chip" data-v="coverflow" aria-pressed="false">coverflow</button>
+      <button class="chip" data-v="cylinder" aria-pressed="false">cylinder</button>
     </div>
     <div class="chips" data-chips="strength">
       <span class="label">Stärke</span>
@@ -191,9 +199,50 @@ img { color: transparent; }
   </section>
 
   <!-- 2 -->
-  <section id="hero">
+  <section id="zylinder">
     <div class="head">
       <div class="num">02</div>
+      <h2>3D-Zylinder</h2>
+      <p>Carousel mit <code>data-slider-effect="cylinder"</code>: Die Karten stehen auf der Innenseite eines Zylinders, man selbst steht in der Mitte. Die Karte in der Mitte ist am weitesten weg, zum Rand hin kommen sie näher und drehen sich zu einem hin. Ziehen, Pfeile, Mausrad und Autoplay funktionieren wie bei jedem Carousel. Stärke = wie stark die Bahn gebogen ist.</p>
+    </div>
+    <div class="chips" data-chips="cy-strength">
+      <span class="label">Krümmung</span>
+      <button class="chip" data-v="0.7" aria-pressed="false">flach</button>
+      <button class="chip" data-v="1" aria-pressed="true">normal</button>
+      <button class="chip" data-v="1.4" aria-pressed="false">stark</button>
+    </div>
+    <div class="cy-stage">
+      <div id="cy" data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-effect="cylinder" data-slider-id="cy-demo" data-slider-label="Arbeiten">
+        <div class="cy-track" data-slider-track>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#1b2a8f,#5b7cff)"><img src="https://picsum.photos/id/1018/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:3/4;background:linear-gradient(135deg,#7a1f22,#ff7a59)"><img src="https://picsum.photos/id/1036/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:1/1;background:linear-gradient(135deg,#0d5c4a,#3fd4a2)"><img src="https://picsum.photos/id/1043/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#3a1a6b,#b18cff)"><img src="https://picsum.photos/id/1015/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:3/2;background:linear-gradient(135deg,#6b4a00,#ffc93d)"><img src="https://picsum.photos/id/1039/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#1d1d1d,#7c7c7c)"><img src="https://picsum.photos/id/1044/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:1/1;background:linear-gradient(135deg,#103a5c,#58b7ff)"><img src="https://picsum.photos/id/1025/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:3/4;background:linear-gradient(135deg,#5c1040,#ff5fa8)"><img src="https://picsum.photos/id/1069/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#2b4a12,#a6e05a)"><img src="https://picsum.photos/id/1074/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:3/2;background:linear-gradient(135deg,#4a2a12,#e09a5a)"><img src="https://picsum.photos/id/1080/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#12324a,#5ae0d0)"><img src="https://picsum.photos/id/1084/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:1/1;background:linear-gradient(135deg,#3b1010,#e05a5a)"><img src="https://picsum.photos/id/110/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:3/4;background:linear-gradient(135deg,#1a1a4a,#7a7aff)"><img src="https://picsum.photos/id/111/600/750" alt=""></div></div>
+          <div class="cy-slide"><div class="cy-in" style="aspect-ratio:4/5;background:linear-gradient(135deg,#4a4a12,#e0e05a)"><img src="https://picsum.photos/id/112/600/750" alt=""></div></div>
+        </div>
+      </div>
+      <div class="controls stage-pad cy-controls">
+        <button class="btn" data-slider-prev="cy-demo">←</button>
+        <button class="btn" data-slider-next="cy-demo">→</button>
+      </div>
+    </div>
+    <pre data-code="cy">slider-wrapper   data-slider="carousel"  data-slider-loop  data-slider-align="center"  data-slider-effect="cylinder"
+                 data-slider-effect-strength="1"   (optional: Krümmung, 0.5 bis 1.5)
+slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)</pre>
+  </section>
+
+  <section id="hero">
+    <div class="head">
+      <div class="num">03</div>
       <h2>Hero-Übergänge</h2>
       <p>Echte Übergänge mit Richtung: Weiter läuft anders als Zurück. Der Kreis öffnet sich dort, wo geklickt oder getippt wurde. Die Headline kommt Zeile für Zeile aus einer Maske.</p>
     </div>
@@ -243,7 +292,7 @@ img { color: transparent; }
   <!-- 3 -->
   <section id="showcase">
     <div class="head">
-      <div class="num">03</div>
+      <div class="num">04</div>
       <h2>Showcase</h2>
       <p>Über dem Bild liegt ein Passepartout in der Farbe der Slide. Beim Wechsel wird der Rahmen breiter und das Bild etwas kleiner, der Ausschnitt bleibt aber immer gefüllt. Dann schiebt das Passepartout mit der Slide zur Seite, das Bild darunter bewegt sich langsamer mit (Parallax). Zum Schluss öffnen sich Rahmen und Bild wieder. Während des Schiebens blendet die Farbe des Passepartouts weich von der alten zur neuen Slide über, ohne harte Kante zwischen den Slides. Die Farbe ist einfach der Hintergrund der Slide, in Webflow per CMS-Farbfeld gebunden. Die Schrift blendet vorher aus und danach wieder ein.</p>
     </div>
@@ -276,7 +325,7 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
   <!-- 4 -->
   <section id="farbe">
     <div class="head">
-      <div class="num">04</div>
+      <div class="num">05</div>
       <h2>Farbe aus dem Bild</h2>
       <p>Mit <code>data-slider-bg</code> am Wrapper bekommt jede Slide die dominante Farbe ihres Bilds als Hintergrund. Hat eine Slide schon eine eigene Farbe (z. B. aus dem CMS gebunden), gewinnt diese. Beim Fade werden die Nachbar-Slides vorgeladen, damit Bild und Farbe beim Wechsel schon da sind.</p>
     </div>
@@ -320,7 +369,7 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
   <!-- 5 -->
   <section id="eigen">
     <div class="head">
-      <div class="num">05</div>
+      <div class="num">06</div>
       <h2>Eigener Effekt per CSS-Variable</h2>
       <p>Jede Slide bekommt <code>--slide-progress</code>: 0 in der Mitte, −1 links daneben, 1 rechts daneben, stufenlos beim Ziehen. Damit baut ihr eigene Effekte in Webflow (Custom Code im Embed), ohne die Library anzufassen. Hier: ein Bogen mit leichter Drehung.</p>
     </div>
@@ -358,6 +407,7 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
       focus: 'Mitte voll da, Nachbarn kleiner und blasser. Passt am besten zu align="center".',
       tilt: 'Neigung je nach Tempo, richtet sich beim Loslassen wieder auf. Am besten kräftig ziehen.',
       coverflow: 'Seitliche Slides drehen sich in die Tiefe.',
+      cylinder: 'Slides auf der Innenseite eines Zylinders, man steht in der Mitte. Eigenes Beispiel mit vielen Karten weiter unten.',
     },
     transition: {
       fade: 'Der bisherige Standard: weiches Überblenden.',
@@ -402,6 +452,10 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
       } else if (kind === 'direction') {
         v ? hero.setAttribute('data-slider-direction', v) : hero.removeAttribute('data-slider-direction');
         restart(hero);
+      } else if (kind === 'cy-strength') {
+        const cy = document.getElementById('cy');
+        v === '1' ? cy.removeAttribute('data-slider-effect-strength') : cy.setAttribute('data-slider-effect-strength', v);
+        restart(cy);
       } else if (kind === 'bg') {
         [document.getElementById('bg-sc'), document.getElementById('bg-cards')].forEach((el) => {
           el.setAttribute('data-slider-bg', v);
