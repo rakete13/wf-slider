@@ -2,6 +2,7 @@
 <script>
 document.documentElement.classList.add('js-slider');
 setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+(function(){var d=document,seen=[];function up(){var r=d.querySelectorAll('[data-slider-lazy]:not([data-slider-lazy="false"])');for(var i=0;i<r.length;i++){if(seen.indexOf(r[i])>-1)continue;var m=r[i].querySelector('img');if(!m)continue;seen.push(r[i]);if(m.loading==='lazy')m.loading='eager';m.setAttribute('fetchpriority','high')}}var mo=new MutationObserver(up);mo.observe(d.documentElement,{childList:true,subtree:true});d.addEventListener('DOMContentLoaded',function(){up();mo.disconnect()})})();
 </script>
 <style>
 [data-slider]{min-width:0}
@@ -9,4 +10,5 @@ setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.rem
 .js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>*{grid-area:1/1/2/2}
 .js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child){opacity:0;visibility:hidden}
 .js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}
+.js-slider [data-slider="fade"][data-slider-lazy]:not([data-slider-lazy="false"]):not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child):not(.wfs-warm) img{display:none}
 </style>

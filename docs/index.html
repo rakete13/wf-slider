@@ -12,13 +12,15 @@
 <script>
 document.documentElement.classList.add('js-slider');
 setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+(function(){var d=document,seen=[];function up(){var r=d.querySelectorAll('[data-slider-lazy]:not([data-slider-lazy="false"])');for(var i=0;i<r.length;i++){if(seen.indexOf(r[i])>-1)continue;var m=r[i].querySelector('img');if(!m)continue;seen.push(r[i]);if(m.loading==='lazy')m.loading='eager';m.setAttribute('fetchpriority','high')}}var mo=new MutationObserver(up);mo.observe(d.documentElement,{childList:true,subtree:true});d.addEventListener('DOMContentLoaded',function(){up();mo.disconnect()})})();
 </script>
 <style>
+[data-slider]{min-width:0}
 .js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items){display:grid}
 .js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>*{grid-area:1/1/2/2}
 .js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child){opacity:0;visibility:hidden}
 .js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}
-[data-slider]{min-width:0}
+.js-slider [data-slider="fade"][data-slider-lazy]:not([data-slider-lazy="false"]):not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child):not(.wfs-warm) img{display:none}
 </style>
 
 <style>
@@ -591,6 +593,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>data-slider-trigger</code></td><td>Nur bei <code>thumbs</code>: <code>click</code> (Standard) oder <code>hover</code> (Wechsel beim Überfahren, 80 ms Verzögerung)</td></tr>
           <tr><td><code>data-slider-hide</code></td><td>Ab dieser Breite ausgeblendet und abgeschaltet: <code>tablet</code> (991 px), <code>landscape</code> (767), <code>portrait</code> (479) oder eine Media Query</td></tr>
           <tr><td><code>data-slider-tablet</code> · <code>-landscape</code> · <code>-portrait</code></td><td>Anderer Typ ab dieser Breite abwärts, z. B. <code>carousel</code>. Die aktuelle Slide bleibt beim Umbau</td></tr>
+          <tr><td><code>data-slider-lazy</code></td><td>Ladezeit (ab 1.11): Bild in Webflow auf <em>Loading: Lazy</em>, dann lädt das erste Bild sofort mit Vorrang. Bei <code>fade</code> kommen die übrigen Slides erst nach dem Laden der Seite bzw. vor ihrem Wechsel. Braucht den Head Code ab 1.11.</td></tr>
           <tr><td><code>data-slider-flow</code></td><td>Nur bei <code>carousel</code> mit Loop: läuft fließend von selbst, Wert = px pro Sekunde (ohne Wert 40). Hält an, solange die Maus auf einer Slide ist</td></tr>
           <tr><td><code>data-slider-effect</code></td><td>Nur bei <code>carousel</code>: <code>parallax</code>, <code>focus</code>, <code>tilt</code>, <code>coverflow</code>, <code>cylinder</code>. Dazu <code>-strength</code></td></tr>
           <tr><td><code>data-slider-bg</code></td><td>Hintergrundfarbe jeder Slide aus ihrem Bild: <code>auto</code>, <code>auto-light</code>, <code>auto-dark</code>. Eine eigene Farbe der Slide (z. B. aus dem CMS) gewinnt</td></tr>

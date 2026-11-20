@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.10.0
+ * WF Slider v1.11.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.10.0';
+  const VERSION = '1.11.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -427,6 +427,27 @@
       s.classList.toggle('is-in-view', i === cur);
     });
 
+    // data-slider-lazy: Bilder in Webflow auf "Lazy". Der Head Code lädt das erste Bild sofort mit Vorrang
+    // und hält die übrigen zurück (display none bis .wfs-warm). Hier: aktive Slide sofort, Nachbarn nach dem
+    // Laden der Seite und jeweils vor dem nächsten Wechsel.
+    const warm = (i) => {
+      const s = slides[o.loop ? mod(i, n) : i];
+      if (!s || s.classList.contains('wfs-warm')) return;
+      s.classList.add('wfs-warm'); // bewusst nicht über R: nach destroy sollen die Bilder sichtbar bleiben
+      s.querySelectorAll('img').forEach((img) => {
+        if (img.loading === 'lazy') img.loading = 'eager';
+      });
+    };
+    const warmNear = (i) => {
+      if (!o.lazy) return;
+      const run = () => [i + 1, i - 1].forEach((j) => (o.loop || (j >= 0 && j < n)) && warm(j));
+      document.readyState === 'complete' ? run() : window.addEventListener('load', run, { once: true });
+    };
+    if (o.lazy) {
+      warm(cur);
+      warmNear(cur);
+    }
+
     const T = o.transition !== 'fade' && F.transitions ? F.transitions[o.transition] : null;
     if (o.transition !== 'fade' && !T) c.issue(`Unbekannter Übergang "${o.transition}", es wird überblendet.`);
     if (T) {
@@ -478,6 +499,10 @@
       const next = slides[i];
       const prevIdx = cur;
       cur = i;
+      if (o.lazy) {
+        warm(i);
+        warmNear(i);
+      }
       gsap.killTweensOf(slides);
       slides.forEach((s) => {
         if (s !== prev && s !== next) {
@@ -1230,6 +1255,7 @@
       snap: ds.sliderSnap !== 'false',
       rewind: bool(ds.sliderRewind),
       start: Math.max(0, Math.round(num(ds.sliderStart, 1)) - 1),
+      lazy: bool(ds.sliderLazy),
       pad: num(ds.sliderPad, 0),
       overflowVisible: ds.sliderOverflow === 'visible',
       keyboard: ds.sliderKeyboard !== 'false',

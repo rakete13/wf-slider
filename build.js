@@ -70,10 +70,17 @@ if (has('fade')) {
   css.push(`${t}{display:grid}`, `${t}>*{grid-area:1/1/2/2}`, `${t}>:not(:first-child){opacity:0;visibility:hidden}`);
 }
 if (has('anim')) css.push('.js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}');
+// data-slider-lazy (fade): Bilder der übrigen Slides zurückhalten, bis die Library sie anfordert (.wfs-warm)
+if (has('fade')) css.push('.js-slider [data-slider="fade"][data-slider-lazy]:not([data-slider-lazy="false"]):not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child):not(.wfs-warm) img{display:none}');
+// data-slider-lazy: erstes Bild sofort und mit Vorrang laden, noch während die Seite aufgebaut wird
+// (Bilder in Webflow auf "Lazy", sonst holt der Browser alle Slides gleichzeitig)
+const lazyLine = has('fade') || has('carousel')
+  ? "\n(function(){var d=document,seen=[];function up(){var r=d.querySelectorAll('[data-slider-lazy]:not([data-slider-lazy=\"false\"])');for(var i=0;i<r.length;i++){if(seen.indexOf(r[i])>-1)continue;var m=r[i].querySelector('img');if(!m)continue;seen.push(r[i]);if(m.loading==='lazy')m.loading='eager';m.setAttribute('fetchpriority','high')}}var mo=new MutationObserver(up);mo.observe(d.documentElement,{childList:true,subtree:true});d.addEventListener('DOMContentLoaded',function(){up();mo.disconnect()})})();"
+  : '';
 const head = `<!-- WF Slider · Head Code -->
 <script>
 document.documentElement.classList.add('js-slider');
-setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);${lazyLine}
 </script>
 <style>
 ${css.join('\n')}

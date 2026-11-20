@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.10.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.11.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -147,9 +147,16 @@ slider-wrapper (Zitate)          data-slider="fade"    data-slider-id="zitate"  
 - Für den Typwechsel die Slides im Designer so anlegen, wie das Carousel sie braucht: Track Display flex, Slide-Breite pro Breakpoint (Desktop z. B. 100 %, Tablet 85 %). Beim Überblenden stapelt die Library die Slides selbst.
 - Pfeile und Punkte, die es nur auf Tablet geben soll, in Webflow auf Desktop ausblenden.
 
+**Ladezeit: `data-slider-lazy`** (ab 1.11). Für Hero-Slider aus einer Collection List: Dort gilt die Loading-Einstellung des Bilds für alle Slides gleich, mit „Eager“ holt der Browser beim Start also alle Bilder gleichzeitig mit Vorrang. So geht es besser:
+
+1. Bild in der Collection Item-Vorlage auf **Loading: Lazy** stellen.
+2. `data-slider-lazy` an den Wrapper.
+
+Der Head Code lädt dann das erste Bild sofort mit `fetchpriority="high"`, noch während die Seite aufgebaut wird. Bei `fade` hält er die Bilder der übrigen Slides zurück. Die Library lädt die Nachbarn der aktiven Slide nach dem Laden der Seite und jeweils vor dem nächsten Wechsel. Bei `carousel` übernimmt der Browser das Nachladen (Lazy). Braucht den Head Code ab 1.11.
+
 ## Einstellungen am Wrapper
 
-`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-flow` (px/s, fließend), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` und `data-slider-trigger` (bei thumbs), `data-slider-hide`, `data-slider-tablet` / `-landscape` / `-portrait`, `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` und `data-slider-direction` (bei fade), `data-slider-bg` (alle Typen).
+`data-slider-id`, `data-slider-loop`, `data-slider-align` (`start` `center` `end`), `data-slider-autoplay` (Sekunden, ohne Wert 5), `data-slider-flow` (px/s, fließend), `data-slider-lazy` (erstes Bild mit Vorrang, Rest später), `data-slider-step` (Zahl oder `page`), `data-slider-start` (ab 1), `data-slider-rewind`, `data-slider-duration`, `data-slider-ease`, `data-slider-snap="false"`, `data-slider-drag="false"`, `data-slider-wheel="false"`, `data-slider-keyboard="false"`, `data-slider-pause-hover="false"`, `data-slider-overflow="visible"`, `data-slider-media="(max-width: 991px)"`, `data-slider-mobile="false"`, `data-slider-pad` (Zähler mit Nullen), `data-slider-label` (für Screenreader), `data-slider-for` und `data-slider-trigger` (bei thumbs), `data-slider-hide`, `data-slider-tablet` / `-landscape` / `-portrait`, `data-slider-effect` und `data-slider-effect-strength` (bei carousel), `data-slider-transition` und `data-slider-direction` (bei fade), `data-slider-bg` (alle Typen).
 
 ## Markierte Elemente
 
