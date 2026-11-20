@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.8.0
+ * WF Slider v1.9.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.8.0';
+  const VERSION = '1.9.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -647,24 +647,40 @@
   /*  circle". dir: 1 = weiter, -1 = zurück                              */
   /* ------------------------------------------------------------------ */
   /*@block transitions*/
+  const slideDir = (c, dir) => {
+    const ds = c.root.dataset;
+    const v = (ds.sliderDirection || (ds.sliderAxis === 'y' ? 'up' : 'left')).trim();
+    const m = { left: ['xPercent', 1], right: ['xPercent', -1], up: ['yPercent', 1], down: ['yPercent', -1] }[v] || ['xPercent', 1];
+    return { k: m[0], e: m[1] * dir };
+  };
   F.transitions = {
     zoom: ({ next, d, done }) =>
       gsap.fromTo(next, { autoAlpha: 0, scale: 1.15 }, { autoAlpha: 1, scale: 1, duration: d * 1.3, ease: 'power2.out', onComplete: done }),
-    // data-slider-axis="y": senkrecht. Weiter (in der Liste nach unten) kommt von unten, zurück von oben
+    // Richtung: data-slider-direction="left" (Standard, neue Slide kommt von rechts) | "right" |
+    // "up" (kommt von unten) | "down" (kommt von oben). data-slider-axis="y" = "up".
+    // Zurück läuft immer gespiegelt.
     wipe: ({ next, prev, dir, d, done, c }) => {
-      const y = c.root.dataset.sliderAxis === 'y';
-      const from = y
-        ? dir > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)'
-        : dir > 0 ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)';
+      const { k, e } = slideDir(c, dir);
+      const from = k === 'yPercent'
+        ? e > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)'
+        : e > 0 ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)';
       gsap.set(next, { autoAlpha: 1 });
       gsap.fromTo(next, { clipPath: from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: d, ease: 'power3.inOut', onComplete: done });
-      gsap.to(prev, { [y ? 'yPercent' : 'xPercent']: -12 * dir, duration: d, ease: 'power3.inOut' });
+      gsap.to(prev, { [k]: -12 * e, duration: d, ease: 'power3.inOut' });
     },
     push: ({ next, prev, dir, d, done, c }) => {
-      const k = c.root.dataset.sliderAxis === 'y' ? 'yPercent' : 'xPercent';
+      const { k, e } = slideDir(c, dir);
       gsap.set(next, { autoAlpha: 1 });
-      gsap.fromTo(next, { [k]: 100 * dir }, { [k]: 0, duration: d, ease: 'power3.inOut', onComplete: done });
-      gsap.to(prev, { [k]: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
+      gsap.fromTo(next, { [k]: 100 * e }, { [k]: 0, duration: d, ease: 'power3.inOut', onComplete: done });
+      gsap.to(prev, { [k]: -35 * e, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
+    },
+    // Einfach schieben: neue Slide fährt herein, die alte gleich schnell hinaus
+    slide: ({ next, prev, dir, d, done, c }) => {
+      const { k, e } = slideDir(c, dir);
+      const ease = c.root.dataset.sliderEase || 'power3.inOut';
+      gsap.set(next, { autoAlpha: 1 });
+      gsap.fromTo(next, { [k]: 100 * e }, { [k]: 0, duration: d, ease, onComplete: done });
+      gsap.fromTo(prev, { [k]: 0 }, { [k]: -100 * e, duration: d, ease });
     },
     // Passepartout-Prinzip: Über dem Bild liegt ein Rahmen in der Farbe der Slide (clip-path
     // an der Bild-Box). Sein Ausschnitt ist immer vom Bild gefüllt.

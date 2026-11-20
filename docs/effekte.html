@@ -203,8 +203,16 @@ img { color: transparent; }
       <button class="chip" data-v="zoom" aria-pressed="false">zoom</button>
       <button class="chip" data-v="wipe" aria-pressed="true">wipe</button>
       <button class="chip" data-v="push" aria-pressed="false">push</button>
+      <button class="chip" data-v="slide" aria-pressed="false">slide</button>
       <button class="chip" data-v="circle" aria-pressed="false">circle</button>
       <button class="chip" data-v="showcase" aria-pressed="false">showcase</button>
+    </div>
+    <div class="chips" data-chips="direction">
+      <span class="label">Richtung (slide, push, wipe)</span>
+      <button class="chip" data-v="" aria-pressed="true">left</button>
+      <button class="chip" data-v="right" aria-pressed="false">right</button>
+      <button class="chip" data-v="up" aria-pressed="false">up</button>
+      <button class="chip" data-v="down" aria-pressed="false">down</button>
     </div>
     <div class="chips" data-chips="text">
       <span class="label">Text</span>
@@ -356,6 +364,7 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
       zoom: 'Neue Slide blendet ein und zoomt dabei von 115 % auf 100 %.',
       wipe: 'Neue Slide wird aus Richtung der Navigation aufgedeckt, die alte rutscht ein Stück mit.',
       push: 'Neue Slide schiebt sich herein, die alte gleitet langsamer weg und dunkelt ab.',
+      slide: 'Neue Slide fährt herein, die alte gleich schnell hinaus. Richtung wählbar, zurück gespiegelt.',
       circle: 'Öffnet sich als Kreis von der Klick- oder Tippstelle. Ohne Klick (Autoplay, Tastatur) vom Rand.',
       showcase: 'Passepartout schiebt über das Bild, das Bild darunter bewegt sich langsamer. Eigenes Beispiel weiter unten.',
     },
@@ -369,7 +378,7 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
   const code = () => {
     const a = (el, n) => (el.hasAttribute(n) ? `  ${n}${el.getAttribute(n) ? `="${el.getAttribute(n)}"` : ''}` : '');
     document.querySelector('[data-code="fx"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-loop', 'data-slider-align', 'data-slider-effect', 'data-slider-effect-strength'].map((n) => a(fx, n)).join('');
-    document.querySelector('[data-code="hero"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-transition', 'data-slider-duration'].map((n) => a(hero, n)).join('') + '\nheadline        data-slider-anim="' + hero.querySelector('h3').getAttribute('data-slider-anim') + '"';
+    document.querySelector('[data-code="hero"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-transition', 'data-slider-direction', 'data-slider-duration'].map((n) => a(hero, n)).join('') + '\nheadline        data-slider-anim="' + hero.querySelector('h3').getAttribute('data-slider-anim') + '"';
     document.querySelector('[data-code="bg"]').textContent = 'slider-wrapper   data-slider-bg="' + document.getElementById('bg-sc').getAttribute('data-slider-bg') + '"\nfarbflaeche      data-slider-bg-target   (optional, sonst die Slide selbst)\nslide mit CMS-Farbe (inline) → behält ihre Farbe';
     document.querySelector('[data-note="effect"]').textContent = NOTES.effect[fx.getAttribute('data-slider-effect') || ''];
     document.querySelector('[data-note="transition"]').textContent = NOTES.transition[hero.getAttribute('data-slider-transition')];
@@ -389,6 +398,9 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
         restart(fx);
       } else if (kind === 'transition') {
         hero.setAttribute('data-slider-transition', v);
+        restart(hero);
+      } else if (kind === 'direction') {
+        v ? hero.setAttribute('data-slider-direction', v) : hero.removeAttribute('data-slider-direction');
         restart(hero);
       } else if (kind === 'bg') {
         [document.getElementById('bg-sc'), document.getElementById('bg-cards')].forEach((el) => {
