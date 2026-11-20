@@ -187,7 +187,7 @@ ol.steps { margin: 0; padding-left: 1.3em; display: grid; gap: 8px; max-width: 7
       <h1>Slider per <em>Attribut</em>, für CMS und statische Inhalte.</h1>
       <p>Wrapper bauen, <code>data-slider="carousel"</code> setzen, fertig. Ob die Slides aus einer Collection List kommen oder von Hand gebaut sind, ist egal. Pfeile, Punkte und Zähler gestaltest du selbst im Designer und markierst sie nur.</p>
       <div class="notice">Braucht nur GSAP selbst, keine Plugins. Läuft auf der veröffentlichten Seite, nicht im Designer. Mit <code>?wfslider-debug</code> an der Adresse siehst du Hinweise zu jedem Slider in der Konsole.</div>
-      <div class="notice">Neu in 1.7: <a href="#liste">Liste steuert Slider</a> (Hover) und Typwechsel ab Tablet.</div>
+      <div class="notice">Neu in 1.7/1.8: <a href="#liste">Liste steuert Slider</a> (Hover), Typwechsel ab Tablet, senkrechtes <code>wipe</code>/<code>push</code>.</div>
       <div class="notice">Neu in 1.1: <a href="effekte.html">Effekte und Übergänge</a> zum Ausprobieren und Vergleichen.</div>
     </header>
 
@@ -381,7 +381,7 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
       <div class="cat-head">
         <div class="num">04</div>
         <h2>Liste steuert Slider</h2>
-        <p>Eine Namensliste aus dem CMS als <code>thumbs</code> mit <code>data-slider-trigger="hover"</code>: Beim Überfahren springt der Slider zum passenden Zitat und blendet über. Ab Tablet ist die Liste mit <code>data-slider-hide="tablet"</code> ausgeblendet, und <code>data-slider-tablet="carousel"</code> macht aus den Zitaten ein Carousel zum Wischen. Zum Ausprobieren das Fenster schmaler ziehen; die aktuelle Slide bleibt erhalten.</p>
+        <p>Eine Namensliste aus dem CMS als <code>thumbs</code> mit <code>data-slider-trigger="hover"</code>: Beim Überfahren springt der Slider zum passenden Zitat; hier mit <code>data-slider-transition="push"</code> und <code>data-slider-axis="y"</code>: Wer in der Liste nach unten geht, sieht das Zitat von unten hereinkommen. Ab Tablet ist die Liste mit <code>data-slider-hide="tablet"</code> ausgeblendet, und <code>data-slider-tablet="carousel"</code> macht aus den Zitaten ein Carousel zum Wischen. Zum Ausprobieren das Fenster schmaler ziehen; die aktuelle Slide bleibt erhalten.</p>
       </div>
       <div class="stage">
       <div class="q-layout">
@@ -393,7 +393,7 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
         <div class="q-name">Tom Becker</div>
         <div class="q-name">Lea Hoffmann</div>
         </div></div>
-        <div data-slider="fade" data-slider-id="zitate" data-slider-tablet="carousel" data-slider-label="Zitate">
+        <div data-slider="fade" data-slider-id="zitate" data-slider-transition="push" data-slider-axis="y" data-slider-tablet="carousel" data-slider-label="Zitate">
           <div class="q-viewport" data-slider-viewport>
             <div class="q-track" data-slider-track>
         <div class="q-slide" style="background:#2f4cf5">
@@ -427,7 +427,7 @@ thumbnails       data-slider="thumbs"  data-slider-for="galerie"</pre>
       </div>
       </div>
       <pre>namensliste   data-slider="thumbs"  data-slider-for="zitate"  data-slider-trigger="hover"  data-slider-hide="tablet"
-zitate        data-slider="fade"    data-slider-id="zitate"    data-slider-tablet="carousel"</pre>
+zitate        data-slider="fade"    data-slider-id="zitate"    data-slider-transition="push"  data-slider-axis="y"  data-slider-tablet="carousel"</pre>
       <p class="note">Liste und Slider aus derselben Collection, gleich sortiert und gefiltert: Der erste Name gehört zur ersten Slide. Slides im Designer wie für ein Carousel anlegen (Flex, Slide-Breite pro Breakpoint), beim Überblenden stapelt die Library sie selbst.</p>
     </section>
 
@@ -585,6 +585,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>data-slider-pad</code></td><td>Zähler mit führenden Nullen, z. B. <code>2</code> → 03</td></tr>
           <tr><td><code>data-slider-label</code></td><td>Name für Screenreader</td></tr>
           <tr><td><code>data-slider-for</code></td><td>Nur bei <code>thumbs</code>: ID des gesteuerten Sliders</td></tr>
+          <tr><td><code>data-slider-axis</code></td><td>Nur bei <code>fade</code> mit <code>wipe</code> oder <code>push</code>: <code>y</code> = senkrecht, weiter kommt von unten</td></tr>
           <tr><td><code>data-slider-trigger</code></td><td>Nur bei <code>thumbs</code>: <code>click</code> (Standard) oder <code>hover</code> (Wechsel beim Überfahren, 80 ms Verzögerung)</td></tr>
           <tr><td><code>data-slider-hide</code></td><td>Ab dieser Breite ausgeblendet und abgeschaltet: <code>tablet</code> (991 px), <code>landscape</code> (767), <code>portrait</code> (479) oder eine Media Query</td></tr>
           <tr><td><code>data-slider-tablet</code> · <code>-landscape</code> · <code>-portrait</code></td><td>Anderer Typ ab dieser Breite abwärts, z. B. <code>carousel</code>. Die aktuelle Slide bleibt beim Umbau</td></tr>

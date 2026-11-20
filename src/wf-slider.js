@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.7.1
+ * WF Slider v1.8.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.7.1';
+  const VERSION = '1.8.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -445,7 +445,7 @@
       const p = partsMap.get(s);
       const els = p ? [s, p.box, p.img] : [s];
       gsap.killTweensOf(els);
-      gsap.set(s, { xPercent: 0, scale: 1, clipPath: 'none', filter: 'none' });
+      gsap.set(s, { xPercent: 0, yPercent: 0, scale: 1, clipPath: 'none', filter: 'none' });
       if (p && p.bg !== undefined) {
         s.style.backgroundColor = p.bg;
         p.bg = undefined;
@@ -650,19 +650,21 @@
   F.transitions = {
     zoom: ({ next, d, done }) =>
       gsap.fromTo(next, { autoAlpha: 0, scale: 1.15 }, { autoAlpha: 1, scale: 1, duration: d * 1.3, ease: 'power2.out', onComplete: done }),
-    wipe: ({ next, prev, dir, d, done }) => {
+    // data-slider-axis="y": senkrecht. Weiter (in der Liste nach unten) kommt von unten, zurück von oben
+    wipe: ({ next, prev, dir, d, done, c }) => {
+      const y = c.root.dataset.sliderAxis === 'y';
+      const from = y
+        ? dir > 0 ? 'inset(100% 0% 0% 0%)' : 'inset(0% 0% 100% 0%)'
+        : dir > 0 ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)';
       gsap.set(next, { autoAlpha: 1 });
-      gsap.fromTo(
-        next,
-        { clipPath: dir > 0 ? 'inset(0% 0% 0% 100%)' : 'inset(0% 100% 0% 0%)' },
-        { clipPath: 'inset(0% 0% 0% 0%)', duration: d, ease: 'power3.inOut', onComplete: done }
-      );
-      gsap.to(prev, { xPercent: -12 * dir, duration: d, ease: 'power3.inOut' });
+      gsap.fromTo(next, { clipPath: from }, { clipPath: 'inset(0% 0% 0% 0%)', duration: d, ease: 'power3.inOut', onComplete: done });
+      gsap.to(prev, { [y ? 'yPercent' : 'xPercent']: -12 * dir, duration: d, ease: 'power3.inOut' });
     },
-    push: ({ next, prev, dir, d, done }) => {
+    push: ({ next, prev, dir, d, done, c }) => {
+      const k = c.root.dataset.sliderAxis === 'y' ? 'yPercent' : 'xPercent';
       gsap.set(next, { autoAlpha: 1 });
-      gsap.fromTo(next, { xPercent: 100 * dir }, { xPercent: 0, duration: d, ease: 'power3.inOut', onComplete: done });
-      gsap.to(prev, { xPercent: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
+      gsap.fromTo(next, { [k]: 100 * dir }, { [k]: 0, duration: d, ease: 'power3.inOut', onComplete: done });
+      gsap.to(prev, { [k]: -35 * dir, filter: 'brightness(0.4)', duration: d, ease: 'power3.inOut' });
     },
     // Passepartout-Prinzip: Über dem Bild liegt ein Rahmen in der Farbe der Slide (clip-path
     // an der Bild-Box). Sein Ausschnitt ist immer vom Bild gefüllt.
