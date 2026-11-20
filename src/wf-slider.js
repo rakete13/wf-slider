@@ -631,6 +631,9 @@
           // Abstand auf der Bahn = Bogenlänge. Die Karte in der Mitte wirkt am kleinsten, zum Rand hin
           // werden sie größer und drehen sich zum Betrachter (Bildschirm-X = r·tan θ, Größe 1/cos θ).
           // Stärke = Krümmung (kleinerer Radius).
+          // Ausrichtung: Standard = jede Karte schaut gerade zur Kamera (nur Lage und Größe folgen dem Zylinder);
+          // data-slider-face="wall" = Karten liegen an der Zylinderwand und sind entsprechend gedreht.
+          const wall = (c.root.dataset.sliderFace || '').trim() === 'wall';
           const r = (vpW * 0.35) / clamp(k, 0.3, 3);
           const P = r;
           dx.forEach((d, i) => {
@@ -645,11 +648,19 @@
             const X = r * Math.sin(th) - d; // Verschiebung gegenüber der flachen Lage
             const Z = r * (1 - Math.cos(th));
             s.style.zIndex = String(1 + Math.round(Math.abs(th) * 100));
-            set(
-              i,
-              `translateX(${(-d).toFixed(1)}px) perspective(${P.toFixed(0)}px) translate3d(${(X + d).toFixed(1)}px,0,${Z.toFixed(1)}px) rotateY(${((-th * 180) / Math.PI).toFixed(2)}deg)`,
-              '1'
-            );
+            if (wall) {
+              set(
+                i,
+                `translateX(${(-d).toFixed(1)}px) perspective(${P.toFixed(0)}px) translate3d(${(X + d).toFixed(1)}px,0,${Z.toFixed(1)}px) rotateY(${((-th * 180) / Math.PI).toFixed(2)}deg)`,
+                '1'
+              );
+            } else {
+              // gerade zur Kamera: Lage auf dem Kreis (r·tan θ), Größe wächst mit 1/cos² θ,
+              // so bleiben die Abstände zwischen den Karten im Verhältnis gleich
+              const cs = Math.cos(th);
+              const sc = Math.min(1 / (cs * cs), 8);
+              set(i, `translateX(${(r * Math.tan(th) - d).toFixed(1)}px) scale(${sc.toFixed(3)})`, '1');
+            }
           });
           return;
         }

@@ -203,13 +203,18 @@ img { color: transparent; }
     <div class="head">
       <div class="num">02</div>
       <h2>3D-Zylinder</h2>
-      <p>Carousel mit <code>data-slider-effect="cylinder"</code>: Die Karten stehen auf der Innenseite eines Zylinders, man selbst steht in der Mitte. Die Karte in der Mitte ist am weitesten weg, zum Rand hin kommen sie näher und drehen sich zu einem hin. Ziehen, Pfeile, Mausrad und Autoplay funktionieren wie bei jedem Carousel. Stärke = wie stark die Bahn gebogen ist.</p>
+      <p>Carousel mit <code>data-slider-effect="cylinder"</code>: Die Karten laufen im Kreis um einen herum. In der Mitte sind sie klein und weit weg, zum Rand hin kommen sie näher und werden größer, jede Karte bleibt gerade zur Kamera ausgerichtet. Mit <code>data-slider-face="wall"</code> liegen sie stattdessen an der Zylinderwand und drehen sich zum Rand hin. Ziehen, Pfeile, Mausrad und Autoplay funktionieren wie bei jedem Carousel. Stärke = wie stark die Bahn gebogen ist.</p>
     </div>
     <div class="chips" data-chips="cy-strength">
       <span class="label">Krümmung</span>
       <button class="chip" data-v="0.7" aria-pressed="false">flach</button>
       <button class="chip" data-v="1" aria-pressed="true">normal</button>
       <button class="chip" data-v="1.4" aria-pressed="false">stark</button>
+    </div>
+    <div class="chips" data-chips="cy-face">
+      <span class="label">Ausrichtung</span>
+      <button class="chip" data-v="" aria-pressed="true">zur Kamera</button>
+      <button class="chip" data-v="wall" aria-pressed="false">an der Wand</button>
     </div>
     <div class="cy-stage">
       <div id="cy" data-slider="carousel" data-slider-loop data-slider-align="center" data-slider-effect="cylinder" data-slider-id="cy-demo" data-slider-label="Arbeiten">
@@ -236,7 +241,8 @@ img { color: transparent; }
       </div>
     </div>
     <pre data-code="cy">slider-wrapper   data-slider="carousel"  data-slider-loop  data-slider-align="center"  data-slider-effect="cylinder"
-                 data-slider-effect-strength="1"   (optional: Krümmung, 0.5 bis 1.5)
+                 data-slider-effect-strength="1"   (optional: Krümmung, 0.7 bis 1.4)
+                 data-slider-face="wall"           (optional: Karten an der Zylinderwand statt gerade)
 slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)</pre>
   </section>
 
@@ -407,7 +413,7 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
       focus: 'Mitte voll da, Nachbarn kleiner und blasser. Passt am besten zu align="center".',
       tilt: 'Neigung je nach Tempo, richtet sich beim Loslassen wieder auf. Am besten kräftig ziehen.',
       coverflow: 'Seitliche Slides drehen sich in die Tiefe.',
-      cylinder: 'Slides auf der Innenseite eines Zylinders, man steht in der Mitte. Eigenes Beispiel mit vielen Karten weiter unten.',
+      cylinder: 'Slides laufen im Kreis um einen herum, in der Mitte klein, zum Rand hin größer. Eigenes Beispiel mit vielen Karten weiter unten.',
     },
     transition: {
       fade: 'Der bisherige Standard: weiches Überblenden.',
@@ -452,6 +458,10 @@ Easing: data-slider-ease (Wechsel der Slide, Standard power3.inOut), data-slider
       } else if (kind === 'direction') {
         v ? hero.setAttribute('data-slider-direction', v) : hero.removeAttribute('data-slider-direction');
         restart(hero);
+      } else if (kind === 'cy-face') {
+        const cy = document.getElementById('cy');
+        v ? cy.setAttribute('data-slider-face', v) : cy.removeAttribute('data-slider-face');
+        restart(cy);
       } else if (kind === 'cy-strength') {
         const cy = document.getElementById('cy');
         v === '1' ? cy.removeAttribute('data-slider-effect-strength') : cy.setAttribute('data-slider-effect-strength', v);
