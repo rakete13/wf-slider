@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>WF Slider · Halbkreis (Demo)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&display=swap">
+<!-- WF Page Transition (Head) -->
+<script>window.WFPageTransitionConfig = { transition: 'fade', duration: 0.8, morphEase: 'expo.inOut' };</script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-page-transition@1.6.0/src/wf-page-transition.min.js"></script>
+<!-- Head Code der Library -->
+<script>
+document.documentElement.classList.add('js-slider');
+setTimeout(function(){if(!window.WFSlider)document.documentElement.classList.remove('js-slider')},3000);
+(function(){var d=document,seen=[];function up(){var r=d.querySelectorAll('[data-slider-lazy]:not([data-slider-lazy="false"])');for(var i=0;i<r.length;i++){if(seen.indexOf(r[i])>-1)continue;var m=r[i].querySelector('img');if(!m)continue;seen.push(r[i]);if(m.loading==='lazy')m.loading='eager';m.setAttribute('fetchpriority','high')}}var mo=new MutationObserver(up);mo.observe(d.documentElement,{childList:true,subtree:true});d.addEventListener('DOMContentLoaded',function(){up();mo.disconnect()})})();
+</script>
+<style>
+[data-slider]{min-width:0}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items){display:grid}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>*{grid-area:1/1/2/2}
+.js-slider [data-slider="fade"]:not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child){opacity:0;visibility:hidden}
+.js-slider [data-slider]:not(.wfs-off) [data-slider-anim]{opacity:0}
+.js-slider [data-slider="fade"][data-slider-lazy]:not([data-slider-lazy="false"]):not(.wfs-off) :is([data-slider-track],.w-dyn-items)>:not(:first-child):not(.wfs-warm) img{display:none}
+</style>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; background: #fff; color: #141824; overflow: hidden; }
+.hint { position: fixed; left: 40px; top: 28px; z-index: 5; font-size: 14px; color: #5d6476; max-width: 440px; line-height: 1.5; }
+.hint a { color: inherit; }
+
+.hk-list { position: fixed; left: 40px; top: 50%; transform: translateY(-50%); z-index: 5; }
+.hk-list-items { display: flex; flex-direction: column; }
+.hk-name { font-size: 22px; padding: 4px 4px; border-bottom: 1px solid #141824; cursor: pointer; transition: color .25s; }
+.hk-name:first-child { border-top: 1px solid #141824; }
+.hk-name.is-active { color: #ff0000; }
+#hk { position: fixed; inset: 0; }
+.hk-viewport { width: 100%; height: 100%; display: flex; align-items: center; }
+.hk-track { display: flex; align-items: center; }
+.hk-slide { flex: 0 0 min(37vw, 640px); }
+.hk-card { display: grid; place-items: center; aspect-ratio: 3 / 2; border-radius: 16px; color: #fff; text-decoration: none;
+  font-size: clamp(22px, 3vw, 46px); box-shadow: 0 30px 60px -20px rgba(0,0,0,.35); }
+.controls { position: fixed; right: 40px; bottom: 28px; z-index: 5; display: flex; gap: 8px; }
+.controls button { width: 44px; height: 44px; border-radius: 50%; border: 1px solid #dde0e8; background: #fff; cursor: pointer; font-size: 18px; }
+.side { position: fixed; right: 40px; top: 28px; z-index: 5; display: flex; gap: 6px; font-size: 13px; }
+.side button { border: 1px solid #dde0e8; background: #fff; border-radius: 999px; padding: 6px 12px; cursor: pointer; }
+.side button[aria-pressed="true"] { background: #141824; color: #fff; }
+</style>
+</head>
+<body>
+<p class="hint"><strong>WF Slider · Halbkreis</strong> (<code>data-slider-effect="arc"</code>). Namen überfahren, ziehen oder Pfeile. Klick auf eine hintere Karte holt sie nach vorn, Klick auf die vordere öffnet die Seite mit <a href="https://github.com/rakete13/wf-page-transition">WF Page Transition</a> (Morph). <a href="effekte.html">Zurück zu den Effekten</a></p>
+<div class="hk-list" data-slider="thumbs" data-slider-for="halbkreis" data-slider-trigger="hover">
+  <div class="hk-list-items" data-slider-track>
+        <div class="hk-name">karte 01</div>
+        <div class="hk-name">karte 02</div>
+        <div class="hk-name">karte 03</div>
+        <div class="hk-name">karte 04</div>
+        <div class="hk-name">karte 05</div>
+        <div class="hk-name">karte 06</div>
+        <div class="hk-name">karte 07</div>
+        <div class="hk-name">karte 08</div>
+  </div>
+</div>
+<div id="hk" data-slider="carousel" data-slider-id="halbkreis" data-slider-loop data-slider-align="center" data-slider-effect="arc" data-slider-arc="right" data-slider-remember data-slider-label="Karten">
+  <div class="hk-viewport" data-slider-viewport>
+    <div class="hk-track" data-slider-track>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-01.html" data-page-morph="karte" style="background:#00d4ff">
+            <span>Karte 01</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-02.html" data-page-morph="karte" style="background:#9dff00">
+            <span>Karte 02</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-03.html" data-page-morph="karte" style="background:#ff2bd6">
+            <span>Karte 03</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-04.html" data-page-morph="karte" style="background:#ff0000">
+            <span>Karte 04</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-05.html" data-page-morph="karte" style="background:#0027ff">
+            <span>Karte 05</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-06.html" data-page-morph="karte" style="background:#e600ff">
+            <span>Karte 06</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-07.html" data-page-morph="karte" style="background:#ff8a00">
+            <span>Karte 07</span>
+          </a>
+        </div>
+        <div class="hk-slide" data-page-item>
+          <a class="hk-card" href="karte-08.html" data-page-morph="karte" style="background:#14c38e">
+            <span>Karte 08</span>
+          </a>
+        </div>
+    </div>
+  </div>
+</div>
+<div class="side" aria-label="Rand">
+  <button data-side="right" aria-pressed="true">rechts</button>
+  <button data-side="left" aria-pressed="false">links</button>
+  <button data-side="bottom" aria-pressed="false">unten</button>
+  <button data-side="top" aria-pressed="false">oben</button>
+</div>
+<div class="controls">
+  <button data-slider-prev="halbkreis" aria-label="Zurück">↑</button>
+  <button data-slider-next="halbkreis" aria-label="Weiter">↓</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.13.0/dist/gsap.min.js"></script>
+<script src="wf-slider.min.js"></script>
+<script>
+(() => {
+  const hk = document.getElementById('hk');
+  const btns = [...document.querySelectorAll('.side button')];
+  const list = document.querySelector('.hk-list');
+  const apply = (v) => {
+    btns.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.side === v)));
+    hk.setAttribute('data-slider-arc', v);
+    list.style.left = v === 'left' ? 'auto' : '40px';
+    list.style.right = v === 'left' ? '40px' : 'auto';
+    WFSlider.destroy(hk); WFSlider.init(hk);
+    try { sessionStorage.setItem('hk-side', v); } catch (e) {}
+  };
+  btns.forEach((b) => b.addEventListener('click', () => apply(b.dataset.side)));
+  try { const v = sessionStorage.getItem('hk-side'); if (v && v !== 'right') addEventListener('load', () => apply(v)); } catch (e) {}
+})();
+</script>
+</body>
+</html>

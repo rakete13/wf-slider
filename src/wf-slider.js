@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.11.0
+ * WF Slider v1.12.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.11.0';
+  const VERSION = '1.12.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -318,7 +318,7 @@
       st.p = active ? target(snapOfSlide(keep), 0, loopOn ? alignPos(clamp(keep, 0, n - 1)) : undefined) : 0;
 
       viewport.style.cursor = active && o.drag && finePointer() ? 'grab' : '';
-      viewport.style.touchAction = active && o.drag ? 'pan-y' : '';
+      viewport.style.touchAction = active && o.drag ? (o.axisY ? 'pan-x' : 'pan-y') : '';
       render();
       return active;
     };
@@ -605,7 +605,7 @@
   /*@block effects*/
   F.effects = (c, name) => {
     const { slides, R } = c;
-    if (!['parallax', 'focus', 'tilt', 'coverflow', 'cylinder'].includes(name)) {
+    if (!['parallax', 'focus', 'tilt', 'coverflow', 'cylinder', 'arc'].includes(name)) {
       c.issue(`Unbekannter Effekt "${name}".`);
       return null;
     }
@@ -625,7 +625,7 @@
       }
     });
     const own = T.filter((t, i) => t !== slides[i]);
-    if (name === 'cylinder') {
+    if (name === 'cylinder' || name === 'arc') {
       slides.forEach((s) => R.style(s));
       own.forEach((t) => (t.style.backfaceVisibility = 'hidden'));
     }
@@ -634,6 +634,69 @@
       if (t === slides[i]) return;
       t.style.transform = tf;
       if (op !== undefined) t.style.opacity = op;
+    };
+
+    // Halbkreis am Fensterrand: data-slider-arc="right" (Standard) | "left" | "top" | "bottom".
+    // Mittelpunkt des Kreises liegt auf dem Rand, die aktive Slide steht am weitesten im Bild,
+    // die anderen laufen den Bogen entlang nach hinten. Weiter = nach unten (links/rechts) bzw. nach rechts.
+    //   data-slider-arc-radius  Radius als Anteil der kürzeren Fensterseite (0.55) oder in px ("600px")
+    //   data-slider-arc-step    Winkel zwischen zwei Slides in Grad (30)
+    //   data-slider-arc-scale   Größe der Slides am Ende des Bogens (1 = alle gleich groß)
+    //   data-slider-arc-rotate  Slides drehen sich mit dem Bogen
+    const ads = c.root.dataset;
+    const side = /^(left|right|top|bottom)$/.test((ads.sliderArc || '').trim()) ? ads.sliderArc.trim() : 'right';
+    const vp = c.viewport;
+    let ys = null;
+    let ysW = -1;
+    const arc = (dx, vpW) => {
+      const vpH = vp.clientHeight;
+      const vr = vp.getBoundingClientRect();
+      if (!ys || ysW !== vpW) {
+        // senkrechte Mitte jeder Slide in der flachen Lage (Transform ändert nur x)
+        ys = slides.map((sl) => {
+          const r = sl.getBoundingClientRect();
+          return r.top + r.height / 2 - vr.top;
+        });
+        ysW = vpW;
+      }
+      // Abstand zweier Slides in der flachen Reihe
+      const ds = dx.map((d, i) => (i ? Math.abs(d - dx[i - 1]) : 0)).filter((d) => d > 0 && d < vpW);
+      const pitch = ds.length ? ds.reduce((a, b) => a + b, 0) / ds.length : 1;
+      const rv = (ads.sliderArcRadius || '').trim();
+      const R0 = /px$/.test(rv) ? parseFloat(rv) : num(rv, 0.55) * Math.min(vpW, vpH);
+      const step = (num(ads.sliderArcStep, 30) * Math.PI) / 180;
+      const back = num(ads.sliderArcScale, 1);
+      const rot = bool(ads.sliderArcRotate);
+      const cx = side === 'left' ? 0 : side === 'right' ? vpW : vpW / 2;
+      const cy = side === 'top' ? 0 : side === 'bottom' ? vpH : vpH / 2;
+      dx.forEach((d, i) => {
+        const ph = (d / pitch) * step;
+        const sl = slides[i];
+        if (Math.abs(ph) > Math.PI * 0.56) {
+          set(i, 'none', '0');
+          sl.style.visibility = 'hidden';
+          return;
+        }
+        sl.style.visibility = '';
+        const cs = Math.cos(ph);
+        const sn = Math.sin(ph);
+        let x;
+        let y;
+        let deg;
+        if (side === 'right') (x = cx - R0 * cs), (y = cy + R0 * sn), (deg = -ph);
+        else if (side === 'left') (x = cx + R0 * cs), (y = cy + R0 * sn), (deg = ph);
+        else if (side === 'bottom') (x = cx + R0 * sn), (y = cy - R0 * cs), (deg = ph);
+        else (x = cx + R0 * sn), (y = cy + R0 * cs), (deg = -ph);
+        const sc = 1 - (1 - back) * Math.min(1, Math.abs(ph) / (Math.PI / 2));
+        sl.style.zIndex = String(1000 - Math.round(Math.abs(ph) * 100));
+        set(
+          i,
+          `translate(${(x - (vpW / 2 + d)).toFixed(1)}px,${(y - ys[i]).toFixed(1)}px)` +
+            (rot ? ` rotate(${((deg * 180) / Math.PI).toFixed(2)}deg)` : '') +
+            (sc !== 1 ? ` scale(${sc.toFixed(3)})` : ''),
+          '1'
+        );
+      });
     };
 
     // Kippen nach Tempo: Neigung folgt der Geschwindigkeit und richtet sich wieder auf
@@ -658,6 +721,7 @@
     return {
       render(pr, pv, pos, dx, vpW) {
         if (tilt) return tilt(pos);
+        if (name === 'arc') return arc(dx, vpW);
         if (name === 'cylinder') {
           // Karten auf der Innenseite eines Zylinders, der Betrachter steht auf der Achse:
           // Abstand auf der Bahn = Bogenlänge. Die Karte in der Mitte wirkt am kleinsten, zum Rand hin
@@ -1265,6 +1329,10 @@
       for: ds.sliderFor || '',
       trigger: type === 'thumbs' && ds.sliderTrigger === 'hover' ? 'hover' : 'click',
       effect: type === 'carousel' ? ds.sliderEffect || '' : '',
+      // senkrecht ziehen: data-slider-axis="y" oder Halbkreis am linken/rechten Rand
+      axisY:
+        type === 'carousel' &&
+        (ds.sliderAxis === 'y' || (ds.sliderEffect === 'arc' && /^(left|right)$/.test((ds.sliderArc || 'right').trim()))),
       transition: fade ? ds.sliderTransition || 'fade' : 'fade',
       bg: ds.sliderBg === undefined || ds.sliderBg === 'false' ? '' : ['auto-light', 'auto-dark'].includes(ds.sliderBg) ? ds.sliderBg : 'auto',
     };
@@ -1295,6 +1363,14 @@
       return null;
     }
     const o = options(ds, type);
+    // data-slider-remember: zuletzt gezeigte Slide merken (z. B. für den Morph zurück von der Detailseite)
+    const remKey = bool(ds.sliderRemember) ? `wfs:${location.pathname}:${ds.sliderId || [...document.querySelectorAll('[data-slider]')].indexOf(root)}` : '';
+    if (remKey && startAt === undefined) {
+      try {
+        const v = sessionStorage.getItem(remKey);
+        if (v !== null && !isNaN(+v)) o.start = Math.max(0, +v);
+      } catch (e) {}
+    }
     if (startAt !== undefined) o.start = Math.max(0, startAt);
     const L = cfg.labels;
     const inst = { root, type, id: ds.sliderId || '', o, enabled: false, issues: [], handlers: {} };
@@ -1474,6 +1550,11 @@
 
       const update = () => {
         const idx = eng.index();
+        if (remKey) {
+          try {
+            sessionStorage.setItem(remKey, String(eng.slideOf(idx)));
+          } catch (e) {}
+        }
         if (!auto) drawBars(eng.progress());
         if (anim && type !== 'fade' && rootVisible) {
           let k = 0;
@@ -1659,6 +1740,8 @@
         let moved = false;
         let startIdx = 0;
         let samples = [];
+        const PX = (e) => (o.axisY ? e.clientY : e.clientX); // Zugrichtung
+        const PY = (e) => (o.axisY ? e.clientX : e.clientY);
         const endDrag = (x) => {
           id = null;
           if (!dragging) return;
@@ -1687,17 +1770,17 @@
           if (staticMode || !eng.active() || (e.pointerType === 'mouse' && e.button !== 0)) return;
           if (isEditable(e.target) || e.target.closest('[data-slider-nodrag]')) return;
           id = e.pointerId;
-          sx = e.clientX;
-          sy = e.clientY;
+          sx = PX(e);
+          sy = PY(e);
           dragging = false;
           startIdx = eng.index();
           samples = [{ x: sx, t: now() }];
         });
         on(window, 'pointermove', (e) => {
           if (e.pointerId !== id) return;
-          if (e.pointerType === 'mouse' && !(e.buttons & 1)) return endDrag(e.clientX);
-          const dx = e.clientX - sx;
-          const dy = e.clientY - sy;
+          if (e.pointerType === 'mouse' && !(e.buttons & 1)) return endDrag(PX(e));
+          const dx = PX(e) - sx;
+          const dy = PY(e) - sy;
           if (!dragging) {
             if (Math.abs(dx) > 6 && Math.abs(dx) > Math.abs(dy)) {
               dragging = true;
@@ -1710,15 +1793,15 @@
               if (eng.drag) eng.drag.start();
               if (auto) auto.pause('drag');
             } else if (Math.abs(dy) > 8) {
-              id = null; // senkrecht: die Seite scrollt
+              id = null; // quer zur Zugrichtung: die Seite scrollt
               return;
             } else return;
           }
           if (eng.drag) eng.drag.move(dx);
-          samples.push({ x: e.clientX, t: now() });
+          samples.push({ x: PX(e), t: now() });
           if (samples.length > 20) samples.shift();
         });
-        on(window, 'pointerup', (e) => e.pointerId === id && endDrag(e.clientX));
+        on(window, 'pointerup', (e) => e.pointerId === id && endDrag(PX(e)));
         on(window, 'pointercancel', (e) => e.pointerId === id && endDrag(sx));
         // Nach dem Ziehen keinen Link öffnen
         on(viewport, 'click', (e) => {
@@ -1729,6 +1812,20 @@
           }
         }, { capture: true });
         on(viewport, 'dragstart', (e) => e.preventDefault());
+      }
+
+      // Halbkreis: Klick auf eine hintere Slide holt sie nach vorn, erst die vordere öffnet ihren Link
+      if (o.effect === 'arc' && fx && ds.sliderArcClick !== 'link') {
+        on(viewport, 'click', (e) => {
+          if (e.defaultPrevented || staticMode || !eng.active()) return;
+          const i = slides.findIndex((sl) => sl.contains(e.target));
+          if (i < 0) return;
+          const t = eng.snapOfSlide(i);
+          if (t === eng.index()) return;
+          e.preventDefault();
+          e.stopPropagation();
+          go(t, 0);
+        });
       }
 
       // Trackpad: waagerechtes Wischen
@@ -1765,10 +1862,10 @@
           const target = type === 'thumbs' ? byId(o.for) : null;
           const p = target && target.api ? target.api.prev : prev;
           const nx = target && target.api ? target.api.next : next;
-          if (e.key === 'ArrowLeft') {
+          if (e.key === 'ArrowLeft' || (o.axisY && e.key === 'ArrowUp')) {
             e.preventDefault();
             p();
-          } else if (e.key === 'ArrowRight') {
+          } else if (e.key === 'ArrowRight' || (o.axisY && e.key === 'ArrowDown')) {
             e.preventDefault();
             nx();
           }

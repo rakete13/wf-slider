@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.11.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.12.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -63,6 +63,25 @@ Live zum Umschalten: [`docs/effekte.html`](docs/effekte.html). Bei „Bewegung r
 | `tilt` | Neigung je nach Tempo, richtet sich beim Anhalten wieder auf |
 | `coverflow` | seitliche Slides drehen sich in die Tiefe |
 | `cylinder` | (ab 1.10) 3D-Zylinder: Die Slides laufen im Kreis um den Betrachter. In der Mitte sind sie klein und weit weg, zum Rand hin kommen sie näher und werden größer, jede Karte bleibt dabei gerade zur Kamera ausgerichtet. Mit `data-slider-face="wall"` liegen die Karten stattdessen an der Zylinderwand und drehen sich zum Rand hin. Stärke = Krümmung (`0.7` flach bis `1.4` stark). Am besten mit `data-slider-loop`, `data-slider-align="center"`, schmalen Slides und voller Viewport-Breite; Platz nach oben und unten lassen, die Randkarten werden deutlich größer. |
+| `arc` | (ab 1.12) Halbkreis am Fensterrand. Der Mittelpunkt liegt auf dem Rand (`data-slider-arc` = `right` Standard, `left`, `top`, `bottom`), die aktive Slide steht am weitesten im Bild, die anderen laufen den Bogen entlang nach hinten und aus dem Bild. Siehe unten. |
+
+### Halbkreis: `data-slider-effect="arc"` (ab 1.12)
+
+Live: [`docs/halbkreis.html`](https://rakete13.github.io/wf-slider/halbkreis.html). Slider über die ganze Fläche (z. B. Section 100vh), Slides im Designer einfach in einer Reihe.
+
+| Attribut | Standard | Wirkung |
+|---|---|---|
+| `data-slider-arc` | `right` | Rand, auf dem der Kreismittelpunkt liegt: `right`, `left`, `top`, `bottom`. Bei `left`/`right` zieht man senkrecht, Pfeiltasten hoch/runter |
+| `data-slider-arc-radius` | `0.55` | Radius als Anteil der kürzeren Fensterseite, oder in px (`600px`) |
+| `data-slider-arc-step` | `30` | Winkel zwischen zwei Slides in Grad: größer = stärker gefächert |
+| `data-slider-arc-scale` | `1` | Größe der Slides am Ende des Bogens, z. B. `0.7` |
+| `data-slider-arc-rotate` | aus | Slides drehen sich mit dem Bogen |
+| `data-slider-arc-click` | nach vorn | Klick auf eine hintere Slide holt sie nach vorn, erst die vordere öffnet ihren Link. `link` = jeder Klick öffnet sofort |
+| `data-slider-remember` | aus | Merkt sich die gezeigte Slide für die Sitzung (für jeden Slider nutzbar), damit man von der Detailseite zur selben Karte zurückkommt |
+
+Steuern wie jeder Slider: Ziehen, Pfeile, Tastatur, `data-slider-flow`, oder über eine Liste mit `thumbs` (`data-slider-trigger="hover"` oder Klick).
+
+**Karte wächst bildschirmfüllend:** mit [WF Page Transition](https://github.com/rakete13/wf-page-transition). Die Slide bekommt `data-page-item`, die Karte (Link zur Detailseite) `data-page-morph="karte"`, die Bühne der Detailseite ebenfalls `data-page-morph="karte"`. Mit `data-slider-remember` am Slider morpht sie beim Zurückgehen in dieselbe Karte.
 
 **Fließend laufen: `data-slider-flow`** (ab 1.10, bei `carousel` mit `data-slider-loop`): Der Slider läuft von selbst gleichmäßig weiter, Wert = Pixel pro Sekunde (ohne Wert `40`, negativ = andere Richtung). Er hält weich an, solange die Maus auf einer Slide ist (dann kann man sie anklicken), beim Ziehen, bei Tastatur-Fokus, außerhalb des Bildschirms und im Hintergrund-Tab. Pfeile und Ziehen funktionieren weiter, danach läuft er weiter. Ein Pause-Button (`data-slider-pause`) ist für die Barrierefreiheit empfohlen. Bei „Bewegung reduzieren“ im System läuft nichts von selbst.
 

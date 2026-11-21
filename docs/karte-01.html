@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Karte 01 · WF Slider Halbkreis (Demo)</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500&display=swap">
+<!-- WF Page Transition (Head) -->
+<script>window.WFPageTransitionConfig = { transition: 'fade', duration: 0.8, morphEase: 'expo.inOut' };</script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-page-transition@1.6.0/src/wf-page-transition.min.js"></script>
+<style>
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif; background: #fff; color: #141824; overflow: hidden; }
+.hint { position: fixed; left: 40px; top: 28px; z-index: 5; font-size: 14px; color: #5d6476; max-width: 440px; line-height: 1.5; }
+.hint a { color: inherit; }
+
+.stage { position: fixed; inset: 0; background: #00d4ff; display: grid; place-items: center; color: #fff; }
+.stage h1 { font-weight: 500; font-size: clamp(40px, 7vw, 110px); margin: 0; }
+.back { position: fixed; left: 40px; top: 28px; z-index: 5; color: #fff; font-size: 16px; }
+</style>
+</head>
+<body data-page-duration="0.8">
+<div class="stage" data-page-morph="karte"><h1>Karte 01</h1></div>
+<a class="back" href="halbkreis.html">← zurück</a>
+</body>
+</html>
