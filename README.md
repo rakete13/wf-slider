@@ -2,7 +2,7 @@
 
 Attribut-basierte Slider für Webflow, passend zu [WF Anim](https://github.com/rakete13/wf-anim). Wrapper auswählen, unter **Custom Attributes** `data-slider` mit `carousel`, `fade` oder `thumbs` setzen, fertig. Funktioniert mit Collection Lists genauso wie mit statischen Slides.
 
-Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io/wf-slider/** (Quelle: [`docs/index.html`](docs/index.html)), Effekte zum Ausprobieren: **https://rakete13.github.io/wf-slider/effekte.html**.
+Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io/wf-slider/** (Quelle: [`docs/index.html`](docs/index.html)), Effekte zum Ausprobieren: **https://rakete13.github.io/wf-slider/#carousel-effekte**.
 
 ## In ein Webflow-Projekt einbauen
 
@@ -52,7 +52,7 @@ Galerie = Haupt-Slider (`fade` oder `carousel`) mit `data-slider-id="galerie"` p
 
 ## Effekte und Übergänge (ab 1.1)
 
-Live zum Umschalten: [`docs/effekte.html`](docs/effekte.html). Bei „Bewegung reduzieren“ fallen alle Effekte weg.
+Live zum Umschalten: [Demo-Seite]((https://rakete13.github.io/wf-slider/#carousel-effekte). Bei „Bewegung reduzieren“ fallen alle Effekte weg.
 
 **Carousel: `data-slider-effect`**, läuft stufenlos mit der Position, auch beim Ziehen:
 
