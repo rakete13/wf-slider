@@ -52,7 +52,7 @@ Galerie = Haupt-Slider (`fade` oder `carousel`) mit `data-slider-id="galerie"` p
 
 ## Effekte und Übergänge (ab 1.1)
 
-Live zum Umschalten: [Demo-Seite]((https://rakete13.github.io/wf-slider/#carousel-effekte). Bei „Bewegung reduzieren“ fallen alle Effekte weg.
+Live zum Umschalten: [Demo-Seite](https://rakete13.github.io/wf-slider/#carousel-effekte). Bei „Bewegung reduzieren“ fallen alle Effekte weg.
 
 **Carousel: `data-slider-effect`**, läuft stufenlos mit der Position, auch beim Ziehen:
 
