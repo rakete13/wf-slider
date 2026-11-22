@@ -495,6 +495,7 @@ slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)<
         <button class="chip" data-v="" aria-pressed="true">gleich groß</button>
         <button class="chip" data-v="0.7" aria-pressed="false">kleiner</button>
         <button class="chip" data-v="rotate" aria-pressed="false">mitdrehen</button>
+        <button class="chip" data-v="combo" aria-pressed="false">mitdrehen + vorne größer</button>
       </div>
       <div class="hk-stage">
         <div class="hk-list" data-slider="thumbs" data-slider-for="halbkreis" data-slider-trigger="hover" data-slider-hide="(max-width: 700px)">
@@ -531,7 +532,7 @@ slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)<
       <pre data-code="arc"></pre>
       <div class="info">
         <h3>Einstellungen</h3>
-        <p><code>data-slider-arc</code> = <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code> · <code>data-slider-arc-radius</code> (Anteil der kürzeren Seite, Standard <code>0.55</code>, oder <code>600px</code>) · <code>data-slider-arc-step</code> (Grad zwischen zwei Karten, <code>30</code>) · <code>data-slider-arc-scale</code> (Größe am Ende des Bogens, <code>1</code>) · <code>data-slider-arc-rotate</code> (Karten drehen mit) · <code>data-slider-arc-click="link"</code> (jeder Klick öffnet sofort). Bei <code>left</code>/<code>right</code> zieht man senkrecht. Für den Morph zur Detailseite: Slide <code>data-page-item</code>, Karte und Bühne der Detailseite <code>data-page-morph="karte"</code>, Slider <code>data-slider-remember</code>.</p>
+        <p><code>data-slider-arc</code> = <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code> · <code>data-slider-arc-radius</code> (Anteil der kürzeren Seite, Standard <code>0.55</code>, oder <code>600px</code>) · <code>data-slider-arc-step</code> (Grad zwischen zwei Karten, <code>30</code>) · <code>data-slider-arc-scale</code> (Größe am Ende des Bogens, <code>1</code>) · <code>data-slider-arc-active</code> (Größe der vorderen Karte, z. B. <code>1.25</code>) · <code>data-slider-arc-rotate</code> (Karten drehen mit) · <code>data-slider-arc-click="link"</code> (jeder Klick öffnet sofort). Bei <code>left</code>/<code>right</code> zieht man senkrecht. Für den Morph zur Detailseite: Slide <code>data-page-item</code>, Karte und Bühne der Detailseite <code>data-page-morph="karte"</code>, Slider <code>data-slider-remember</code>.</p>
       </div>
     </section>
 
@@ -866,7 +867,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>data-slider-effect</code></td><td>Nur bei <code>carousel</code>: <code>parallax</code>, <code>focus</code>, <code>tilt</code>, <code>coverflow</code>, <code>cylinder</code>, <code>arc</code> (Halbkreis, <a href="#halbkreis">Demo</a>). Dazu <code>-strength</code></td></tr>
           <tr><td><code>data-slider-effect-strength</code></td><td>Stärke des Carousel-Effekts (Standard <code>1</code>), beim Zylinder die Krümmung</td></tr>
           <tr><td><code>data-slider-face="wall"</code></td><td>Nur bei <code>cylinder</code>: Karten liegen an der Zylinderwand und drehen sich (Standard: gerade zur Kamera)</td></tr>
-          <tr><td><code>data-slider-arc</code></td><td>Nur bei <code>arc</code>: Rand mit dem Kreismittelpunkt, <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code>. Dazu <code>-radius</code> (<code>0.55</code> oder px), <code>-step</code> (Grad, <code>30</code>), <code>-scale</code> (<code>1</code>), <code>-rotate</code>, <code>-click="link"</code></td></tr>
+          <tr><td><code>data-slider-arc</code></td><td>Nur bei <code>arc</code>: Rand mit dem Kreismittelpunkt, <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code>. Dazu <code>-radius</code> (<code>0.55</code> oder px), <code>-step</code> (Grad, <code>30</code>), <code>-scale</code> (<code>1</code>), <code>-active</code> (Größe vorne, z. B. <code>1.25</code>), <code>-rotate</code>, <code>-click="link"</code></td></tr>
           <tr><td><code>data-slider-axis="y"</code></td><td>Carousel senkrecht ziehen, Pfeiltasten hoch/runter (bei <code>arc</code> links/rechts automatisch). Bei <code>fade</code> mit <code>wipe</code>/<code>push</code> = <code>data-slider-direction="up"</code></td></tr>
           <tr><td><code>data-slider-remember</code></td><td>Gezeigte Slide für die Sitzung merken, z. B. für den Morph zurück von der Detailseite</td></tr>
           <tr><td><code>data-slider-shape</code></td><td>Nur bei <code>showcase</code>: <code>rect</code>, <code>rounded</code> (mit <code>-shape-radius</code>), <code>circle</code>, <code>triangle</code> oder SVG-Datei. Dazu <code>-scale</code>, <code>-parallax</code>, <code>-image-scale</code>, <code>-frame-ease</code></td></tr>
@@ -1003,7 +1004,7 @@ WFSlider.destroy(scope);</pre>
     document.querySelector('[data-code="fx"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-loop', 'data-slider-align', 'data-slider-effect', 'data-slider-effect-strength'].map((n) => a(fx, n)).join('');
     document.querySelector('[data-code="hero"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-transition', 'data-slider-direction', 'data-slider-duration'].map((n) => a(hero, n)).join('') + '\nheadline        data-slider-anim="' + hero.querySelector('h3').getAttribute('data-slider-anim') + '"';
     const hk = document.getElementById('hk');
-    document.querySelector('[data-code="arc"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-id', 'data-slider-loop', 'data-slider-align', 'data-slider-effect', 'data-slider-arc', 'data-slider-arc-step', 'data-slider-arc-scale', 'data-slider-arc-rotate'].map((n) => a(hk, n)).join('') + '\nliste            data-slider="thumbs"  data-slider-for="halbkreis"  data-slider-trigger="hover"';
+    document.querySelector('[data-code="arc"]').textContent = 'slider-wrapper' + ['data-slider', 'data-slider-id', 'data-slider-loop', 'data-slider-align', 'data-slider-effect', 'data-slider-arc', 'data-slider-arc-step', 'data-slider-arc-scale', 'data-slider-arc-active', 'data-slider-arc-rotate'].map((n) => a(hk, n)).join('') + '\nliste            data-slider="thumbs"  data-slider-for="halbkreis"  data-slider-trigger="hover"';
     document.querySelector('[data-note="effect"]').textContent = NOTES.effect[fx.getAttribute('data-slider-effect') || ''];
     document.querySelector('[data-note="transition"]').textContent = NOTES.transition[hero.getAttribute('data-slider-transition')];
   };
@@ -1050,7 +1051,9 @@ WFSlider.destroy(scope);</pre>
         } else {
           hk.removeAttribute('data-slider-arc-scale');
           hk.removeAttribute('data-slider-arc-rotate');
-          if (v === 'rotate') hk.setAttribute('data-slider-arc-rotate', '');
+          hk.removeAttribute('data-slider-arc-active');
+          if (v === 'rotate' || v === 'combo') hk.setAttribute('data-slider-arc-rotate', '');
+          if (v === 'combo') hk.setAttribute('data-slider-arc-active', '1.25');
           else if (v) hk.setAttribute('data-slider-arc-scale', v);
         }
         restart(hk);

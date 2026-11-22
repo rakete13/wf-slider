@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.12.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.13.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -75,6 +75,7 @@ Live: [`docs/halbkreis.html`](https://rakete13.github.io/wf-slider/halbkreis.htm
 | `data-slider-arc-radius` | `0.55` | Radius als Anteil der kürzeren Fensterseite, oder in px (`600px`) |
 | `data-slider-arc-step` | `30` | Winkel zwischen zwei Slides in Grad: größer = stärker gefächert |
 | `data-slider-arc-scale` | `1` | Größe der Slides am Ende des Bogens, z. B. `0.7` |
+| `data-slider-arc-active` | `1` | (ab 1.13) Größe der vorderen Slide, z. B. `1.25`. Sie wächst stufenlos, während sie nach vorn läuft |
 | `data-slider-arc-rotate` | aus | Slides drehen sich mit dem Bogen |
 | `data-slider-arc-click` | nach vorn | Klick auf eine hintere Slide holt sie nach vorn, erst die vordere öffnet ihren Link. `link` = jeder Klick öffnet sofort |
 | `data-slider-remember` | aus | Merkt sich die gezeigte Slide für die Sitzung (für jeden Slider nutzbar), damit man von der Detailseite zur selben Karte zurückkommt |
