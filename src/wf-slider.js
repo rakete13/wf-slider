@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.13.0
+ * WF Slider v1.14.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.13.0';
+  const VERSION = '1.14.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -644,10 +644,12 @@
     //   data-slider-arc-scale   Größe der Slides am Ende des Bogens (1 = alle gleich groß)
     //   data-slider-arc-active  Größe der vorderen Slide, z. B. 1.2 (wächst stufenlos beim Heranlaufen)
     //   data-slider-arc-rotate  Slides drehen sich mit dem Bogen
+    //   data-slider-arc-tilt    Karten vor/nach der aktiven kippen nach hinten (Grad, ohne Wert 25), -perspective (900)
     const ads = c.root.dataset;
     const side = /^(left|right|top|bottom)$/.test((ads.sliderArc || '').trim()) ? ads.sliderArc.trim() : 'right';
     const vp = c.viewport;
     let ys = null;
+    let hs = null;
     let ysW = -1;
     const arc = (dx, vpW) => {
       const vpH = vp.clientHeight;
@@ -658,6 +660,7 @@
           const r = sl.getBoundingClientRect();
           return r.top + r.height / 2 - vr.top;
         });
+        hs = T.map((t) => [t.offsetWidth, t.offsetHeight]);
         ysW = vpW;
       }
       // Abstand zweier Slides in der flachen Reihe
@@ -668,6 +671,9 @@
       const step = (num(ads.sliderArcStep, 30) * Math.PI) / 180;
       const back = num(ads.sliderArcScale, 1);
       const act = num(ads.sliderArcActive, 1);
+      const tilt = ads.sliderArcTilt === undefined ? 0 : num(ads.sliderArcTilt, 25);
+      const persp = num(ads.sliderArcPerspective, 900);
+      const vert = side === 'left' || side === 'right';
       const rot = bool(ads.sliderArcRotate);
       const cx = side === 'left' ? 0 : side === 'right' ? vpW : vpW / 2;
       const cy = side === 'top' ? 0 : side === 'bottom' ? vpH : vpH / 2;
@@ -693,11 +699,28 @@
         const grow = 1 + (act - 1) * Math.max(0, 1 - Math.abs(ph) / step);
         const sc = (1 - (1 - back) * Math.min(1, Math.abs(ph) / (Math.PI / 2))) * grow;
         sl.style.zIndex = String(1000 - Math.round(Math.abs(ph) * 100));
+        // Kippen: Karten vor der aktiven (oben bzw. links) kippen nach hinten mit Drehpunkt an der
+        // zugewandten Kante, die danach ebenso – wie Seiten, die sich vom Betrachter wegneigen
+        let tl = '';
+        if (tilt) {
+          const a = tilt * Math.min(1, Math.abs(ph) / step);
+          if (a > 0.01) {
+            const s = ph < 0 ? 1 : -1; // vor der aktiven: Drehpunkt an der unteren bzw. rechten Kante
+            if (vert) {
+              const o = (s * hs[i][1]) / 2;
+              tl = ` translateY(${o.toFixed(1)}px) perspective(${persp}px) rotateX(${(s * a).toFixed(2)}deg) translateY(${(-o).toFixed(1)}px)`;
+            } else {
+              const o = (s * hs[i][0]) / 2;
+              tl = ` translateX(${o.toFixed(1)}px) perspective(${persp}px) rotateY(${(-s * a).toFixed(2)}deg) translateX(${(-o).toFixed(1)}px)`;
+            }
+          }
+        }
         set(
           i,
           `translate(${(x - (vpW / 2 + d)).toFixed(1)}px,${(y - ys[i]).toFixed(1)}px)` +
             (rot ? ` rotate(${((deg * 180) / Math.PI).toFixed(2)}deg)` : '') +
-            (sc !== 1 ? ` scale(${sc.toFixed(3)})` : ''),
+            (sc !== 1 ? ` scale(${sc.toFixed(3)})` : '') +
+            tl,
           '1'
         );
       });
