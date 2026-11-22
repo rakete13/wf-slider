@@ -217,6 +217,7 @@ img { color: transparent; }
 @media (max-width: 700px) { .stage.bleed { padding: 20px 0; } .stage-pad { padding-inline: 16px; } }
 /* Halbkreis */
 .hk-run { height: 300vh; margin-block: 8px; }
+.hk-stage.is-ring .hk-slide { flex-basis: min(17vw, 190px); }
 .hk-sticky { position: sticky; top: 0; height: 100vh; display: grid; align-items: center; }
 .hk-sticky .hk-stage { height: min(86vh, 680px); }
 .hk-stage { position: relative; height: min(78vh, 640px); background: #fff; border-radius: 12px; overflow: hidden; }
@@ -486,6 +487,7 @@ slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)<
         <button class="chip" data-v="left" aria-pressed="false">links</button>
         <button class="chip" data-v="bottom" aria-pressed="false">unten</button>
         <button class="chip" data-v="top" aria-pressed="false">oben</button>
+        <button class="chip" data-v="center" aria-pressed="false">ganzer Kreis</button>
       </div>
       <div class="chips" data-chips="arc-step">
         <span class="label">Fächer</span>
@@ -578,7 +580,7 @@ Oder mit WF Anim statt Sticky:  section  data-anim="pin"  data-anim-length="300"
 Optional: data-slider-scroll=".meine-section"   (Laufstrecke per Selektor)</pre>
       <div class="info">
         <h3>Einstellungen</h3>
-        <p><code>data-slider-arc</code> = <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code> · <code>data-slider-arc-radius</code> (Anteil der kürzeren Seite, Standard <code>0.55</code>, oder <code>600px</code>) · <code>data-slider-arc-step</code> (Grad zwischen zwei Karten, <code>30</code>) · <code>data-slider-arc-scale</code> (Größe am Ende des Bogens, <code>1</code>) · <code>data-slider-arc-active</code> (Größe der vorderen Karte, z. B. <code>1.25</code>) · <code>data-slider-arc-tilt</code> (Karten ober- und unterhalb kippen nach hinten, Grad, ohne Wert <code>25</code>; <code>-perspective</code> <code>900</code>) · <code>data-slider-arc-rotate</code> (Karten drehen mit) · <code>data-slider-arc-click="link"</code> (jeder Klick öffnet sofort). Bei <code>left</code>/<code>right</code> zieht man senkrecht. Für den Morph zur Detailseite: Slide <code>data-page-item</code>, Karte und Bühne der Detailseite <code>data-page-morph="karte"</code>, Slider <code>data-slider-remember</code>.</p>
+        <p><code>data-slider-arc</code> = <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code> oder <code>center</code> (ganzer Kreis in der Mitte, aktive Karte per <code>data-slider-arc-front</code> = <code>top</code>/<code>bottom</code>/<code>left</code>/<code>right</code>) · <code>data-slider-arc-radius</code> (Anteil der kürzeren Seite, Standard <code>0.55</code>, oder <code>600px</code>) · <code>data-slider-arc-step</code> (Grad zwischen zwei Karten, <code>30</code>) · <code>data-slider-arc-scale</code> (Größe am Ende des Bogens, <code>1</code>) · <code>data-slider-arc-active</code> (Größe der vorderen Karte, z. B. <code>1.25</code>) · <code>data-slider-arc-tilt</code> (Karten ober- und unterhalb kippen nach hinten, Grad, ohne Wert <code>25</code>; <code>-perspective</code> <code>900</code>) · <code>data-slider-arc-rotate</code> (Karten drehen mit) · <code>data-slider-arc-click="link"</code> (jeder Klick öffnet sofort). Bei <code>left</code>/<code>right</code> zieht man senkrecht. Für den Morph zur Detailseite: Slide <code>data-page-item</code>, Karte und Bühne der Detailseite <code>data-page-morph="karte"</code>, Slider <code>data-slider-remember</code>.</p>
       </div>
     </section>
 
@@ -913,7 +915,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>data-slider-effect</code></td><td>Nur bei <code>carousel</code>: <code>parallax</code>, <code>focus</code>, <code>tilt</code>, <code>coverflow</code>, <code>cylinder</code>, <code>arc</code> (Halbkreis, <a href="#halbkreis">Demo</a>). Dazu <code>-strength</code></td></tr>
           <tr><td><code>data-slider-effect-strength</code></td><td>Stärke des Carousel-Effekts (Standard <code>1</code>), beim Zylinder die Krümmung</td></tr>
           <tr><td><code>data-slider-face="wall"</code></td><td>Nur bei <code>cylinder</code>: Karten liegen an der Zylinderwand und drehen sich (Standard: gerade zur Kamera)</td></tr>
-          <tr><td><code>data-slider-arc</code></td><td>Nur bei <code>arc</code>: Rand mit dem Kreismittelpunkt, <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code>. Dazu <code>-radius</code> (<code>0.55</code> oder px), <code>-step</code> (Grad, <code>30</code>), <code>-scale</code> (<code>1</code>), <code>-active</code> (Größe vorne, z. B. <code>1.25</code>), <code>-rotate</code>, <code>-tilt</code> (Karten kippen nach hinten, Grad, ohne Wert 25) mit <code>-perspective</code>, <code>-click="link"</code></td></tr>
+          <tr><td><code>data-slider-arc</code></td><td>Nur bei <code>arc</code>: Rand mit dem Kreismittelpunkt, <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code>, oder <code>center</code> = ganzer Kreis in der Mitte (dazu <code>-front</code>: wo die aktive Karte steht). Dazu <code>-radius</code> (<code>0.55</code> oder px), <code>-step</code> (Grad, <code>30</code>), <code>-scale</code> (<code>1</code>), <code>-active</code> (Größe vorne, z. B. <code>1.25</code>), <code>-rotate</code>, <code>-tilt</code> (Karten kippen nach hinten, Grad, ohne Wert 25) mit <code>-perspective</code>, <code>-click="link"</code></td></tr>
           <tr><td><code>data-slider-axis="y"</code></td><td>Carousel senkrecht ziehen, Pfeiltasten hoch/runter (bei <code>arc</code> links/rechts automatisch). Bei <code>fade</code> mit <code>wipe</code>/<code>push</code> = <code>data-slider-direction="up"</code></td></tr>
           <tr><td><code>data-slider-scroll</code></td><td>Carousel: Scrollen durch eine Laufstrecke bewegt den Slider (angepinnte Section mit WF Anim <code>data-anim="pin"</code>, hohe Section mit Sticky-Inhalt oder Selektor als Wert). Dazu <code>data-slider-scroll-snap</code>: rastet nach dem Scrollen auf der nächsten Karte ein</td></tr>
           <tr><td><code>data-slider-remember</code></td><td>Gezeigte Slide für die Sitzung merken, z. B. für den Morph zurück von der Detailseite</td></tr>
@@ -1091,6 +1093,8 @@ WFSlider.destroy(scope);</pre>
         const list = document.querySelector('.hk-list');
         if (kind === 'arc') {
           hk.setAttribute('data-slider-arc', v);
+          hk.closest('.hk-stage').classList.toggle('is-ring', v === 'center');
+          v === 'center' ? hk.setAttribute('data-slider-arc-scale', '0.7') : hk.removeAttribute('data-slider-arc-scale');
           list.style.left = v === 'left' ? 'auto' : '';
           list.style.right = v === 'left' ? '28px' : '';
         } else if (kind === 'arc-step') {

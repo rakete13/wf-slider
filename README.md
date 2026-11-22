@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.15.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.16.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -72,6 +72,7 @@ Live: [`docs/halbkreis.html`](https://rakete13.github.io/wf-slider/halbkreis.htm
 | Attribut | Standard | Wirkung |
 |---|---|---|
 | `data-slider-arc` | `right` | Rand, auf dem der Kreismittelpunkt liegt: `right`, `left`, `top`, `bottom`. Bei `left`/`right` zieht man senkrecht, Pfeiltasten hoch/runter |
+| `data-slider-arc="center"` | – | (ab 1.16) Ganzer Kreis in der Mitte der Fläche. Alle Slides verteilen sich gleichmäßig rundherum (Winkel = 360° / Anzahl, mit `-step` änderbar), läuft immer im Loop. `data-slider-arc-front` = `top` (Standard), `bottom`, `left`, `right`: wo die aktive Slide steht. Radius-Standard hier `0.34` |
 | `data-slider-arc-radius` | `0.55` | Radius als Anteil der kürzeren Fensterseite, oder in px (`600px`) |
 | `data-slider-arc-step` | `30` | Winkel zwischen zwei Slides in Grad: größer = stärker gefächert |
 | `data-slider-arc-scale` | `1` | Größe der Slides am Ende des Bogens, z. B. `0.7` |

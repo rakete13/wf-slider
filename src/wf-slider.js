@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.15.0
+ * WF Slider v1.16.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.15.0';
+  const VERSION = '1.16.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -301,8 +301,8 @@
       T = last.right - first.left + gap;
       lo = -off - maxW;
 
-      active = n > 1 && contentEnd > vpW + 1;
-      loopOn = active && o.loop && T >= vpW + maxW;
+      active = n > 1 && (contentEnd > vpW + 1 || o.ring);
+      loopOn = active && o.loop && (T >= vpW + maxW || o.ring);
       c.info = { loopBlocked: o.loop && active && !loopOn, wraps: rects.some((r) => Math.abs(r.top - first.top) > 2), zero: W.some((w) => w < 1) };
 
       if (!active) snaps = [{ pos: 0, slide: 0 }];
@@ -668,7 +668,11 @@
     //   data-slider-arc-rotate  Slides drehen sich mit dem Bogen
     //   data-slider-arc-tilt    Karten vor/nach der aktiven kippen nach hinten (Grad, ohne Wert 25), -perspective (900)
     const ads = c.root.dataset;
-    const side = /^(left|right|top|bottom)$/.test((ads.sliderArc || '').trim()) ? ads.sliderArc.trim() : 'right';
+    const side = /^(left|right|top|bottom|center)$/.test((ads.sliderArc || '').trim()) ? ads.sliderArc.trim() : 'right';
+    const ring = side === 'center';
+    // ganzer Kreis: wo steht die aktive Slide? top (Standard) | bottom | left | right
+    const front = /^(top|bottom|left|right)$/.test((ads.sliderArcFront || '').trim()) ? ads.sliderArcFront.trim() : 'top';
+    const a0 = { top: -Math.PI / 2, right: 0, bottom: Math.PI / 2, left: Math.PI }[front];
     const vp = c.viewport;
     let ys = null;
     let hs = null;
@@ -689,20 +693,23 @@
       const ds = dx.map((d, i) => (i ? Math.abs(d - dx[i - 1]) : 0)).filter((d) => d > 0 && d < vpW);
       const pitch = ds.length ? ds.reduce((a, b) => a + b, 0) / ds.length : 1;
       const rv = (ads.sliderArcRadius || '').trim();
-      const R0 = /px$/.test(rv) ? parseFloat(rv) : num(rv, 0.55) * Math.min(vpW, vpH);
-      const step = (num(ads.sliderArcStep, 30) * Math.PI) / 180;
+      const R0 = /px$/.test(rv) ? parseFloat(rv) : num(rv, ring ? 0.34 : 0.55) * Math.min(vpW, vpH);
+      const step = (num(ads.sliderArcStep, ring ? 360 / slides.length : 30) * Math.PI) / 180;
       const back = num(ads.sliderArcScale, 1);
       const act = num(ads.sliderArcActive, 1);
       const tilt = ads.sliderArcTilt === undefined ? 0 : num(ads.sliderArcTilt, 25);
       const persp = num(ads.sliderArcPerspective, 900);
-      const vert = side === 'left' || side === 'right';
+      const vert = ring ? front === 'left' || front === 'right' : side === 'left' || side === 'right';
       const rot = bool(ads.sliderArcRotate);
       const cx = side === 'left' ? 0 : side === 'right' ? vpW : vpW / 2;
       const cy = side === 'top' ? 0 : side === 'bottom' ? vpH : vpH / 2;
+      const Tn = pitch * slides.length;
       dx.forEach((d, i) => {
-        const ph = (d / pitch) * step;
+        // ganzer Kreis: auf die kürzere Seite um den Kreis legen
+        const dd = ring && Tn ? ((((d + Tn / 2) % Tn) + Tn) % Tn) - Tn / 2 : d;
+        const ph = (dd / pitch) * step;
         const sl = slides[i];
-        if (Math.abs(ph) > Math.PI * 0.56) {
+        if (Math.abs(ph) > (ring ? Math.PI * 1.02 : Math.PI * 0.56)) {
           set(i, 'none', '0');
           sl.style.visibility = 'hidden';
           return;
@@ -713,13 +720,16 @@
         let x;
         let y;
         let deg;
-        if (side === 'right') (x = cx - R0 * cs), (y = cy + R0 * sn), (deg = -ph);
+        if (ring) {
+          const th = a0 + ph; // im Uhrzeigersinn weiter
+          (x = cx + R0 * Math.cos(th)), (y = cy + R0 * Math.sin(th)), (deg = ph);
+        } else if (side === 'right') (x = cx - R0 * cs), (y = cy + R0 * sn), (deg = -ph);
         else if (side === 'left') (x = cx + R0 * cs), (y = cy + R0 * sn), (deg = ph);
         else if (side === 'bottom') (x = cx + R0 * sn), (y = cy - R0 * cs), (deg = ph);
         else (x = cx + R0 * sn), (y = cy + R0 * cs), (deg = -ph);
         // aktive Karte größer: wächst stufenlos, je näher sie an die vordere Stelle kommt
         const grow = 1 + (act - 1) * Math.max(0, 1 - Math.abs(ph) / step);
-        const sc = (1 - (1 - back) * Math.min(1, Math.abs(ph) / (Math.PI / 2))) * grow;
+        const sc = (1 - (1 - back) * Math.min(1, Math.abs(ph) / (ring ? Math.PI : Math.PI / 2))) * grow;
         sl.style.zIndex = String(1000 - Math.round(Math.abs(ph) * 100));
         // Kippen: Karten vor der aktiven (oben bzw. links) kippen nach hinten mit Drehpunkt an der
         // zugewandten Kante, die danach ebenso – wie Seiten, die sich vom Betrachter wegneigen
@@ -1379,10 +1389,15 @@
       for: ds.sliderFor || '',
       trigger: type === 'thumbs' && ds.sliderTrigger === 'hover' ? 'hover' : 'click',
       effect: type === 'carousel' ? ds.sliderEffect || '' : '',
+      // ganzer Kreis (data-slider-arc="center"): läuft immer, auch wenn die flache Reihe ins Bild passt
+      ring: type === 'carousel' && ds.sliderEffect === 'arc' && (ds.sliderArc || '').trim() === 'center',
       // senkrecht ziehen: data-slider-axis="y" oder Halbkreis am linken/rechten Rand
       axisY:
         type === 'carousel' &&
-        (ds.sliderAxis === 'y' || (ds.sliderEffect === 'arc' && /^(left|right)$/.test((ds.sliderArc || 'right').trim()))),
+        (ds.sliderAxis === 'y' ||
+          (ds.sliderEffect === 'arc' &&
+            (/^(left|right)$/.test((ds.sliderArc || 'right').trim()) ||
+              ((ds.sliderArc || '').trim() === 'center' && /^(left|right)$/.test((ds.sliderArcFront || '').trim()))))),
       transition: fade ? ds.sliderTransition || 'fade' : 'fade',
       bg: ds.sliderBg === undefined || ds.sliderBg === 'false' ? '' : ['auto-light', 'auto-dark'].includes(ds.sliderBg) ? ds.sliderBg : 'auto',
     };
