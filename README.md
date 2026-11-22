@@ -16,7 +16,7 @@ Die Übersicht mit Live-Demos und allen Attributen: **https://rakete13.github.io
 ### Alternative: aus GitHub laden
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.14.0/src/wf-slider.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/rakete13/wf-slider@1.15.0/src/wf-slider.min.js"></script>
 ```
 
 Bequem für eigene und betreute Projekte. Die Seite hängt dann aber an diesem Repo und an jsDelivr, und die IP-Adresse der Besucher geht an jsDelivr (in der Datenschutzerklärung erwähnen). Bei Übergabe an einen Kunden besser den eingebetteten Footer Code nehmen.
@@ -82,6 +82,13 @@ Live: [`docs/halbkreis.html`](https://rakete13.github.io/wf-slider/halbkreis.htm
 | `data-slider-remember` | aus | Merkt sich die gezeigte Slide für die Sitzung (für jeden Slider nutzbar), damit man von der Detailseite zur selben Karte zurückkommt |
 
 Steuern wie jeder Slider: Ziehen, Pfeile, Tastatur, `data-slider-flow`, oder über eine Liste mit `thumbs` (`data-slider-trigger="hover"` oder Klick).
+
+**Scrollen dreht die Karten: `data-slider-scroll`** (ab 1.15, jedes Carousel). Die Section bleibt stehen, während man weiterscrollt, und die Position des Sliders folgt dem Scrollen. Die Seite scrollt normal weiter, das Mausrad wird nicht abgefangen. Laufstrecke:
+- WF Anim: Section (100vh) mit `data-anim="pin"` und `data-anim-length="300"` (Haltedauer in % der Fensterhöhe), oder
+- nur CSS: Section z. B. 300vh hoch, darin ein Wrapper mit Position Sticky, Top 0, Höhe 100vh, oder
+- Selektor als Wert: `data-slider-scroll=".meine-section"`.
+
+`data-slider-scroll-snap` rastet nach dem Scrollen auf der nächsten Karte ein. Liste, Ziehen und Klick funktionieren zusätzlich.
 
 **Karte wächst bildschirmfüllend:** mit [WF Page Transition](https://github.com/rakete13/wf-page-transition). Die Slide bekommt `data-page-item`, die Karte (Link zur Detailseite) `data-page-morph="karte"`, die Bühne der Detailseite ebenfalls `data-page-morph="karte"`. Mit `data-slider-remember` am Slider morpht sie beim Zurückgehen in dieselbe Karte.
 

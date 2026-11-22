@@ -216,6 +216,9 @@ img { color: transparent; }
 .stage.bleed > pre, .stage.bleed > .controls { margin-inline: 28px; }
 @media (max-width: 700px) { .stage.bleed { padding: 20px 0; } .stage-pad { padding-inline: 16px; } }
 /* Halbkreis */
+.hk-run { height: 300vh; margin-block: 8px; }
+.hk-sticky { position: sticky; top: 0; height: 100vh; display: grid; align-items: center; }
+.hk-sticky .hk-stage { height: min(86vh, 680px); }
 .hk-stage { position: relative; height: min(78vh, 640px); background: #fff; border-radius: 12px; overflow: hidden; }
 .hk-list { position: absolute; left: 28px; top: 50%; transform: translateY(-50%); z-index: 5; }
 .hk-list-items { display: flex; flex-direction: column; }
@@ -531,6 +534,48 @@ slide            → erstes Kind ist das Element, das sich dreht (Bild-Wrapper)<
         </div>
       </div>
       <pre data-code="arc"></pre>
+      <div class="info">
+        <h3>Scrollen dreht die Karten: <code>data-slider-scroll</code></h3>
+        <p>Die Section bleibt stehen, während man weiterscrollt, und das Scrollen dreht den Halbkreis Karte für Karte weiter. Danach geht es mit der Seite weiter. Die Seite scrollt dabei ganz normal, niemand bleibt hängen; Liste, Ziehen und Klick funktionieren zusätzlich. Einfach hier weiterscrollen:</p>
+      </div>
+      <div class="hk-run">
+        <div class="hk-sticky">
+          <div class="hk-stage">
+            <div class="hk-list" data-slider="thumbs" data-slider-for="halbkreis-scroll" data-slider-trigger="hover" data-slider-hide="(max-width: 700px)">
+              <div class="hk-list-items" data-slider-track>
+              <div class="hk-name">karte 01</div>
+              <div class="hk-name">karte 02</div>
+              <div class="hk-name">karte 03</div>
+              <div class="hk-name">karte 04</div>
+              <div class="hk-name">karte 05</div>
+              <div class="hk-name">karte 06</div>
+              <div class="hk-name">karte 07</div>
+              <div class="hk-name">karte 08</div>
+              </div>
+            </div>
+            <div class="hk" data-slider="carousel" data-slider-id="halbkreis-scroll" data-slider-align="center" data-slider-effect="arc" data-slider-arc-tilt data-slider-arc-active="1.25" data-slider-scroll data-slider-scroll-snap data-slider-label="Karten im Halbkreis, per Scrollen">
+              <div class="hk-viewport" data-slider-viewport>
+                <div class="hk-track" data-slider-track>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#00c8f0">Karte 01</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#7fd400">Karte 02</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#ff2bd6">Karte 03</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#ff2a2a">Karte 04</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#1f3dff">Karte 05</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#b300ff">Karte 06</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#ff8a00">Karte 07</a></div>
+                <div class="hk-slide"><a class="hk-card" href="halbkreis.html" style="background:#14b37f">Karte 08</a></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <pre>section (hoch, z. B. 300vh)   → Laufstrecke
+  wrapper                     Position Sticky, Top 0, Höhe 100vh
+    slider                    data-slider="carousel"  data-slider-effect="arc"  data-slider-scroll  data-slider-scroll-snap
+
+Oder mit WF Anim statt Sticky:  section  data-anim="pin"  data-anim-length="300"   (Section 100vh hoch)
+Optional: data-slider-scroll=".meine-section"   (Laufstrecke per Selektor)</pre>
       <div class="info">
         <h3>Einstellungen</h3>
         <p><code>data-slider-arc</code> = <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code> · <code>data-slider-arc-radius</code> (Anteil der kürzeren Seite, Standard <code>0.55</code>, oder <code>600px</code>) · <code>data-slider-arc-step</code> (Grad zwischen zwei Karten, <code>30</code>) · <code>data-slider-arc-scale</code> (Größe am Ende des Bogens, <code>1</code>) · <code>data-slider-arc-active</code> (Größe der vorderen Karte, z. B. <code>1.25</code>) · <code>data-slider-arc-tilt</code> (Karten ober- und unterhalb kippen nach hinten, Grad, ohne Wert <code>25</code>; <code>-perspective</code> <code>900</code>) · <code>data-slider-arc-rotate</code> (Karten drehen mit) · <code>data-slider-arc-click="link"</code> (jeder Klick öffnet sofort). Bei <code>left</code>/<code>right</code> zieht man senkrecht. Für den Morph zur Detailseite: Slide <code>data-page-item</code>, Karte und Bühne der Detailseite <code>data-page-morph="karte"</code>, Slider <code>data-slider-remember</code>.</p>
@@ -870,6 +915,7 @@ Easing: data-slider-ease="power3.inOut" (Wechsel der Slide) · data-slider-frame
           <tr><td><code>data-slider-face="wall"</code></td><td>Nur bei <code>cylinder</code>: Karten liegen an der Zylinderwand und drehen sich (Standard: gerade zur Kamera)</td></tr>
           <tr><td><code>data-slider-arc</code></td><td>Nur bei <code>arc</code>: Rand mit dem Kreismittelpunkt, <code>right</code> (Standard), <code>left</code>, <code>top</code>, <code>bottom</code>. Dazu <code>-radius</code> (<code>0.55</code> oder px), <code>-step</code> (Grad, <code>30</code>), <code>-scale</code> (<code>1</code>), <code>-active</code> (Größe vorne, z. B. <code>1.25</code>), <code>-rotate</code>, <code>-tilt</code> (Karten kippen nach hinten, Grad, ohne Wert 25) mit <code>-perspective</code>, <code>-click="link"</code></td></tr>
           <tr><td><code>data-slider-axis="y"</code></td><td>Carousel senkrecht ziehen, Pfeiltasten hoch/runter (bei <code>arc</code> links/rechts automatisch). Bei <code>fade</code> mit <code>wipe</code>/<code>push</code> = <code>data-slider-direction="up"</code></td></tr>
+          <tr><td><code>data-slider-scroll</code></td><td>Carousel: Scrollen durch eine Laufstrecke bewegt den Slider (angepinnte Section mit WF Anim <code>data-anim="pin"</code>, hohe Section mit Sticky-Inhalt oder Selektor als Wert). Dazu <code>data-slider-scroll-snap</code>: rastet nach dem Scrollen auf der nächsten Karte ein</td></tr>
           <tr><td><code>data-slider-remember</code></td><td>Gezeigte Slide für die Sitzung merken, z. B. für den Morph zurück von der Detailseite</td></tr>
           <tr><td><code>data-slider-shape</code></td><td>Nur bei <code>showcase</code>: <code>rect</code>, <code>rounded</code> (mit <code>-shape-radius</code>), <code>circle</code>, <code>triangle</code> oder SVG-Datei. Dazu <code>-scale</code>, <code>-parallax</code>, <code>-image-scale</code>, <code>-frame-ease</code></td></tr>
           <tr><td><code>?wfslider-debug</code></td><td>An die URL hängen: zeigt Einrichtungsfehler und Hinweise in der Konsole und am Slider</td></tr>

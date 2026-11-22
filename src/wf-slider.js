@@ -1,5 +1,5 @@
 /*!
- * WF Slider v1.14.0
+ * WF Slider v1.15.0
  * Attribut-basierte Slider für Webflow, CMS und statisch
  *
  * Benötigt: gsap (Core). Keine Plugins.
@@ -11,7 +11,7 @@
   'use strict';
   if (window.WFSlider) return;
 
-  const VERSION = '1.14.0';
+  const VERSION = '1.15.0';
 
   /* ------------------------------------------------------------------ */
   /*  Konfiguration (überschreibbar über window.WFSliderConfig vor dem   */
@@ -339,6 +339,28 @@
         animate(target(i, dir), instant ? 0 : undefined, undefined, i);
       },
       progress: () => (!active ? 0 : loopOn ? index() / Math.max(1, n - 1) : maxPos ? clamp(st.p / maxPos, 0, 1) : 0),
+      // Position aus dem Scrollen (data-slider-scroll): f = Snap-Index mit Nachkommastellen
+      scrub(f, dur) {
+        if (!active || !snaps.length) return;
+        f = clamp(f, 0, snaps.length - 1);
+        const k = Math.floor(f);
+        const a = snaps[k].pos;
+        const b = snaps[Math.min(k + 1, snaps.length - 1)].pos;
+        let t = a + (b - a) * (f - k);
+        if (loopOn) {
+          // kürzester Weg von der jetzigen Darstellung aus
+          t += Math.round((st.p - t) / T) * T;
+        }
+        goal = null;
+        if (tween) tween.kill();
+        tween = dur
+          ? gsap.to(st, { p: t, duration: dur, ease: 'power3.out', onUpdate: render, onComplete: () => (tween = null) })
+          : null;
+        if (!dur) {
+          st.p = t;
+          render();
+        }
+      },
       visibleCount: () => Math.max(1, slides.filter((s, i) => xOf(i) >= -off - 1 && xOf(i) + W[i] <= vpW - off + 1).length),
       // Slide i komplett ins Bild holen (Thumbnails, Tastatur-Fokus)
       reveal: (i, instant) => {
@@ -1351,6 +1373,7 @@
       overflowVisible: ds.sliderOverflow === 'visible',
       keyboard: ds.sliderKeyboard !== 'false',
       pauseHover: ds.sliderPauseHover !== 'false',
+      scroll: type === 'carousel' && ds.sliderScroll !== undefined && ds.sliderScroll !== 'false',
       flow: type === 'carousel' && ds.sliderFlow !== undefined && ds.sliderFlow !== 'false' ? num(ds.sliderFlow, 40) : 0,
       label: ds.sliderLabel,
       for: ds.sliderFor || '',
@@ -1739,6 +1762,66 @@
           });
         }
         flow = { stop, go };
+      }
+
+      /* ---------- Scrollen bewegt den Slider: data-slider-scroll ---------- */
+      // Die Seite scrollt ganz normal weiter (kein Abfangen des Mausrads). Die Position des Sliders folgt dem
+      // Fortschritt durch eine „Laufstrecke“: die angepinnte Section (WF Anim data-anim="pin" → .pin-spacer),
+      // eine hohe Section mit Sticky-Inhalt oder ein Element per Selektor (data-slider-scroll=".meine-section").
+      if (o.scroll && eng.scrub) {
+        const sel = (ds.sliderScroll || '').trim();
+        const runway = () => {
+          if (sel) {
+            try {
+              const r = root.closest(sel) || document.querySelector(sel);
+              if (r) return r;
+            } catch (e) {}
+          }
+          for (let p = root.parentElement; p && p !== document.body; p = p.parentElement) {
+            if (p.classList.contains('pin-spacer') || p.offsetHeight > window.innerHeight * 1.15) return p;
+          }
+          return null;
+        };
+        const snapOn = bool(ds.sliderScrollSnap);
+        let st0 = -1;
+        let idle = 0;
+        let first = true;
+        const sync = () => {
+          if (staticMode || !eng.active()) return;
+          const r = runway();
+          let f;
+          if (r) {
+            const b = r.getBoundingClientRect();
+            const len = b.height - window.innerHeight;
+            f = len > 0 ? clamp(-b.top / len, 0, 1) : 0;
+          } else {
+            // ohne Laufstrecke: Fortschritt, während die Section durchs Bild läuft
+            const b = root.getBoundingClientRect();
+            f = clamp((window.innerHeight - b.top) / (b.height + window.innerHeight), 0, 1);
+          }
+          const k = f * (eng.count() - 1);
+          if (Math.abs(k - st0) < 0.001) return;
+          st0 = k;
+          eng.scrub(k, first ? 0 : 0.35);
+          first = false;
+          clearTimeout(idle);
+          if (snapOn) idle = setTimeout(() => eng.go(Math.round(st0), 0), 160);
+        };
+        let raf2 = 0;
+        const onScroll = () => {
+          if (raf2) return;
+          raf2 = requestAnimationFrame(() => {
+            raf2 = 0;
+            sync();
+          });
+        };
+        on(window, 'scroll', onScroll, { passive: true });
+        on(window, 'resize', onScroll);
+        requestAnimationFrame(sync);
+        R.add(() => {
+          cancelAnimationFrame(raf2);
+          clearTimeout(idle);
+        });
       }
 
       // erst animieren, wenn der Slider im Bild ist
